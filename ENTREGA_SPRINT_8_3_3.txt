@@ -1,0 +1,12 @@
+LOGIFAENA SPRINT 8.3.3 - CORRECCIÓN IMPORTADOR XLSX
+
+- Reemplaza spreadsheet_decoder por package:excel.
+- Detecta la hoja Trabajadores por nombre.
+- Si no existe, utiliza la primera hoja disponible.
+- Mejora la lectura de celdas y mensajes de diagnóstico.
+- Incluye el Excel de 100 trabajadores en Recursos.
+
+Ejecutar:
+flutter clean
+flutter pub get
+flutter run -d chrome

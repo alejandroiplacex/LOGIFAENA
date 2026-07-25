@@ -1,0 +1,14 @@
+LOGIFAENA SPRINT 10.0 - VISTA TABLA PROFESIONAL
+
+Cambios incluidos:
+- Selector Tarjetas / Tabla en la ventana Personal.
+- Vista tabla compacta para administrar grandes volúmenes de trabajadores.
+- Columnas: Estado, Nombre, RUT, Empresa, Cargo, Proyecto y Turno.
+- La selección por teclado funciona en ambas vistas.
+- Doble clic sobre una fila abre la ficha del trabajador.
+- Botón para abrir la ficha desde cada fila.
+- Colores de estado en la tabla.
+- Barra inferior de estado con registros visibles, total, en faena, en traslado y base guardada.
+- Se conserva el scrollbar, rueda del mouse, arrastre y navegación Home/End/PageUp/PageDown.
+
+Base: Sprint 9.3 validada por el usuario.

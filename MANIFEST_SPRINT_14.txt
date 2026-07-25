@@ -1,0 +1,21 @@
+LOGIFAENA ENTERPRISE — ENTREGA SPRINT 14.0
+Versión: 1.2.0+1200
+Fecha: 24-07-2026
+
+ARCHIVOS PRINCIPALES MODIFICADOS
+- pubspec.yaml
+- README.md
+- CHANGELOG.md
+- lib/src/features/shell/presentation/main_shell_screen.dart
+
+ARCHIVOS AGREGADOS
+- lib/src/features/settings/domain/app_settings.dart
+- lib/src/features/settings/data/settings_repository.dart
+- lib/src/features/settings/presentation/settings_screen.dart
+- SPRINT_14_0.md
+- Documentacion/LM-015-REGISTRO-SPRINT-14.md
+
+VALIDACIÓN REALIZADA
+- Integridad de ZIP y estructura: OK
+- Verificación estática de delimitadores: OK
+- Flutter analyze/test/build: pendiente de ejecutar en equipo con Flutter instalado

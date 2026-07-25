@@ -1,0 +1,16 @@
+LOGIFAENA SPRINT 9.3 - NAVEGACION PROFESIONAL EN PERSONAL
+
+Implementado en la ventana Personal:
+- Scrollbar vertical visible, interactivo y arrastrable.
+- Desplazamiento con rueda del mouse.
+- Flechas Arriba/Abajo para seleccionar y recorrer trabajadores.
+- Page Up / Page Down para avanzar por bloques.
+- Home / End para ir al inicio o final.
+- Enter abre la ficha del trabajador seleccionado.
+- Escape limpia filtros/busqueda o devuelve el foco a la lista.
+- Ctrl+F enfoca el buscador.
+- Ctrl+N abre Nuevo trabajador.
+- Ctrl+I abre Importar Excel.
+- Resaltado visual del trabajador seleccionado.
+
+Se conserva el importador XLSX seguro de Sprint 9.2.

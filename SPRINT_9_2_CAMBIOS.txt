@@ -1,0 +1,9 @@
+LOGIFAENA SPRINT 9.2 - NAVEGACION POR TECLADO EN IMPORTACION
+
+Cambios:
+- El área principal de Importar trabajadores desde Excel recibe foco automáticamente.
+- Flecha abajo/arriba desplaza verticalmente la pantalla.
+- Page Down / Page Up realizan desplazamiento por página.
+- Home lleva al inicio y End al final.
+- Se mantiene el scrollbar visible, interactivo y arrastrable.
+- Se conserva el importador OOXML seguro validado en Sprint 9.1.

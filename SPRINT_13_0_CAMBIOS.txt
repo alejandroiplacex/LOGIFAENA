@@ -1,0 +1,9 @@
+LOGIFAENA ENTERPRISE v0.13.0
+
+- Importación multihoja de operación completa desde Excel.
+- Relación por RUT entre Personal, Pasajes, Hoteles, Traslados y Observaciones.
+- Importación de Proveedores y Vehículos.
+- Creación y activación automática de Operation.
+- Ejecución del OperationEngine y generación de alertas.
+- Resumen final con conteos logísticos.
+- Versión actualizada a 0.13.0+130.

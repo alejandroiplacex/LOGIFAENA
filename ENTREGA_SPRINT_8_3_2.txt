@@ -1,0 +1,21 @@
+LOGIFAENA SPRINT 8.3.2
+
+PRUEBA RECOMENDADA
+1. flutter clean
+2. flutter pub get
+3. flutter run -d chrome
+4. Ir a Personal > Importar Excel.
+5. Seleccionar Recursos/LogiFaena_100_Trabajadores_Prueba.xlsx.
+6. Probar primero "Omitir duplicados".
+7. Confirmar que la vista previa muestre 100 registros.
+8. Procesar la importación y comprobar que el total cambie de 3 a 103.
+9. Presionar F5 y comprobar que los datos continúen guardados.
+10. Volver a importar el mismo archivo y probar "Actualizar existentes".
+
+La carpeta raíz del ZIP es únicamente: logifaena_master
+
+
+Sprint 8.3.3
+- Corrección del lector .xlsx usando package:excel.
+- Detección explícita de la hoja Trabajadores.
+- Mensajes de diagnóstico para libros y hojas.

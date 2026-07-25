@@ -1,0 +1,16 @@
+LogiFaena Sprint 9.1 - Importador seguro y scrollbar
+
+Cambios incluidos:
+- Se eliminó excel_plus del proyecto.
+- El lector XLSX abre directamente los componentes OOXML necesarios.
+- styles.xml se ignora completamente para evitar "Corrupt or unreadable styles part".
+- Se leen workbook.xml, relaciones, sharedStrings y hojas de cálculo.
+- Scrollbar vertical visible, interactivo y con pista en la pantalla de importación.
+- Se mantiene la validación de RUT, duplicados, campos obligatorios y vista previa.
+
+Prueba recomendada:
+flutter clean
+flutter pub get
+flutter run -d chrome
+
+Luego: Personal > Importar Excel y seleccionar Recursos/LogiFaena_100_Trabajadores_Prueba.xlsx

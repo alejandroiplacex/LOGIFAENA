@@ -1,0 +1,25 @@
+LOGIFAENA ENTERPRISE — SPRINT 11.1
+Motor de Importación Inteligente Multihoja
+
+IMPLEMENTADO
+- Reconocimiento automático de hojas Control, Personal, Pasajes, Hoteles,
+  Traslados, Observaciones, Proveedores y Vehículos.
+- Compatibilidad con la hoja antigua Trabajadores.
+- Detección automática de la fila de encabezados; admite títulos y filas vacías
+  antes de los encabezados de la plantilla oficial.
+- Lectura de datos generales desde la hoja Control.
+- Resumen visual por hoja con cantidad de registros.
+- Detección de RUT inválidos y registros logísticos cuyo RUT no existe en Personal.
+- Importación de Personal desde la nueva columna Nombre completo.
+- Conservación de políticas de duplicados: omitir, actualizar o crear nuevo.
+- Inclusión de la Plantilla Oficial Multihoja v1 en la carpeta Recursos.
+
+ALCANCE DE ESTA ENTREGA
+- Personal ya puede procesarse y guardarse usando la nueva plantilla.
+- Las demás hojas son reconocidas, contabilizadas y validadas estructuralmente.
+- La persistencia definitiva de Pasajes, Hoteles y Traslados desde el mismo archivo
+  corresponde a la siguiente etapa, después de validar esta base en Flutter.
+
+VALIDACIÓN
+- Se revisó la integridad estructural del código y del archivo ZIP.
+- La compilación y ejecución de Flutter debe validarse en el equipo local.

@@ -1,0 +1,7 @@
+LOGIFAENA SPRINT 8.3.4 - CORRECCION DE COMPILACION
+
+Correcciones:
+- Se agregó la importación del servicio excel_import_service.dart en workers_screen.dart.
+- Se corrigió la cadena de texto multilínea del historial de importaciones.
+- Se resolvieron los tipos ExcelImportPayload y DuplicateImportPolicy.
+- Versión 0.9.3+93.

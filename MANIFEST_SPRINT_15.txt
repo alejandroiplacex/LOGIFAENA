@@ -1,0 +1,25 @@
+LOGIFAENA ENTERPRISE — SPRINT 15.0
+Versión: 1.3.0+1300
+Base: Sprint 14.1 v1.2.1+1201
+
+ARCHIVOS PRINCIPALES MODIFICADOS
+- pubspec.yaml
+- lib/main.dart
+- test/widget_test.dart
+- lib/src/features/workers/data/worker_repository.dart
+- lib/src/features/workers/data/import_history_repository.dart
+- lib/src/features/tickets/data/ticket_repository.dart
+- lib/src/features/hotels/data/hotel_repository.dart
+- lib/src/features/transfers/data/transfer_repository.dart
+- CHANGELOG.md
+
+ARCHIVOS NUEVOS
+- lib/src/core/database/database_service.dart
+- lib/src/core/database/database_service_io.dart
+- lib/src/core/database/database_service_stub.dart
+- SPRINT_15_0.md
+- MANIFEST_SPRINT_15.txt
+
+NOTA
+pubspec.lock se actualizará automáticamente al ejecutar flutter pub get,
+pues el entorno de empaquetado no dispone del SDK Flutter.

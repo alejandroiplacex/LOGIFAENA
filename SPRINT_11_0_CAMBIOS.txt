@@ -1,0 +1,25 @@
+LOGIFAENA ENTERPRISE — SPRINT 11.0
+MÓDULO PASAJES OPERACIONAL
+
+Cambios principales:
+- Vista Tabla y Vista Tarjetas.
+- Indicadores clicables: Total, Solicitados, Emitidos, Reprogramados y Cancelados.
+- Filtros por estado y tipo de pasaje.
+- Búsqueda por trabajador, RUT, empresa, reserva, origen y destino.
+- Scrollbar vertical visible, interactivo y arrastrable.
+- Botones flotantes para subir y bajar.
+- Navegación por teclado:
+  * Flechas arriba y abajo.
+  * Page Up y Page Down.
+  * Home y End.
+  * Enter para editar el pasaje seleccionado.
+  * Esc para limpiar filtros.
+  * Ctrl + F para enfocar búsqueda.
+  * Ctrl + N para crear un pasaje.
+- Selección visual de filas.
+- Doble clic para editar.
+- Barra inferior con totales, posición y estado de guardado.
+- Persistencia local conservada.
+- Sincronización del estado del pasaje con la ficha del trabajador conservada.
+
+Base utilizada: LogiFaena Sprint 10.0.

@@ -1,0 +1,12 @@
+LOGIFAENA - SPRINT 8.3.1
+
+Estructura corregida: el ZIP contiene una única carpeta raíz llamada logifaena_master.
+
+Prueba sugerida:
+1. Extraer el ZIP.
+2. Abrir la carpeta logifaena_master en Visual Studio Code.
+3. Ejecutar: flutter clean
+4. Ejecutar: flutter pub get
+5. Ejecutar: flutter run -d chrome
+6. Ingresar a Personal y verificar el botón Importar Excel.
+7. Usar el archivo Recursos/LogiFaena_100_Trabajadores_Prueba.xlsx.

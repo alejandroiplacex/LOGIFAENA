@@ -1,0 +1,8 @@
+LogiFaena Enterprise
+Sprint 14.1
+Versión 1.2.1+1201
+
+Corrección incluida:
+- Desplazamiento de Configuración mediante teclado.
+- Scrollbar controlada y visible.
+- Compatibilidad con ↑, ↓, Page Up, Page Down, Home y End.
