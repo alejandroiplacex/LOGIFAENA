@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
 import '../../../core/database/database_service.dart';
+import '../../../core/sync/audit_service.dart';
 import '../../../core/sync/sync_queue_service.dart';
 import '../domain/worker.dart';
 
@@ -149,6 +151,31 @@ class InMemoryWorkerRepository implements WorkerRepository {
     }
   }
 
+  void _recordAudit({
+    required String action,
+    required Map<String, dynamic> details,
+  }) {
+    unawaited(_recordAuditSafely(action: action, details: details));
+  }
+
+  Future<void> _recordAuditSafely({
+    required String action,
+    required Map<String, dynamic> details,
+  }) async {
+    try {
+      await AuditService.instance.record(
+        action: action,
+        entityType: 'worker',
+        details: jsonEncode(details),
+      );
+    } catch (error, stackTrace) {
+      debugPrint(
+        'No fue posible registrar la auditoría del trabajador: $error',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
   @override
   List<Worker> getAll() => List.unmodifiable(_workers);
 
@@ -161,6 +188,15 @@ class InMemoryWorkerRepository implements WorkerRepository {
       entityId: worker.id,
       operation: 'create',
       payload: worker.toJson(),
+    );
+
+    _recordAudit(
+      action: 'create',
+      details: <String, dynamic>{
+        'workerId': worker.id,
+        'rut': worker.rut,
+        'fullName': worker.fullName,
+      },
     );
   }
 
@@ -178,6 +214,14 @@ class InMemoryWorkerRepository implements WorkerRepository {
         payload: worker.toJson(),
       );
     }
+
+    _recordAudit(
+      action: 'create_bulk',
+      details: <String, dynamic>{
+        'created': workers.length,
+        'workerIds': workers.map((worker) => worker.id).toList(),
+      },
+    );
   }
 
   @override
@@ -218,6 +262,16 @@ class InMemoryWorkerRepository implements WorkerRepository {
 
     _persist();
 
+    _recordAudit(
+      action: 'import',
+      details: <String, dynamic>{
+        'received': workers.length,
+        'created': created,
+        'updated': updated,
+        'updateExisting': updateExisting,
+      },
+    );
+
     return (created: created, updated: updated);
   }
 
@@ -237,6 +291,16 @@ class InMemoryWorkerRepository implements WorkerRepository {
       operation: 'update',
       payload: worker.toJson(),
     );
+
+    _recordAudit(
+      action: 'update',
+      details: <String, dynamic>{
+        'workerId': worker.id,
+        'rut': worker.rut,
+        'fullName': worker.fullName,
+        'status': worker.status.name,
+      },
+    );
   }
 
   @override
@@ -245,6 +309,8 @@ class InMemoryWorkerRepository implements WorkerRepository {
 
     if (index == -1) return;
 
+    final deletedWorker = _workers[index];
+
     _workers.removeAt(index);
     _persist();
 
@@ -252,6 +318,15 @@ class InMemoryWorkerRepository implements WorkerRepository {
       entityId: id,
       operation: 'delete',
       payload: <String, dynamic>{'id': id},
+    );
+
+    _recordAudit(
+      action: 'delete',
+      details: <String, dynamic>{
+        'workerId': deletedWorker.id,
+        'rut': deletedWorker.rut,
+        'fullName': deletedWorker.fullName,
+      },
     );
   }
 
