@@ -80,9 +80,9 @@ class OperationImportOverview {
 
   int get totalRows => sheets.fold(0, (sum, sheet) => sum + sheet.rows);
   int get issueCount => sheets.fold(
-        0,
-        (sum, sheet) => sum + sheet.invalidRows + sheet.orphanRutRows,
-      );
+    0,
+    (sum, sheet) => sum + sheet.invalidRows + sheet.orphanRutRows,
+  );
 }
 
 class ExcelImportPayload {
@@ -127,22 +127,23 @@ class ExcelImportService {
       duplicatePolicy: duplicatePolicy,
     );
     final sheets = _readXlsxWithoutStyles(bytes);
-    final overview = workerResult.operationOverview ?? _analyzeOperation(sheets);
+    final overview =
+        workerResult.operationOverview ?? _analyzeOperation(sheets);
     final control = overview.control;
     final now = DateTime.now();
-    final operationId = _controlValue(
-      control,
-      const ['ID Operación', 'ID Operacion', 'Operación', 'Operacion'],
-      fallback: 'OP-${now.microsecondsSinceEpoch}',
-    );
+    final operationId = _controlValue(control, const [
+      'ID Operación',
+      'ID Operacion',
+      'Operación',
+      'Operacion',
+    ], fallback: 'OP-${now.microsecondsSinceEpoch}');
 
     final importedByRut = <String, Worker>{
       for (final worker in workerResult.workers)
         _normalizeRut(worker.rut): worker,
     };
     final existingByRut = <String, Worker>{
-      for (final worker in existingWorkers)
-        _normalizeRut(worker.rut): worker,
+      for (final worker in existingWorkers) _normalizeRut(worker.rut): worker,
     };
     final operationWorkers = <Worker>[];
     final seenWorkerIds = <String>{};
@@ -175,13 +176,9 @@ class ExcelImportService {
     }
 
     final workerByRut = <String, Worker>{
-      for (final worker in operationWorkers)
-        _normalizeRut(worker.rut): worker,
+      for (final worker in operationWorkers) _normalizeRut(worker.rut): worker,
     };
-    final warnings = <String>[
-      ...workerResult.warnings,
-      ...overview.warnings,
-    ];
+    final warnings = <String>[...workerResult.warnings, ...overview.warnings];
     final providers = _parseProviders(
       sheets,
       operationId: operationId,
@@ -202,13 +199,18 @@ class ExcelImportService {
     final hotels = _parseHotels(sheets, workerByRut, warnings);
     final transfers = _parseTransfers(sheets, workerByRut, vehicles, warnings);
 
-    final startDate = _parseDate(
-          _controlValue(control, const ['Fecha inicio', 'Inicio']),
-        ) ??
+    final startDate =
+        _parseDate(_controlValue(control, const ['Fecha inicio', 'Inicio'])) ??
         _earliestDate(tickets, hotels, transfers) ??
         now;
-    final endDate = _parseDate(
-          _controlValue(control, const ['Fecha término', 'Fecha termino', 'Término', 'Termino']),
+    final endDate =
+        _parseDate(
+          _controlValue(control, const [
+            'Fecha término',
+            'Fecha termino',
+            'Término',
+            'Termino',
+          ]),
         ) ??
         _latestDate(tickets, hotels, transfers) ??
         startDate.add(const Duration(days: 10));
@@ -219,12 +221,16 @@ class ExcelImportService {
       company: _controlValue(
         control,
         const ['Empresa'],
-        fallback: operationWorkers.isEmpty ? '' : operationWorkers.first.company,
+        fallback: operationWorkers.isEmpty
+            ? ''
+            : operationWorkers.first.company,
       ),
       project: _controlValue(
         control,
         const ['Proyecto / Faena', 'Proyecto', 'Faena'],
-        fallback: operationWorkers.isEmpty ? '' : operationWorkers.first.project,
+        fallback: operationWorkers.isEmpty
+            ? ''
+            : operationWorkers.first.project,
       ),
       shift: _controlValue(
         control,
@@ -234,11 +240,9 @@ class ExcelImportService {
       coordinator: _controlValue(control, const ['Coordinador']),
       startDate: startDate,
       endDate: endDate.isBefore(startDate) ? startDate : endDate,
-      createdBy: _controlValue(
-        control,
-        const ['Coordinador'],
-        fallback: 'Importador Excel',
-      ),
+      createdBy: _controlValue(control, const [
+        'Coordinador',
+      ], fallback: 'Importador Excel'),
       workers: operationWorkers,
       tickets: tickets,
       hotels: hotels,
@@ -255,22 +259,24 @@ class ExcelImportService {
         warnings: warnings,
       ),
     );
-    final generalObservation = _controlValue(
-      control,
-      const ['Observación general', 'Observacion general'],
-    );
+    final generalObservation = _controlValue(control, const [
+      'Observación general',
+      'Observacion general',
+    ]);
     if (generalObservation.isNotEmpty) {
-      operation.notes.add(OperationNote(
-        id: '$operationId-NOTE-GENERAL',
-        operationId: operationId,
-        workerId: null,
-        category: 'General',
-        message: generalObservation,
-        priority: 'Media',
-        createdAt: now,
-        updatedAt: now,
-        createdBy: operation.coordinator,
-      ));
+      operation.notes.add(
+        OperationNote(
+          id: '$operationId-NOTE-GENERAL',
+          operationId: operationId,
+          workerId: null,
+          category: 'General',
+          message: generalObservation,
+          priority: 'Media',
+          createdAt: now,
+          updatedAt: now,
+          createdBy: operation.coordinator,
+        ),
+      );
     }
     engine.recalculate(operation);
 
@@ -297,14 +303,11 @@ class ExcelImportService {
       );
     }
 
-    final sheet = sheets.firstWhere(
-      (item) {
-        final name = _normalize(item.name);
-        return name == _normalize('Personal') ||
-            name == _normalize('Trabajadores');
-      },
-      orElse: () => sheets.first,
-    );
+    final sheet = sheets.firstWhere((item) {
+      final name = _normalize(item.name);
+      return name == _normalize('Personal') ||
+          name == _normalize('Trabajadores');
+    }, orElse: () => sheets.first);
     final rows = sheet.rows;
     if (rows.isEmpty) {
       throw const FormatException('La hoja Personal está vacía.');
@@ -325,10 +328,11 @@ class ExcelImportService {
     final headers = _headersFromRow(rows[headerIndex]);
 
     final rutColumn = _findColumn(headers, ['rut']);
-    final firstNameColumn = _findColumn(
-      headers,
-      ['nombre completo', 'nombres', 'nombre'],
-    );
+    final firstNameColumn = _findColumn(headers, [
+      'nombre completo',
+      'nombres',
+      'nombre',
+    ]);
     if (rutColumn == null || firstNameColumn == null) {
       throw const FormatException(
         'El Excel debe contener como mínimo las columnas RUT y Nombres.',
@@ -354,19 +358,26 @@ class ExcelImportService {
 
       final rut = _valueAt(row, rutColumn);
       final firstName = _valueAt(row, firstNameColumn);
-      final explicitLastName = _valueByHeaders(row, headers, ['apellidos', 'apellido']);
+      final explicitLastName = _valueByHeaders(row, headers, [
+        'apellidos',
+        'apellido',
+      ]);
       final nameParts = _splitName(firstName, explicitLastName);
       final importedFirstName = nameParts.$1;
       final lastName = nameParts.$2;
 
       if (rut.isEmpty || importedFirstName.isEmpty) {
         invalidCount++;
-        warnings.add('Fila ${rowIndex + 1}: falta RUT o Nombres; no fue importada.');
+        warnings.add(
+          'Fila ${rowIndex + 1}: falta RUT o Nombres; no fue importada.',
+        );
         continue;
       }
       if (!_isValidRut(rut)) {
         invalidCount++;
-        warnings.add('Fila ${rowIndex + 1}: el RUT $rut no es válido; no fue importada.');
+        warnings.add(
+          'Fila ${rowIndex + 1}: el RUT $rut no es válido; no fue importada.',
+        );
         continue;
       }
 
@@ -377,27 +388,38 @@ class ExcelImportService {
       if (isDuplicate) {
         duplicateCount++;
         if (repeatedInFile) {
-          warnings.add('Fila ${rowIndex + 1}: el RUT $rut está repetido dentro del Excel; se omitió.');
+          warnings.add(
+            'Fila ${rowIndex + 1}: el RUT $rut está repetido dentro del Excel; se omitió.',
+          );
           continue;
         }
         if (duplicatePolicy == DuplicateImportPolicy.skip) {
-          warnings.add('Fila ${rowIndex + 1}: el RUT $rut ya existe; se omitió.');
+          warnings.add(
+            'Fila ${rowIndex + 1}: el RUT $rut ya existe; se omitió.',
+          );
           continue;
         }
       }
 
-      final email = _valueByHeaders(row, headers, ['correo', 'email', 'e-mail']);
+      final email = _valueByHeaders(row, headers, [
+        'correo',
+        'email',
+        'e-mail',
+      ]);
       if (email.isNotEmpty && !_looksLikeEmail(email)) {
-        warnings.add('Fila ${rowIndex + 1}: correo "$email" con formato dudoso; se importó igualmente.');
+        warnings.add(
+          'Fila ${rowIndex + 1}: correo "$email" con formato dudoso; se importó igualmente.',
+        );
       }
 
       importedRuts.add(normalizedRut);
       final sourceId = _valueByHeaders(row, headers, ['id']);
-      final importedId = duplicatePolicy == DuplicateImportPolicy.update && existing != null
+      final importedId =
+          duplicatePolicy == DuplicateImportPolicy.update && existing != null
           ? existing.id
           : (isDuplicate || sourceId.isEmpty
-              ? 'IMP-${DateTime.now().microsecondsSinceEpoch}-$rowIndex'
-              : sourceId);
+                ? 'IMP-${DateTime.now().microsecondsSinceEpoch}-$rowIndex'
+                : sourceId);
 
       imported.add(
         Worker(
@@ -407,19 +429,44 @@ class ExcelImportService {
           lastName: lastName,
           company: _valueByHeaders(row, headers, ['empresa']),
           role: _valueByHeaders(row, headers, ['cargo', 'funcion', 'función']),
-          project: _valueByHeaders(row, headers, ['faena/proyecto', 'faena', 'proyecto', 'proyecto / faena']),
+          project: _valueByHeaders(row, headers, [
+            'faena/proyecto',
+            'faena',
+            'proyecto',
+            'proyecto / faena',
+          ]),
           shift: _valueByHeaders(row, headers, ['turno']),
           supervisor: _valueByHeaders(row, headers, ['supervisor']),
-          city: _valueByHeaders(row, headers, ['ciudad de origen', 'ciudad origen', 'ciudad', 'origen']),
-          phone: _valueByHeaders(row, headers, ['telefono', 'teléfono', 'celular']),
+          city: _valueByHeaders(row, headers, [
+            'ciudad de origen',
+            'ciudad origen',
+            'ciudad',
+            'origen',
+          ]),
+          phone: _valueByHeaders(row, headers, [
+            'telefono',
+            'teléfono',
+            'celular',
+          ]),
           email: email,
-          emergencyContact: _valueByHeaders(row, headers, ['contacto de emergencia', 'contacto emergencia']),
-          emergencyPhone: _valueByHeaders(row, headers, ['telefono de emergencia', 'teléfono de emergencia', 'telefono emergencia']),
+          emergencyContact: _valueByHeaders(row, headers, [
+            'contacto de emergencia',
+            'contacto emergencia',
+          ]),
+          emergencyPhone: _valueByHeaders(row, headers, [
+            'telefono de emergencia',
+            'teléfono de emergencia',
+            'telefono emergencia',
+          ]),
           hotel: _valueByHeaders(row, headers, ['hotel', 'alojamiento']),
           room: _valueByHeaders(row, headers, ['habitacion', 'habitación']),
           ticket: _valueByHeaders(row, headers, ['pasaje', 'reserva']),
           transfer: _valueByHeaders(row, headers, ['traslado', 'transporte']),
-          notes: _valueByHeaders(row, headers, ['observaciones', 'nota', 'notas']),
+          notes: _valueByHeaders(row, headers, [
+            'observaciones',
+            'nota',
+            'notas',
+          ]),
           status: _parseStatus(_valueByHeaders(row, headers, ['estado'])),
         ),
       );
@@ -435,10 +482,7 @@ class ExcelImportService {
     );
   }
 
-  static _XlsxSheet? _sheetByName(
-    List<_XlsxSheet> sheets,
-    List<String> names,
-  ) {
+  static _XlsxSheet? _sheetByName(List<_XlsxSheet> sheets, List<String> names) {
     final normalized = names.map(_normalize).toSet();
     for (final sheet in sheets) {
       if (normalized.contains(_normalize(sheet.name))) return sheet;
@@ -468,7 +512,12 @@ class ExcelImportService {
   ) {
     final sheet = _sheetByName(sheets, const ['Pasajes']);
     if (sheet == null) return <Ticket>[];
-    final header = _findHeaderRow(sheet.rows, requiredAliases: const [['rut']]);
+    final header = _findHeaderRow(
+      sheet.rows,
+      requiredAliases: const [
+        ['rut'],
+      ],
+    );
     if (header == null) return <Ticket>[];
     final headers = _headersFromRow(sheet.rows[header]);
     final result = <Ticket>[];
@@ -486,22 +535,44 @@ class ExcelImportService {
         warnings.add('Pasajes fila ${i + 1}: fecha inválida.');
         continue;
       }
-      result.add(Ticket(
-        id: 'TKT-${worker.id}-${i + 1}',
-        workerId: worker.id,
-        type: _parseTicketType(_valueByHeaders(row, headers, const ['tipo'])),
-        company: _valueByHeaders(row, headers, const ['aerolínea / empresa', 'aerolinea / empresa', 'empresa', 'aerolínea', 'aerolinea']),
-        serviceNumber: _valueByHeaders(row, headers, const ['n° vuelo / servicio', 'n vuelo / servicio', 'vuelo', 'servicio']),
-        bookingCode: _valueByHeaders(row, headers, const ['reserva', 'código reserva', 'codigo reserva']),
-        origin: _valueByHeaders(row, headers, const ['origen']),
-        destination: _valueByHeaders(row, headers, const ['destino']),
-        travelDate: date,
-        travelTime: _parseTime(_valueByHeaders(row, headers, const ['hora'])),
-        baggage: _valueByHeaders(row, headers, const ['equipaje', 'baggage']),
-        seat: _valueByHeaders(row, headers, const ['asiento']),
-        notes: _valueByHeaders(row, headers, const ['observaciones', 'notas']),
-        status: _parseTicketStatus(_valueByHeaders(row, headers, const ['estado'])),
-      ));
+      result.add(
+        Ticket(
+          id: 'TKT-${worker.id}-${i + 1}',
+          workerId: worker.id,
+          type: _parseTicketType(_valueByHeaders(row, headers, const ['tipo'])),
+          company: _valueByHeaders(row, headers, const [
+            'aerolínea / empresa',
+            'aerolinea / empresa',
+            'empresa',
+            'aerolínea',
+            'aerolinea',
+          ]),
+          serviceNumber: _valueByHeaders(row, headers, const [
+            'n° vuelo / servicio',
+            'n vuelo / servicio',
+            'vuelo',
+            'servicio',
+          ]),
+          bookingCode: _valueByHeaders(row, headers, const [
+            'reserva',
+            'código reserva',
+            'codigo reserva',
+          ]),
+          origin: _valueByHeaders(row, headers, const ['origen']),
+          destination: _valueByHeaders(row, headers, const ['destino']),
+          travelDate: date,
+          travelTime: _parseTime(_valueByHeaders(row, headers, const ['hora'])),
+          baggage: _valueByHeaders(row, headers, const ['equipaje', 'baggage']),
+          seat: _valueByHeaders(row, headers, const ['asiento']),
+          notes: _valueByHeaders(row, headers, const [
+            'observaciones',
+            'notas',
+          ]),
+          status: _parseTicketStatus(
+            _valueByHeaders(row, headers, const ['estado']),
+          ),
+        ),
+      );
     }
     return result;
   }
@@ -513,42 +584,94 @@ class ExcelImportService {
   ) {
     final sheet = _sheetByName(sheets, const ['Hoteles']);
     if (sheet == null) return <HotelAssignment>[];
-    final header = _findHeaderRow(sheet.rows, requiredAliases: const [['rut']]);
+    final header = _findHeaderRow(
+      sheet.rows,
+      requiredAliases: const [
+        ['rut'],
+      ],
+    );
     if (header == null) return <HotelAssignment>[];
     final headers = _headersFromRow(sheet.rows[header]);
     final result = <HotelAssignment>[];
     for (var i = header + 1; i < sheet.rows.length; i++) {
       final row = sheet.rows[i];
       if (row.every((cell) => cell.trim().isEmpty)) continue;
-      final worker = workerByRut[_normalizeRut(_valueByHeaders(row, headers, const ['rut']))];
+      final worker =
+          workerByRut[_normalizeRut(
+            _valueByHeaders(row, headers, const ['rut']),
+          )];
       if (worker == null) {
         warnings.add('Hoteles fila ${i + 1}: RUT sin trabajador asociado.');
         continue;
       }
-      final checkIn = _parseDate(_valueByHeaders(row, headers, const ['check-in', 'check in', 'entrada']));
-      final checkOut = _parseDate(_valueByHeaders(row, headers, const ['check-out', 'check out', 'salida']));
+      final checkIn = _parseDate(
+        _valueByHeaders(row, headers, const [
+          'check-in',
+          'check in',
+          'entrada',
+        ]),
+      );
+      final checkOut = _parseDate(
+        _valueByHeaders(row, headers, const [
+          'check-out',
+          'check out',
+          'salida',
+        ]),
+      );
       if (checkIn == null || checkOut == null) {
         warnings.add('Hoteles fila ${i + 1}: fechas de alojamiento inválidas.');
         continue;
       }
-      final hotelName = _valueByHeaders(row, headers, const ['hotel', 'alojamiento']);
-      final room = _valueByHeaders(row, headers, const ['habitación', 'habitacion']);
-      result.add(HotelAssignment(
-        id: 'HTL-${worker.id}-${i + 1}',
-        workerId: worker.id,
-        hotelName: hotelName,
-        city: _valueByHeaders(row, headers, const ['ciudad']),
-        address: _valueByHeaders(row, headers, const ['dirección', 'direccion']),
-        contactName: _valueByHeaders(row, headers, const ['contacto']),
-        contactPhone: _valueByHeaders(row, headers, const ['teléfono', 'telefono']),
-        room: room,
-        checkInDate: checkIn,
-        checkOutDate: checkOut,
-        dailyRate: _parseDouble(_valueByHeaders(row, headers, const ['costo diario', 'tarifa diaria', 'costo'])),
-        confirmationCode: _valueByHeaders(row, headers, const ['código confirmación', 'codigo confirmacion', 'confirmación', 'confirmacion']),
-        notes: _valueByHeaders(row, headers, const ['observaciones', 'notas', 'tipo habitación', 'tipo habitacion']),
-        status: _parseHotelStatus(_valueByHeaders(row, headers, const ['estado'])),
-      ));
+      final hotelName = _valueByHeaders(row, headers, const [
+        'hotel',
+        'alojamiento',
+      ]);
+      final room = _valueByHeaders(row, headers, const [
+        'habitación',
+        'habitacion',
+      ]);
+      result.add(
+        HotelAssignment(
+          id: 'HTL-${worker.id}-${i + 1}',
+          workerId: worker.id,
+          hotelName: hotelName,
+          city: _valueByHeaders(row, headers, const ['ciudad']),
+          address: _valueByHeaders(row, headers, const [
+            'dirección',
+            'direccion',
+          ]),
+          contactName: _valueByHeaders(row, headers, const ['contacto']),
+          contactPhone: _valueByHeaders(row, headers, const [
+            'teléfono',
+            'telefono',
+          ]),
+          room: room,
+          checkInDate: checkIn,
+          checkOutDate: checkOut,
+          dailyRate: _parseDouble(
+            _valueByHeaders(row, headers, const [
+              'costo diario',
+              'tarifa diaria',
+              'costo',
+            ]),
+          ),
+          confirmationCode: _valueByHeaders(row, headers, const [
+            'código confirmación',
+            'codigo confirmacion',
+            'confirmación',
+            'confirmacion',
+          ]),
+          notes: _valueByHeaders(row, headers, const [
+            'observaciones',
+            'notas',
+            'tipo habitación',
+            'tipo habitacion',
+          ]),
+          status: _parseHotelStatus(
+            _valueByHeaders(row, headers, const ['estado']),
+          ),
+        ),
+      );
       worker.hotel = hotelName;
       worker.room = room;
     }
@@ -563,14 +686,22 @@ class ExcelImportService {
   ) {
     final sheet = _sheetByName(sheets, const ['Traslados']);
     if (sheet == null) return <Transfer>[];
-    final header = _findHeaderRow(sheet.rows, requiredAliases: const [['rut']]);
+    final header = _findHeaderRow(
+      sheet.rows,
+      requiredAliases: const [
+        ['rut'],
+      ],
+    );
     if (header == null) return <Transfer>[];
     final headers = _headersFromRow(sheet.rows[header]);
     final byKey = <String, Transfer>{};
     for (var i = header + 1; i < sheet.rows.length; i++) {
       final row = sheet.rows[i];
       if (row.every((cell) => cell.trim().isEmpty)) continue;
-      final worker = workerByRut[_normalizeRut(_valueByHeaders(row, headers, const ['rut']))];
+      final worker =
+          workerByRut[_normalizeRut(
+            _valueByHeaders(row, headers, const ['rut']),
+          )];
       if (worker == null) {
         warnings.add('Traslados fila ${i + 1}: RUT sin trabajador asociado.');
         continue;
@@ -585,8 +716,12 @@ class ExcelImportService {
       final destination = _valueByHeaders(row, headers, const ['destino']);
       final plate = _valueByHeaders(row, headers, const ['patente']);
       final provider = _valueByHeaders(row, headers, const ['proveedor']);
-      final vehicleText = _valueByHeaders(row, headers, const ['vehículo', 'vehiculo']);
-      final key = '${date.toIso8601String()}|$time|${_normalize(origin)}|${_normalize(destination)}|${_normalize(plate)}|${_normalize(provider)}';
+      final vehicleText = _valueByHeaders(row, headers, const [
+        'vehículo',
+        'vehiculo',
+      ]);
+      final key =
+          '${date.toIso8601String()}|$time|${_normalize(origin)}|${_normalize(destination)}|${_normalize(plate)}|${_normalize(provider)}';
       Vehicle? knownVehicle;
       for (final item in vehicles) {
         if (_normalize(item.licensePlate) == _normalize(plate)) {
@@ -594,27 +729,36 @@ class ExcelImportService {
           break;
         }
       }
-      final transfer = byKey.putIfAbsent(key, () => Transfer(
-        id: 'TR-${i + 1}',
-        code: 'TR-${(byKey.length + 1).toString().padLeft(3, '0')}',
-        date: date,
-        departureTime: time,
-        estimatedArrivalTime: '',
-        origin: origin,
-        destination: destination,
-        routeDescription: '$origin → $destination',
-        vehicleType: _parseTransferVehicleType(vehicleText),
-        vehicleIdentifier: knownVehicle?.identifier ?? vehicleText,
-        licensePlate: plate,
-        capacity: knownVehicle?.capacity ?? 0,
-        driverName: _valueByHeaders(row, headers, const ['conductor']),
-        driverPhone: knownVehicle?.driverPhone ?? '',
-        providerCompany: provider,
-        workerIds: <String>[],
-        notes: _valueByHeaders(row, headers, const ['observaciones', 'notas']),
-        status: _parseTransferStatus(_valueByHeaders(row, headers, const ['estado'])),
-      ));
-      if (!transfer.workerIds.contains(worker.id)) transfer.workerIds.add(worker.id);
+      final transfer = byKey.putIfAbsent(
+        key,
+        () => Transfer(
+          id: 'TR-${i + 1}',
+          code: 'TR-${(byKey.length + 1).toString().padLeft(3, '0')}',
+          date: date,
+          departureTime: time,
+          estimatedArrivalTime: '',
+          origin: origin,
+          destination: destination,
+          routeDescription: '$origin → $destination',
+          vehicleType: _parseTransferVehicleType(vehicleText),
+          vehicleIdentifier: knownVehicle?.identifier ?? vehicleText,
+          licensePlate: plate,
+          capacity: knownVehicle?.capacity ?? 0,
+          driverName: _valueByHeaders(row, headers, const ['conductor']),
+          driverPhone: knownVehicle?.driverPhone ?? '',
+          providerCompany: provider,
+          workerIds: <String>[],
+          notes: _valueByHeaders(row, headers, const [
+            'observaciones',
+            'notas',
+          ]),
+          status: _parseTransferStatus(
+            _valueByHeaders(row, headers, const ['estado']),
+          ),
+        ),
+      );
+      if (!transfer.workerIds.contains(worker.id))
+        transfer.workerIds.add(worker.id);
       worker.transfer = transfer.code;
     }
     return byKey.values.toList();
@@ -643,21 +787,39 @@ class ExcelImportService {
       }
       if (!usedNames.add(_normalize(name))) continue;
       final now = DateTime.now();
-      result.add(Provider(
-        id: _valueByHeaders(row, headers, const ['id proveedor', 'id'], fallback: 'PRV-${i + 1}'),
-        operationId: operationId,
-        name: name,
-        category: _valueByHeaders(row, headers, const ['tipo', 'categoría', 'categoria']),
-        contactName: _valueByHeaders(row, headers, const ['contacto']),
-        phone: _valueByHeaders(row, headers, const ['teléfono', 'telefono']),
-        email: _valueByHeaders(row, headers, const ['correo', 'email']),
-        address: _valueByHeaders(row, headers, const ['dirección', 'direccion', 'ciudad']),
-        notes: _valueByHeaders(row, headers, const ['observaciones', 'notas']),
-        active: !_normalize(_valueByHeaders(row, headers, const ['estado'])).contains('inactivo'),
-        createdAt: now,
-        updatedAt: now,
-        createdBy: createdBy,
-      ));
+      result.add(
+        Provider(
+          id: _valueByHeaders(row, headers, const [
+            'id proveedor',
+            'id',
+          ], fallback: 'PRV-${i + 1}'),
+          operationId: operationId,
+          name: name,
+          category: _valueByHeaders(row, headers, const [
+            'tipo',
+            'categoría',
+            'categoria',
+          ]),
+          contactName: _valueByHeaders(row, headers, const ['contacto']),
+          phone: _valueByHeaders(row, headers, const ['teléfono', 'telefono']),
+          email: _valueByHeaders(row, headers, const ['correo', 'email']),
+          address: _valueByHeaders(row, headers, const [
+            'dirección',
+            'direccion',
+            'ciudad',
+          ]),
+          notes: _valueByHeaders(row, headers, const [
+            'observaciones',
+            'notas',
+          ]),
+          active: !_normalize(
+            _valueByHeaders(row, headers, const ['estado']),
+          ).contains('inactivo'),
+          createdAt: now,
+          updatedAt: now,
+          createdBy: createdBy,
+        ),
+      );
     }
     return result;
   }
@@ -687,22 +849,43 @@ class ExcelImportService {
       if (!usedPlates.add(_normalize(plate))) continue;
       final providerName = _valueByHeaders(row, headers, const ['proveedor']);
       final now = DateTime.now();
-      result.add(Vehicle(
-        id: 'VEH-${i + 1}',
-        operationId: operationId,
-        identifier: _valueByHeaders(row, headers, const ['marca / modelo', 'marca', 'modelo'], fallback: plate),
-        type: _valueByHeaders(row, headers, const ['tipo vehículo', 'tipo vehiculo', 'tipo']),
-        licensePlate: plate,
-        capacity: _parseInt(_valueByHeaders(row, headers, const ['capacidad'])),
-        driverName: _valueByHeaders(row, headers, const ['conductor']),
-        driverPhone: _valueByHeaders(row, headers, const ['teléfono conductor', 'telefono conductor']),
-        providerId: providerIdByName[_normalize(providerName)] ?? providerName,
-        status: _valueByHeaders(row, headers, const ['estado'], fallback: 'Disponible'),
-        notes: _valueByHeaders(row, headers, const ['observaciones', 'notas']),
-        createdAt: now,
-        updatedAt: now,
-        createdBy: createdBy,
-      ));
+      result.add(
+        Vehicle(
+          id: 'VEH-${i + 1}',
+          operationId: operationId,
+          identifier: _valueByHeaders(row, headers, const [
+            'marca / modelo',
+            'marca',
+            'modelo',
+          ], fallback: plate),
+          type: _valueByHeaders(row, headers, const [
+            'tipo vehículo',
+            'tipo vehiculo',
+            'tipo',
+          ]),
+          licensePlate: plate,
+          capacity: _parseInt(
+            _valueByHeaders(row, headers, const ['capacidad']),
+          ),
+          driverName: _valueByHeaders(row, headers, const ['conductor']),
+          driverPhone: _valueByHeaders(row, headers, const [
+            'teléfono conductor',
+            'telefono conductor',
+          ]),
+          providerId:
+              providerIdByName[_normalize(providerName)] ?? providerName,
+          status: _valueByHeaders(row, headers, const [
+            'estado',
+          ], fallback: 'Disponible'),
+          notes: _valueByHeaders(row, headers, const [
+            'observaciones',
+            'notas',
+          ]),
+          createdAt: now,
+          updatedAt: now,
+          createdBy: createdBy,
+        ),
+      );
     }
     return result;
   }
@@ -716,7 +899,12 @@ class ExcelImportService {
   }) {
     final sheet = _sheetByName(sheets, const ['Observaciones']);
     if (sheet == null) return <OperationNote>[];
-    final header = _findHeaderRow(sheet.rows, requiredAliases: const [['detalle']]);
+    final header = _findHeaderRow(
+      sheet.rows,
+      requiredAliases: const [
+        ['detalle'],
+      ],
+    );
     if (header == null) return <OperationNote>[];
     final headers = _headersFromRow(sheet.rows[header]);
     final result = <OperationNote>[];
@@ -726,22 +914,38 @@ class ExcelImportService {
       final rut = _normalizeRut(_valueByHeaders(row, headers, const ['rut']));
       final worker = rut.isEmpty ? null : workerByRut[rut];
       if (rut.isNotEmpty && worker == null) {
-        warnings.add('Observaciones fila ${i + 1}: RUT sin trabajador asociado.');
+        warnings.add(
+          'Observaciones fila ${i + 1}: RUT sin trabajador asociado.',
+        );
       }
-      final message = _valueByHeaders(row, headers, const ['detalle', 'observación', 'observacion']);
+      final message = _valueByHeaders(row, headers, const [
+        'detalle',
+        'observación',
+        'observacion',
+      ]);
       if (message.isEmpty) continue;
-      final createdAt = _parseDate(_valueByHeaders(row, headers, const ['fecha'])) ?? DateTime.now();
-      result.add(OperationNote(
-        id: '$operationId-NOTE-${i + 1}',
-        operationId: operationId,
-        workerId: worker?.id,
-        category: _valueByHeaders(row, headers, const ['tipo'], fallback: 'General'),
-        message: message,
-        priority: _valueByHeaders(row, headers, const ['prioridad'], fallback: 'Media'),
-        createdAt: createdAt,
-        updatedAt: createdAt,
-        createdBy: _valueByHeaders(row, headers, const ['responsable'], fallback: createdBy),
-      ));
+      final createdAt =
+          _parseDate(_valueByHeaders(row, headers, const ['fecha'])) ??
+          DateTime.now();
+      result.add(
+        OperationNote(
+          id: '$operationId-NOTE-${i + 1}',
+          operationId: operationId,
+          workerId: worker?.id,
+          category: _valueByHeaders(row, headers, const [
+            'tipo',
+          ], fallback: 'General'),
+          message: message,
+          priority: _valueByHeaders(row, headers, const [
+            'prioridad',
+          ], fallback: 'Media'),
+          createdAt: createdAt,
+          updatedAt: createdAt,
+          createdBy: _valueByHeaders(row, headers, const [
+            'responsable',
+          ], fallback: createdBy),
+        ),
+      );
     }
     return result;
   }
@@ -755,7 +959,8 @@ class ExcelImportService {
 
   static TicketStatus _parseTicketStatus(String value) {
     final normalized = _normalize(value);
-    if (normalized.contains('emit') || normalized.contains('utiliz')) return TicketStatus.issued;
+    if (normalized.contains('emit') || normalized.contains('utiliz'))
+      return TicketStatus.issued;
     if (normalized.contains('reprogram')) return TicketStatus.rescheduled;
     if (normalized.contains('cancel')) return TicketStatus.cancelled;
     return TicketStatus.requested;
@@ -763,26 +968,33 @@ class ExcelImportService {
 
   static HotelStatus _parseHotelStatus(String value) {
     final normalized = _normalize(value);
-    if (normalized.contains('check-in') || normalized.contains('check in')) return HotelStatus.checkedIn;
-    if (normalized.contains('check-out') || normalized.contains('check out')) return HotelStatus.checkedOut;
-    if (normalized.contains('confirm') || normalized.contains('reserv')) return HotelStatus.confirmed;
+    if (normalized.contains('check-in') || normalized.contains('check in'))
+      return HotelStatus.checkedIn;
+    if (normalized.contains('check-out') || normalized.contains('check out'))
+      return HotelStatus.checkedOut;
+    if (normalized.contains('confirm') || normalized.contains('reserv'))
+      return HotelStatus.confirmed;
     if (normalized.contains('cancel')) return HotelStatus.cancelled;
     return HotelStatus.requested;
   }
 
   static TransferStatus _parseTransferStatus(String value) {
     final normalized = _normalize(value);
-    if (normalized.contains('curso') || normalized.contains('ruta')) return TransferStatus.onRoute;
+    if (normalized.contains('curso') || normalized.contains('ruta'))
+      return TransferStatus.onRoute;
     if (normalized.contains('embar')) return TransferStatus.boarding;
-    if (normalized.contains('complet') || normalized.contains('final')) return TransferStatus.completed;
+    if (normalized.contains('complet') || normalized.contains('final'))
+      return TransferStatus.completed;
     if (normalized.contains('cancel')) return TransferStatus.cancelled;
     return TransferStatus.scheduled;
   }
 
   static TransferVehicleType _parseTransferVehicleType(String value) {
     final normalized = _normalize(value);
-    if (normalized.contains('bus') || normalized.contains('minibus')) return TransferVehicleType.bus;
-    if (normalized.contains('pickup') || normalized.contains('camioneta')) return TransferVehicleType.pickup;
+    if (normalized.contains('bus') || normalized.contains('minibus'))
+      return TransferVehicleType.bus;
+    if (normalized.contains('pickup') || normalized.contains('camioneta'))
+      return TransferVehicleType.pickup;
     if (normalized.contains('taxi')) return TransferVehicleType.taxi;
     return TransferVehicleType.van;
   }
@@ -825,7 +1037,10 @@ class ExcelImportService {
   }
 
   static double _parseDouble(String value) =>
-      double.tryParse(value.replaceAll(RegExp(r'[^0-9,.-]'), '').replaceAll(',', '.')) ?? 0;
+      double.tryParse(
+        value.replaceAll(RegExp(r'[^0-9,.-]'), '').replaceAll(',', '.'),
+      ) ??
+      0;
 
   static int _parseInt(String value) => _parseDouble(value).round();
 
@@ -869,8 +1084,8 @@ class ExcelImportService {
     final byName = <String, _XlsxSheet>{
       for (final sheet in sheets) _normalize(sheet.name): sheet,
     };
-    final personalSheet = byName[_normalize('Personal')] ??
-        byName[_normalize('Trabajadores')];
+    final personalSheet =
+        byName[_normalize('Personal')] ?? byName[_normalize('Trabajadores')];
     final personalRuts = <String>{};
     if (personalSheet != null) {
       final header = _findHeaderRow(
@@ -895,16 +1110,15 @@ class ExcelImportService {
     final summaries = <OperationSheetSummary>[];
     final warnings = <String>[];
     for (final expectedName in expected) {
-      final sheet = byName[_normalize(expectedName)] ??
+      final sheet =
+          byName[_normalize(expectedName)] ??
           (expectedName == 'Personal'
               ? byName[_normalize('Trabajadores')]
               : null);
       if (sheet == null) {
-        summaries.add(OperationSheetSummary(
-          name: expectedName,
-          found: false,
-          rows: 0,
-        ));
+        summaries.add(
+          OperationSheetSummary(name: expectedName, found: false, rows: 0),
+        );
         if (expectedName == 'Control' || expectedName == 'Personal') {
           warnings.add('No se encontró la hoja obligatoria $expectedName.');
         }
@@ -912,30 +1126,37 @@ class ExcelImportService {
       }
 
       if (expectedName == 'Control') {
-        summaries.add(OperationSheetSummary(
-          name: expectedName,
-          found: true,
-          rows: _countNonEmptyRows(sheet.rows),
-        ));
+        summaries.add(
+          OperationSheetSummary(
+            name: expectedName,
+            found: true,
+            rows: _countNonEmptyRows(sheet.rows),
+          ),
+        );
         continue;
       }
 
       final header = _findHeaderRow(
         sheet.rows,
-        requiredAliases: expectedName == 'Proveedores' || expectedName == 'Vehículos'
+        requiredAliases:
+            expectedName == 'Proveedores' || expectedName == 'Vehículos'
             ? const <List<String>>[]
             : const [
                 ['rut'],
               ],
       );
       if (header == null) {
-        summaries.add(OperationSheetSummary(
-          name: expectedName,
-          found: true,
-          rows: 0,
-          invalidRows: 1,
-        ));
-        warnings.add('La hoja $expectedName no tiene encabezados reconocibles.');
+        summaries.add(
+          OperationSheetSummary(
+            name: expectedName,
+            found: true,
+            rows: 0,
+            invalidRows: 1,
+          ),
+        );
+        warnings.add(
+          'La hoja $expectedName no tiene encabezados reconocibles.',
+        );
         continue;
       }
       final headers = _headersFromRow(sheet.rows[header]);
@@ -958,15 +1179,19 @@ class ExcelImportService {
           }
         }
       }
-      summaries.add(OperationSheetSummary(
-        name: expectedName,
-        found: true,
-        rows: count,
-        invalidRows: invalid,
-        orphanRutRows: orphan,
-      ));
+      summaries.add(
+        OperationSheetSummary(
+          name: expectedName,
+          found: true,
+          rows: count,
+          invalidRows: invalid,
+          orphanRutRows: orphan,
+        ),
+      );
       if (orphan > 0) {
-        warnings.add('$expectedName: $orphan registro(s) con RUT no presente en Personal.');
+        warnings.add(
+          '$expectedName: $orphan registro(s) con RUT no presente en Personal.',
+        );
       }
     }
 
@@ -1038,14 +1263,17 @@ class ExcelImportService {
 
       String readText(String path) {
         final file = files[_normalizeZipPath(path)];
-        if (file == null) throw FormatException('Falta el componente interno $path.');
+        if (file == null)
+          throw FormatException('Falta el componente interno $path.');
         final content = file.content;
-        final data = content is Uint8List ? content : Uint8List.fromList(content as List<int>);
+        final data = content;
         return utf8.decode(data, allowMalformed: true);
       }
 
       final workbook = XmlDocument.parse(readText('xl/workbook.xml'));
-      final relationships = XmlDocument.parse(readText('xl/_rels/workbook.xml.rels'));
+      final relationships = XmlDocument.parse(
+        readText('xl/_rels/workbook.xml.rels'),
+      );
       final relationshipTargets = <String, String>{};
       for (final node in relationships.descendants.whereType<XmlElement>()) {
         if (node.name.local != 'Relationship') continue;
@@ -1057,7 +1285,9 @@ class ExcelImportService {
       final sharedStrings = <String>[];
       if (files.containsKey('xl/sharedStrings.xml')) {
         final shared = XmlDocument.parse(readText('xl/sharedStrings.xml'));
-        for (final item in shared.descendants.whereType<XmlElement>().where((e) => e.name.local == 'si')) {
+        for (final item in shared.descendants.whereType<XmlElement>().where(
+          (e) => e.name.local == 'si',
+        )) {
           sharedStrings.add(
             item.descendants
                 .whereType<XmlElement>()
@@ -1069,7 +1299,9 @@ class ExcelImportService {
       }
 
       final result = <_XlsxSheet>[];
-      for (final sheet in workbook.descendants.whereType<XmlElement>().where((e) => e.name.local == 'sheet')) {
+      for (final sheet in workbook.descendants.whereType<XmlElement>().where(
+        (e) => e.name.local == 'sheet',
+      )) {
         final name = sheet.getAttribute('name') ?? 'Hoja';
         String? relationId;
         for (final attribute in sheet.attributes) {
@@ -1095,15 +1327,24 @@ class ExcelImportService {
     }
   }
 
-  static List<List<String>> _parseSheetRows(XmlDocument document, List<String> sharedStrings) {
+  static List<List<String>> _parseSheetRows(
+    XmlDocument document,
+    List<String> sharedStrings,
+  ) {
     final rows = <List<String>>[];
-    for (final rowElement in document.descendants.whereType<XmlElement>().where((e) => e.name.local == 'row')) {
+    for (final rowElement in document.descendants.whereType<XmlElement>().where(
+      (e) => e.name.local == 'row',
+    )) {
       final values = <int, String>{};
       var maxColumn = -1;
       var sequentialColumn = 0;
-      for (final cell in rowElement.children.whereType<XmlElement>().where((e) => e.name.local == 'c')) {
+      for (final cell in rowElement.children.whereType<XmlElement>().where(
+        (e) => e.name.local == 'c',
+      )) {
         final reference = cell.getAttribute('r');
-        final column = reference == null ? sequentialColumn : _columnIndex(reference);
+        final column = reference == null
+            ? sequentialColumn
+            : _columnIndex(reference);
         sequentialColumn = column + 1;
         maxColumn = column > maxColumn ? column : maxColumn;
         values[column] = _readCellValue(cell, sharedStrings);
@@ -1111,7 +1352,9 @@ class ExcelImportService {
       if (maxColumn < 0) {
         rows.add(const <String>[]);
       } else {
-        rows.add(List<String>.generate(maxColumn + 1, (index) => values[index] ?? ''));
+        rows.add(
+          List<String>.generate(maxColumn + 1, (index) => values[index] ?? ''),
+        );
       }
     }
     return rows;
@@ -1128,9 +1371,9 @@ class ExcelImportService {
           .trim();
     }
     final valueElement = cell.descendants.whereType<XmlElement>().firstWhere(
-          (e) => e.name.local == 'v',
-          orElse: () => XmlElement(XmlName('v')),
-        );
+      (e) => e.name.local == 'v',
+      orElse: () => XmlElement(XmlName('v')),
+    );
     final raw = valueElement.innerText.trim();
     if (type == 's') {
       final index = int.tryParse(raw);
