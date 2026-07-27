@@ -34,7 +34,8 @@ class DatabaseService {
   bool get isInitialized => _initialized;
   String get databasePath => _databasePath;
   bool get databaseExists => _initialized && File(_databasePath).existsSync();
-  int get databaseSizeBytes => databaseExists ? File(_databasePath).lengthSync() : 0;
+  int get databaseSizeBytes =>
+      databaseExists ? File(_databasePath).lengthSync() : 0;
 
   Future<void> initialize() async {
     if (_initialized) return;
@@ -94,14 +95,18 @@ class DatabaseService {
     await _migrateLegacyCollections();
 
     debugPrint('LogiFaena SQLite activo: $_databasePath');
-    debugPrint('Base creada: $databaseExists · tamaño: $databaseSizeBytes bytes');
+    debugPrint(
+      'Base creada: $databaseExists · tamaño: $databaseSizeBytes bytes',
+    );
   }
 
   Future<Directory> _resolveDataDirectory() async {
     if (Platform.isWindows) {
       final localAppData = Platform.environment['LOCALAPPDATA'];
       if (localAppData != null && localAppData.trim().isNotEmpty) {
-        return Directory(path.join(localAppData, 'LogiFaena Enterprise', 'data'));
+        return Directory(
+          path.join(localAppData, 'LogiFaena Enterprise', 'data'),
+        );
       }
     }
 
@@ -149,10 +154,9 @@ class DatabaseService {
     final now = DateTime.now().toUtc().toIso8601String();
     _database.execute('BEGIN IMMEDIATE TRANSACTION;');
     try {
-      _database.execute(
-        'DELETE FROM local_collections WHERE storage_key = ?',
-        [key],
-      );
+      _database.execute('DELETE FROM local_collections WHERE storage_key = ?', [
+        key,
+      ]);
       for (var index = 0; index < value.length; index++) {
         _database.execute(
           'INSERT INTO local_collections '
@@ -165,5 +169,102 @@ class DatabaseService {
       _database.execute('ROLLBACK;');
       rethrow;
     }
+  }
+
+  Future<int> enqueueSyncOperation({
+    required String entityType,
+    String? entityId,
+    required String operation,
+    required String payload,
+    required String createdAt,
+    int attempts = 0,
+    String status = 'pending',
+  }) async {
+    if (!_initialized) {
+      throw StateError('DatabaseService no ha sido inicializado.');
+    }
+
+    _database.execute(
+      '''
+      INSERT INTO sync_queue (
+        created_at,
+        entity_type,
+        entity_id,
+        operation,
+        payload,
+        attempts,
+        status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      ''',
+      [createdAt, entityType, entityId, operation, payload, attempts, status],
+    );
+
+    return _database.lastInsertRowId;
+  }
+
+  List<Map<String, Object?>> readSyncQueue({String? status}) {
+    if (!_initialized) return [];
+
+    final ResultSet rows;
+
+    if (status == null) {
+      rows = _database.select('SELECT * FROM sync_queue ORDER BY id ASC');
+    } else {
+      rows = _database.select(
+        'SELECT * FROM sync_queue '
+        'WHERE status = ? ORDER BY id ASC',
+        [status],
+      );
+    }
+
+    return rows
+        .map(
+          (row) => <String, Object?>{
+            'id': row['id'],
+            'created_at': row['created_at'],
+            'entity_type': row['entity_type'],
+            'entity_id': row['entity_id'],
+            'operation': row['operation'],
+            'payload': row['payload'],
+            'attempts': row['attempts'],
+            'status': row['status'],
+          },
+        )
+        .toList();
+  }
+
+  Future<void> updateSyncOperationStatus(
+    int id,
+    String status, {
+    bool incrementAttempts = false,
+  }) async {
+    if (!_initialized) {
+      throw StateError('DatabaseService no ha sido inicializado.');
+    }
+
+    if (incrementAttempts) {
+      _database.execute(
+        '''
+        UPDATE sync_queue
+        SET status = ?, attempts = attempts + 1
+        WHERE id = ?
+        ''',
+        [status, id],
+      );
+      return;
+    }
+
+    _database.execute('UPDATE sync_queue SET status = ? WHERE id = ?', [
+      status,
+      id,
+    ]);
+  }
+
+  Future<void> deleteSyncOperation(int id) async {
+    if (!_initialized) {
+      throw StateError('DatabaseService no ha sido inicializado.');
+    }
+
+    _database.execute('DELETE FROM sync_queue WHERE id = ?', [id]);
   }
 }

@@ -1,18 +1,32 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+
 import '../../../core/database/database_service.dart';
+import '../../../core/sync/sync_queue_service.dart';
 import '../domain/worker.dart';
 
 abstract class WorkerRepository {
   List<Worker> getAll();
+
   void add(Worker worker);
+
   void addAll(List<Worker> workers);
-  ({int created, int updated}) importAll(List<Worker> workers, {required bool updateExisting});
+
+  ({int created, int updated}) importAll(
+    List<Worker> workers, {
+    required bool updateExisting,
+  });
+
   void update(Worker worker);
+
   void delete(String id);
 }
 
 class InMemoryWorkerRepository implements WorkerRepository {
   InMemoryWorkerRepository._() {
     final saved = DatabaseService.instance.readList('logifaena_workers');
+
     if (saved.isNotEmpty) {
       _workers
         ..clear()
@@ -92,10 +106,47 @@ class InMemoryWorkerRepository implements WorkerRepository {
   ];
 
   void _persist() {
-    DatabaseService.instance.writeList(
-      'logifaena_workers',
-      _workers.map((item) => item.toJson()).toList(),
+    unawaited(
+      DatabaseService.instance.writeList(
+        'logifaena_workers',
+        _workers.map((worker) => worker.toJson()).toList(),
+      ),
     );
+  }
+
+  void _enqueueSync({
+    required String entityId,
+    required String operation,
+    required Map<String, dynamic> payload,
+  }) {
+    unawaited(
+      _enqueueSyncSafely(
+        entityId: entityId,
+        operation: operation,
+        payload: payload,
+      ),
+    );
+  }
+
+  Future<void> _enqueueSyncSafely({
+    required String entityId,
+    required String operation,
+    required Map<String, dynamic> payload,
+  }) async {
+    try {
+      await SyncQueueService.instance.enqueue(
+        entityType: 'worker',
+        entityId: entityId,
+        operation: operation,
+        payload: payload,
+      );
+    } catch (error, stackTrace) {
+      debugPrint(
+        'No fue posible agregar la operación del trabajador '
+        'a la cola de sincronización: $error',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+    }
   }
 
   @override
@@ -105,13 +156,28 @@ class InMemoryWorkerRepository implements WorkerRepository {
   void add(Worker worker) {
     _workers.add(worker);
     _persist();
+
+    _enqueueSync(
+      entityId: worker.id,
+      operation: 'create',
+      payload: worker.toJson(),
+    );
   }
 
   @override
   void addAll(List<Worker> workers) {
     if (workers.isEmpty) return;
+
     _workers.addAll(workers);
     _persist();
+
+    for (final worker in workers) {
+      _enqueueSync(
+        entityId: worker.id,
+        operation: 'create',
+        payload: worker.toJson(),
+      );
+    }
   }
 
   @override
@@ -121,34 +187,75 @@ class InMemoryWorkerRepository implements WorkerRepository {
   }) {
     var created = 0;
     var updated = 0;
+
     for (final worker in workers) {
-      final normalizedRut = worker.rut.replaceAll(RegExp(r'[^0-9kK]'), '').toUpperCase();
-      final index = _workers.indexWhere((item) =>
-          item.rut.replaceAll(RegExp(r'[^0-9kK]'), '').toUpperCase() == normalizedRut);
+      final normalizedRut = _normalizeRut(worker.rut);
+
+      final index = _workers.indexWhere(
+        (existingWorker) => _normalizeRut(existingWorker.rut) == normalizedRut,
+      );
+
       if (updateExisting && index != -1) {
         _workers[index] = worker;
         updated++;
+
+        _enqueueSync(
+          entityId: worker.id,
+          operation: 'update',
+          payload: worker.toJson(),
+        );
       } else {
         _workers.add(worker);
         created++;
+
+        _enqueueSync(
+          entityId: worker.id,
+          operation: 'create',
+          payload: worker.toJson(),
+        );
       }
     }
+
     _persist();
+
     return (created: created, updated: updated);
   }
 
   @override
   void update(Worker worker) {
-    final index = _workers.indexWhere((item) => item.id == worker.id);
-    if (index != -1) {
-      _workers[index] = worker;
-      _persist();
-    }
+    final index = _workers.indexWhere(
+      (existingWorker) => existingWorker.id == worker.id,
+    );
+
+    if (index == -1) return;
+
+    _workers[index] = worker;
+    _persist();
+
+    _enqueueSync(
+      entityId: worker.id,
+      operation: 'update',
+      payload: worker.toJson(),
+    );
   }
 
   @override
   void delete(String id) {
-    _workers.removeWhere((worker) => worker.id == id);
+    final index = _workers.indexWhere((worker) => worker.id == id);
+
+    if (index == -1) return;
+
+    _workers.removeAt(index);
     _persist();
+
+    _enqueueSync(
+      entityId: id,
+      operation: 'delete',
+      payload: <String, dynamic>{'id': id},
+    );
+  }
+
+  String _normalizeRut(String rut) {
+    return rut.replaceAll(RegExp(r'[^0-9kK]'), '').toUpperCase();
   }
 }
