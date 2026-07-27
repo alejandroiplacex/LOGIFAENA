@@ -267,4 +267,64 @@ class DatabaseService {
 
     _database.execute('DELETE FROM sync_queue WHERE id = ?', [id]);
   }
+
+  Future<int> insertAuditEntry({
+    required String occurredAt,
+    required String action,
+    required String entityType,
+    String? details,
+  }) async {
+    if (!_initialized) {
+      throw StateError('DatabaseService no ha sido inicializado.');
+    }
+
+    _database.execute(
+      '''
+      INSERT INTO audit_log (
+        occurred_at,
+        action,
+        entity_type,
+        details
+      ) VALUES (?, ?, ?, ?)
+      ''',
+      [occurredAt, action, entityType, details],
+    );
+
+    return _database.lastInsertRowId;
+  }
+
+  List<Map<String, Object?>> readAuditLog() {
+    if (!_initialized) return [];
+
+    final rows = _database.select('''
+      SELECT
+        id,
+        occurred_at,
+        action,
+        entity_type,
+        details
+      FROM audit_log
+      ORDER BY id DESC
+      ''');
+
+    return rows
+        .map(
+          (row) => <String, Object?>{
+            'id': row['id'],
+            'occurred_at': row['occurred_at'],
+            'action': row['action'],
+            'entity_type': row['entity_type'],
+            'details': row['details'],
+          },
+        )
+        .toList(growable: false);
+  }
+
+  Future<void> clearAuditLog() async {
+    if (!_initialized) {
+      throw StateError('DatabaseService no ha sido inicializado.');
+    }
+
+    _database.execute('DELETE FROM audit_log');
+  }
 }

@@ -111,4 +111,20 @@ class DatabaseService {
 
     await writeList(_syncQueueKey, items);
   }
+
+  Future<int> insertAuditEntry({
+    required String occurredAt,
+    required String action,
+    required String entityType,
+    String? details,
+  }) async {
+    // En Web aún no persistimos auditoría.
+    return 0;
+  }
+
+  List<Map<String, Object?>> readAuditLog() {
+    return const [];
+  }
+
+  Future<void> clearAuditLog() async {}
 }
