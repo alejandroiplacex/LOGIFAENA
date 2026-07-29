@@ -8,11 +8,16 @@ class HotelStatusChip extends StatelessWidget {
 
   Color get color {
     switch (status) {
-      case HotelStatus.requested: return AppColors.warning;
-      case HotelStatus.confirmed: return AppColors.success;
-      case HotelStatus.checkedIn: return Colors.blue;
-      case HotelStatus.checkedOut: return Colors.blueGrey;
-      case HotelStatus.cancelled: return AppColors.danger;
+      case HotelStatus.requested:
+        return AppColors.warning;
+      case HotelStatus.confirmed:
+        return AppColors.success;
+      case HotelStatus.checkedIn:
+        return Colors.blue;
+      case HotelStatus.checkedOut:
+        return Colors.blueGrey;
+      case HotelStatus.cancelled:
+        return AppColors.danger;
     }
   }
 

@@ -7,11 +7,7 @@ class TicketFormScreen extends StatefulWidget {
   final Ticket? ticket;
   final String? initialWorkerId;
 
-  const TicketFormScreen({
-    super.key,
-    this.ticket,
-    this.initialWorkerId,
-  });
+  const TicketFormScreen({super.key, this.ticket, this.initialWorkerId});
 
   @override
   State<TicketFormScreen> createState() => _TicketFormScreenState();
@@ -45,7 +41,8 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
     super.initState();
     final ticket = widget.ticket;
 
-    workerId = ticket?.workerId ??
+    workerId =
+        ticket?.workerId ??
         widget.initialWorkerId ??
         (workers.isNotEmpty ? workers.first.id : '');
     type = ticket?.type ?? TicketType.flight;
@@ -53,8 +50,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
     travelDate = ticket?.travelDate ?? DateTime.now();
 
     company = TextEditingController(text: ticket?.company ?? '');
-    serviceNumber =
-        TextEditingController(text: ticket?.serviceNumber ?? '');
+    serviceNumber = TextEditingController(text: ticket?.serviceNumber ?? '');
     bookingCode = TextEditingController(text: ticket?.bookingCode ?? '');
     origin = TextEditingController(text: ticket?.origin ?? '');
     destination = TextEditingController(text: ticket?.destination ?? '');
@@ -116,7 +112,8 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
     Navigator.pop(
       context,
       Ticket(
-        id: widget.ticket?.id ??
+        id:
+            widget.ticket?.id ??
             DateTime.now().millisecondsSinceEpoch.toString(),
         workerId: workerId,
         type: type,
@@ -138,9 +135,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(editing ? 'Editar pasaje' : 'Nuevo pasaje'),
-      ),
+      appBar: AppBar(title: Text(editing ? 'Editar pasaje' : 'Nuevo pasaje')),
       body: Form(
         key: formKey,
         child: SingleChildScrollView(

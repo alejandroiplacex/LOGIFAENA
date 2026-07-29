@@ -27,15 +27,20 @@ class WorkersScreen extends StatefulWidget {
 
 class _WorkersScreenState extends State<WorkersScreen> {
   final WorkerRepository repository = InMemoryWorkerRepository.instance;
-  final OperationRepository operationRepository = InMemoryOperationRepository.instance;
+  final OperationRepository operationRepository =
+      InMemoryOperationRepository.instance;
   final TicketRepository ticketRepository = InMemoryTicketRepository.instance;
   final HotelRepository hotelRepository = InMemoryHotelRepository.instance;
-  final TransferRepository transferRepository = InMemoryTransferRepository.instance;
-  final ImportHistoryRepository importHistoryRepository = ImportHistoryRepository.instance;
+  final TransferRepository transferRepository =
+      InMemoryTransferRepository.instance;
+  final ImportHistoryRepository importHistoryRepository =
+      ImportHistoryRepository.instance;
   final TextEditingController searchController = TextEditingController();
   final ScrollController _listScrollController = ScrollController();
   final FocusNode _listFocusNode = FocusNode(debugLabel: 'PersonalListFocus');
-  final FocusNode _searchFocusNode = FocusNode(debugLabel: 'PersonalSearchFocus');
+  final FocusNode _searchFocusNode = FocusNode(
+    debugLabel: 'PersonalSearchFocus',
+  );
   int _selectedWorkerIndex = 0;
   bool _tableView = false;
 
@@ -74,7 +79,8 @@ class _WorkersScreenState extends State<WorkersScreen> {
     final query = searchController.text.trim().toLowerCase();
 
     return repository.getAll().where((worker) {
-      final matchesSearch = query.isEmpty ||
+      final matchesSearch =
+          query.isEmpty ||
           worker.fullName.toLowerCase().contains(query) ||
           worker.rut.toLowerCase().contains(query) ||
           worker.role.toLowerCase().contains(query) ||
@@ -92,13 +98,14 @@ class _WorkersScreenState extends State<WorkersScreen> {
   }
 
   List<String> get projects {
-    final values = repository
-        .getAll()
-        .map((worker) => worker.project)
-        .where((project) => project.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort();
+    final values =
+        repository
+            .getAll()
+            .map((worker) => worker.project)
+            .where((project) => project.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
 
     return ['Todos', ...values];
   }
@@ -106,9 +113,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
   Future<void> addWorker() async {
     final worker = await Navigator.push<Worker>(
       context,
-      MaterialPageRoute(
-        builder: (_) => const WorkerFormScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const WorkerFormScreen()),
     );
 
     if (!mounted || worker == null) return;
@@ -121,18 +126,16 @@ class _WorkersScreenState extends State<WorkersScreen> {
     );
   }
 
-
   Future<void> importWorkers() async {
     final payload = await Navigator.push<ExcelImportPayload>(
       context,
       MaterialPageRoute(
-        builder: (_) => ExcelImportScreen(
-          existingWorkers: repository.getAll(),
-        ),
+        builder: (_) => ExcelImportScreen(existingWorkers: repository.getAll()),
       ),
     );
 
-    if (!mounted || payload == null || payload.operation.workers.isEmpty) return;
+    if (!mounted || payload == null || payload.operation.workers.isEmpty)
+      return;
 
     final result = repository.importAll(
       payload.workers,
@@ -156,7 +159,8 @@ class _WorkersScreenState extends State<WorkersScreen> {
         rowsRead: payload.rowsRead,
         created: result.created,
         updated: result.updated,
-        skippedOrInvalid: payload.invalidCount +
+        skippedOrInvalid:
+            payload.invalidCount +
             (payload.duplicatePolicy == DuplicateImportPolicy.skip
                 ? payload.duplicateCount
                 : 0),
@@ -173,7 +177,8 @@ class _WorkersScreenState extends State<WorkersScreen> {
     await _showImportSummary(
       created: result.created,
       updated: result.updated,
-      skipped: payload.invalidCount +
+      skipped:
+          payload.invalidCount +
           (payload.duplicatePolicy == DuplicateImportPolicy.skip
               ? payload.duplicateCount
               : 0),
@@ -231,7 +236,6 @@ class _WorkersScreenState extends State<WorkersScreen> {
     );
   }
 
-
   Future<void> showImportHistory() async {
     final items = importHistoryRepository.getAll();
     await showDialog<void>(
@@ -242,7 +246,9 @@ class _WorkersScreenState extends State<WorkersScreen> {
           width: 760,
           height: 420,
           child: items.isEmpty
-              ? const Center(child: Text('Todavía no existen importaciones registradas.'))
+              ? const Center(
+                  child: Text('Todavía no existen importaciones registradas.'),
+                )
               : ListView.separated(
                   itemCount: items.length,
                   separatorBuilder: (_, __) => const Divider(height: 1),
@@ -252,10 +258,10 @@ class _WorkersScreenState extends State<WorkersScreen> {
                     final formattedDate = date == null
                         ? item.importedAt
                         : '${date.day.toString().padLeft(2, '0')}/'
-                            '${date.month.toString().padLeft(2, '0')}/'
-                            '${date.year} '
-                            '${date.hour.toString().padLeft(2, '0')}:'
-                            '${date.minute.toString().padLeft(2, '0')}';
+                              '${date.month.toString().padLeft(2, '0')}/'
+                              '${date.year} '
+                              '${date.hour.toString().padLeft(2, '0')}:'
+                              '${date.minute.toString().padLeft(2, '0')}';
                     return ListTile(
                       leading: const CircleAvatar(child: Icon(Icons.history)),
                       title: Text(item.fileName),
@@ -282,9 +288,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
   Future<void> editWorker(Worker worker) async {
     final updated = await Navigator.push<Worker>(
       context,
-      MaterialPageRoute(
-        builder: (_) => WorkerFormScreen(worker: worker),
-      ),
+      MaterialPageRoute(builder: (_) => WorkerFormScreen(worker: worker)),
     );
 
     if (!mounted || updated == null) return;
@@ -315,9 +319,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Eliminar trabajador'),
-        content: Text(
-          '¿Deseas eliminar a ${worker.fullName}?',
-        ),
+        content: Text('¿Deseas eliminar a ${worker.fullName}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -342,7 +344,6 @@ class _WorkersScreenState extends State<WorkersScreen> {
     repository.update(worker);
     setState(() {});
   }
-
 
   KeyEventResult _handlePersonalKeyEvent(
     FocusNode node,
@@ -458,13 +459,18 @@ class _WorkersScreenState extends State<WorkersScreen> {
         .clamp(0, filtered.length - 1)
         .toInt();
     setState(() => _selectedWorkerIndex = next);
-    _animateListTo(_listScrollController.offset + (viewport * 0.85 * direction));
+    _animateListTo(
+      _listScrollController.offset + (viewport * 0.85 * direction),
+    );
   }
 
   void _animateListTo(double offset) {
     if (!_listScrollController.hasClients) return;
     final position = _listScrollController.position;
-    final target = offset.clamp(position.minScrollExtent, position.maxScrollExtent);
+    final target = offset.clamp(
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
     _listScrollController.animateTo(
       target.toDouble(),
       duration: const Duration(milliseconds: 180),
@@ -529,11 +535,14 @@ class _WorkersScreenState extends State<WorkersScreen> {
                                               index == _selectedWorkerIndex;
                                           return GestureDetector(
                                             onTap: () {
-                                              setState(() =>
-                                                  _selectedWorkerIndex = index);
+                                              setState(
+                                                () => _selectedWorkerIndex =
+                                                    index,
+                                              );
                                               _listFocusNode.requestFocus();
                                             },
-                                            onDoubleTap: () => openWorker(worker),
+                                            onDoubleTap: () =>
+                                                openWorker(worker),
                                             child: _tableView
                                                 ? _workerTableRow(
                                                     worker,
@@ -545,13 +554,16 @@ class _WorkersScreenState extends State<WorkersScreen> {
                                                     ),
                                                     decoration: BoxDecoration(
                                                       borderRadius:
-                                                          BorderRadius.circular(14),
+                                                          BorderRadius.circular(
+                                                            14,
+                                                          ),
                                                       border: Border.all(
                                                         color: selected
                                                             ? Theme.of(context)
-                                                                .colorScheme
-                                                                .primary
-                                                            : Colors.transparent,
+                                                                  .colorScheme
+                                                                  .primary
+                                                            : Colors
+                                                                  .transparent,
                                                         width: selected ? 2 : 0,
                                                       ),
                                                     ),
@@ -563,9 +575,13 @@ class _WorkersScreenState extends State<WorkersScreen> {
                                                           editWorker(worker),
                                                       onDelete: () =>
                                                           deleteWorker(worker),
-                                                      onStatusChanged: (status) {
-                                                        updateStatus(worker, status);
-                                                      },
+                                                      onStatusChanged:
+                                                          (status) {
+                                                            updateStatus(
+                                                              worker,
+                                                              status,
+                                                            );
+                                                          },
                                                     ),
                                                   ),
                                           );
@@ -663,8 +679,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                 decoration: BoxDecoration(
                   color: _statusColor(worker.status).withOpacity(0.12),
                   borderRadius: BorderRadius.circular(999),
@@ -723,8 +738,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
   Widget _statusBar(List<Worker> filtered) {
     final all = repository.getAll();
     final site = all.where((w) => w.status == WorkerStatus.atSite).length;
-    final transfer =
-        all.where((w) => w.status == WorkerStatus.transfer).length;
+    final transfer = all.where((w) => w.status == WorkerStatus.transfer).length;
 
     return Container(
       height: 34,
@@ -744,11 +758,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
           const Text('  ·  '),
           Text('$transfer en traslado'),
           const Spacer(),
-          Icon(
-            Icons.cloud_done_outlined,
-            size: 17,
-            color: AppColors.success,
-          ),
+          Icon(Icons.cloud_done_outlined, size: 17, color: AppColors.success),
           const SizedBox(width: 6),
           const Text(
             'Base guardada',
@@ -853,7 +863,8 @@ class _WorkersScreenState extends State<WorkersScreen> {
   }
 
   Widget _activeFilterBar(int resultCount) {
-    final hasFilter = selectedStatus != null ||
+    final hasFilter =
+        selectedStatus != null ||
         selectedProject != 'Todos' ||
         searchController.text.trim().isNotEmpty;
 
@@ -930,12 +941,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
             prefixIcon: Icon(Icons.business),
           ),
           items: projects
-              .map(
-                (item) => DropdownMenuItem(
-                  value: item,
-                  child: Text(item),
-                ),
-              )
+              .map((item) => DropdownMenuItem(value: item, child: Text(item)))
               .toList(),
           onChanged: (value) {
             setState(() => selectedProject = value ?? 'Todos');
@@ -1049,5 +1055,4 @@ class _WorkersScreenState extends State<WorkersScreen> {
       },
     );
   }
-
 }

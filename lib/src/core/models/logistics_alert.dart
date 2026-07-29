@@ -35,13 +35,13 @@ class LogisticsAlert {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'operationId': operationId,
-        'workerId': workerId,
-        'severity': severity.name,
-        'code': code,
-        'title': title,
-        'description': description,
-        'createdAt': createdAt.toIso8601String(),
-      };
+    'id': id,
+    'operationId': operationId,
+    'workerId': workerId,
+    'severity': severity.name,
+    'code': code,
+    'title': title,
+    'description': description,
+    'createdAt': createdAt.toIso8601String(),
+  };
 }

@@ -42,7 +42,9 @@ class OperationalAlertService {
         );
       }
 
-      if (InMemoryTransferRepository.instance.findByWorkerId(worker.id).isEmpty) {
+      if (InMemoryTransferRepository.instance
+          .findByWorkerId(worker.id)
+          .isEmpty) {
         alerts.add(
           OperationalAlert(
             id: '${worker.id}-transfer',

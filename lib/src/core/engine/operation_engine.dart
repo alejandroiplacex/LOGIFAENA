@@ -100,73 +100,85 @@ class OperationEngine {
       final transfers = _transfersForWorker(operation, worker.id);
 
       if (ticket == null || ticket.status != TicketStatus.issued) {
-        alerts.add(LogisticsAlert(
-          id: '${operation.id}-${worker.id}-ticket',
-          operationId: operation.id,
-          workerId: worker.id,
-          severity: LogisticsAlertSeverity.critical,
-          code: 'WORKER_WITHOUT_ISSUED_TICKET',
-          title: 'Trabajador sin pasaje emitido',
-          description: '${worker.fullName} no tiene un pasaje emitido.',
-          createdAt: now,
-        ));
+        alerts.add(
+          LogisticsAlert(
+            id: '${operation.id}-${worker.id}-ticket',
+            operationId: operation.id,
+            workerId: worker.id,
+            severity: LogisticsAlertSeverity.critical,
+            code: 'WORKER_WITHOUT_ISSUED_TICKET',
+            title: 'Trabajador sin pasaje emitido',
+            description: '${worker.fullName} no tiene un pasaje emitido.',
+            createdAt: now,
+          ),
+        );
       }
 
       if (hotel == null ||
           hotel.status == HotelStatus.requested ||
           hotel.status == HotelStatus.cancelled) {
-        alerts.add(LogisticsAlert(
-          id: '${operation.id}-${worker.id}-hotel',
-          operationId: operation.id,
-          workerId: worker.id,
-          severity: LogisticsAlertSeverity.critical,
-          code: 'WORKER_WITHOUT_CONFIRMED_HOTEL',
-          title: 'Trabajador sin alojamiento confirmado',
-          description: '${worker.fullName} no tiene alojamiento confirmado.',
-          createdAt: now,
-        ));
+        alerts.add(
+          LogisticsAlert(
+            id: '${operation.id}-${worker.id}-hotel',
+            operationId: operation.id,
+            workerId: worker.id,
+            severity: LogisticsAlertSeverity.critical,
+            code: 'WORKER_WITHOUT_CONFIRMED_HOTEL',
+            title: 'Trabajador sin alojamiento confirmado',
+            description: '${worker.fullName} no tiene alojamiento confirmado.',
+            createdAt: now,
+          ),
+        );
       }
 
       if (transfers.isEmpty ||
           transfers.every((item) => item.status == TransferStatus.cancelled)) {
-        alerts.add(LogisticsAlert(
-          id: '${operation.id}-${worker.id}-transfer',
-          operationId: operation.id,
-          workerId: worker.id,
-          severity: LogisticsAlertSeverity.important,
-          code: 'WORKER_WITHOUT_TRANSFER',
-          title: 'Trabajador sin traslado asignado',
-          description: '${worker.fullName} no tiene traslado vigente.',
-          createdAt: now,
-        ));
+        alerts.add(
+          LogisticsAlert(
+            id: '${operation.id}-${worker.id}-transfer',
+            operationId: operation.id,
+            workerId: worker.id,
+            severity: LogisticsAlertSeverity.important,
+            code: 'WORKER_WITHOUT_TRANSFER',
+            title: 'Trabajador sin traslado asignado',
+            description: '${worker.fullName} no tiene traslado vigente.',
+            createdAt: now,
+          ),
+        );
       }
     }
 
     for (final transfer in operation.transfers) {
       if (transfer.status == TransferStatus.cancelled) continue;
       if (transfer.driverName.trim().isEmpty) {
-        alerts.add(LogisticsAlert(
-          id: '${operation.id}-${transfer.id}-driver',
-          operationId: operation.id,
-          workerId: null,
-          severity: LogisticsAlertSeverity.critical,
-          code: 'TRANSFER_WITHOUT_DRIVER',
-          title: 'Traslado sin conductor',
-          description: 'El traslado ${transfer.code} no tiene conductor asignado.',
-          createdAt: now,
-        ));
+        alerts.add(
+          LogisticsAlert(
+            id: '${operation.id}-${transfer.id}-driver',
+            operationId: operation.id,
+            workerId: null,
+            severity: LogisticsAlertSeverity.critical,
+            code: 'TRANSFER_WITHOUT_DRIVER',
+            title: 'Traslado sin conductor',
+            description:
+                'El traslado ${transfer.code} no tiene conductor asignado.',
+            createdAt: now,
+          ),
+        );
       }
-      if (transfer.capacity > 0 && transfer.workerIds.length > transfer.capacity) {
-        alerts.add(LogisticsAlert(
-          id: '${operation.id}-${transfer.id}-capacity',
-          operationId: operation.id,
-          workerId: null,
-          severity: LogisticsAlertSeverity.critical,
-          code: 'TRANSFER_OVER_CAPACITY',
-          title: 'Capacidad de traslado excedida',
-          description: 'El traslado ${transfer.code} supera su capacidad.',
-          createdAt: now,
-        ));
+      if (transfer.capacity > 0 &&
+          transfer.workerIds.length > transfer.capacity) {
+        alerts.add(
+          LogisticsAlert(
+            id: '${operation.id}-${transfer.id}-capacity',
+            operationId: operation.id,
+            workerId: null,
+            severity: LogisticsAlertSeverity.critical,
+            code: 'TRANSFER_OVER_CAPACITY',
+            title: 'Capacidad de traslado excedida',
+            description: 'El traslado ${transfer.code} supera su capacidad.',
+            createdAt: now,
+          ),
+        );
       }
     }
 
@@ -179,14 +191,17 @@ class OperationEngine {
       return operation.status;
     }
     if (operation.endDate.isBefore(DateTime.now()) &&
-        operation.workers.every((worker) =>
-            worker.status == WorkerStatus.finished ||
-            worker.status == WorkerStatus.cancelled)) {
+        operation.workers.every(
+          (worker) =>
+              worker.status == WorkerStatus.finished ||
+              worker.status == WorkerStatus.cancelled,
+        )) {
       return OperationStatus.finished;
     }
     if (operation.workers.isEmpty) return OperationStatus.planning;
     if (operation.alerts.any(
-        (alert) => alert.severity == LogisticsAlertSeverity.critical)) {
+      (alert) => alert.severity == LogisticsAlertSeverity.critical,
+    )) {
       return OperationStatus.validation;
     }
     if (operation.operationalReadinessIndex >= 95) {
@@ -200,8 +215,7 @@ class OperationEngine {
 
   Ticket? _ticketForWorker(Operation operation, String workerId) {
     for (final item in operation.tickets.reversed) {
-      if (item.workerId == workerId &&
-          item.status != TicketStatus.cancelled) {
+      if (item.workerId == workerId && item.status != TicketStatus.cancelled) {
         return item;
       }
     }
@@ -210,8 +224,7 @@ class OperationEngine {
 
   HotelAssignment? _hotelForWorker(Operation operation, String workerId) {
     for (final item in operation.hotels.reversed) {
-      if (item.workerId == workerId &&
-          item.status != HotelStatus.cancelled) {
+      if (item.workerId == workerId && item.status != HotelStatus.cancelled) {
         return item;
       }
     }

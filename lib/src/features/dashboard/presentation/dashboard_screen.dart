@@ -68,10 +68,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final totalChecks = workers.isEmpty ? 1 : workers.length * 3;
     final completedChecks = (totalChecks - alerts.length).clamp(0, totalChecks);
     final health = ((completedChecks / totalChecks) * 100).round();
-    final todayEvents = events.where((event) => _sameDay(event.date, _now)).toList();
-    final displayEvents = todayEvents.isNotEmpty ? todayEvents : events.take(5).toList();
-    final arrivalsToday = events.where((event) =>
-      _sameDay(event.date, _now) && event.type == AgendaEventType.ticket).length;
+    final todayEvents = events
+        .where((event) => _sameDay(event.date, _now))
+        .toList();
+    final displayEvents = todayEvents.isNotEmpty
+        ? todayEvents
+        : events.take(5).toList();
+    final arrivalsToday = events
+        .where(
+          (event) =>
+              _sameDay(event.date, _now) &&
+              event.type == AgendaEventType.ticket,
+        )
+        .length;
 
     return ColoredBox(
       color: const Color(0xFFF5F7FB),
@@ -91,78 +100,151 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 interactive: true,
                 child: SingleChildScrollView(
                   controller: _scrollController,
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: const EdgeInsets.fromLTRB(24, 20, 72, 96),
                   child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            DashboardHeader(now: _now, alertCount: alerts.length),
-            const SizedBox(height: 18),
-            StatusBanner(
-              alertCount: alerts.length,
-              activeWorkers: workers.length,
-              arrivalsToday: arrivalsToday,
-            ),
-            const SizedBox(height: 18),
-            LayoutBuilder(builder: (context, constraints) {
-              final width = constraints.maxWidth;
-              final columns = width >= 1250 ? 6 : width >= 850 ? 3 : width >= 520 ? 2 : 1;
-              return GridView.count(
-                crossAxisCount: columns,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 14,
-                childAspectRatio: width >= 1250 ? 1.18 : 1.35,
-                children: [
-                  KpiCard(title: 'PERSONAL', value: '${workers.length}', subtitle: 'Activos', icon: Icons.groups_rounded, color: const Color(0xFF2367F2), onTap: () => widget.onNavigate(1)),
-                  KpiCard(title: 'LLEGADAS', value: '$arrivalsToday', subtitle: 'Hoy', icon: Icons.flight_land_rounded, color: const Color(0xFF16A36A), onTap: () => widget.onNavigate(2)),
-                  KpiCard(title: 'PASAJES', value: '${tickets.length}', subtitle: 'Registrados', icon: Icons.airplane_ticket_rounded, color: const Color(0xFFFF7A1A), onTap: () => widget.onNavigate(3)),
-                  KpiCard(title: 'HOTELES', value: '${hotels.length}', subtitle: 'Asignaciones', icon: Icons.apartment_rounded, color: const Color(0xFF7B3FF2), onTap: () => widget.onNavigate(4)),
-                  KpiCard(title: 'TRASLADOS', value: '${transfers.length}', subtitle: 'Programados', icon: Icons.directions_bus_rounded, color: const Color(0xFF078AA5), onTap: () => widget.onNavigate(5)),
-                  KpiCard(title: 'ALERTAS', value: '${alerts.length}', subtitle: 'Pendientes', icon: Icons.warning_amber_rounded, color: const Color(0xFFEF3340), onTap: () => widget.onNavigate(7)),
-                ],
-              );
-            }),
-            const SizedBox(height: 18),
-            WorkerStatusOverview(
-              workers: workers,
-              onOpenWorkers: () => widget.onNavigate(1),
-              onStatusSelected: widget.onOpenWorkerStatus,
-            ),
-            const SizedBox(height: 18),
-            LayoutBuilder(builder: (context, constraints) {
-              final desktop = constraints.maxWidth >= 980;
-              final left = Column(children: [
-                RecentActivityPanel(
-                  workers: workers,
-                  tickets: tickets,
-                  hotels: hotels,
-                  transfers: transfers,
-                  events: displayEvents,
-                  onOpenAgenda: () => widget.onNavigate(2),
-                ),
-                const SizedBox(height: 18),
-                OperationalHealth(value: health, alertCount: alerts.length),
-              ]);
-              final right = Column(children: [
-                AlertPanel(alerts: alerts.take(3).toList(), onViewAll: () => widget.onNavigate(7)),
-                const SizedBox(height: 18),
-                QuickActions(onNavigate: widget.onNavigate),
-              ]);
-              if (!desktop) return Column(children: [left, const SizedBox(height: 18), right]);
-              return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Expanded(flex: 5, child: left),
-                const SizedBox(width: 18),
-                Expanded(flex: 4, child: right),
-              ]);
-            }),
-          ],
-        ),
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      DashboardHeader(now: _now, alertCount: alerts.length),
+                      const SizedBox(height: 18),
+                      StatusBanner(
+                        alertCount: alerts.length,
+                        activeWorkers: workers.length,
+                        arrivalsToday: arrivalsToday,
+                      ),
+                      const SizedBox(height: 18),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final width = constraints.maxWidth;
+                          final columns = width >= 1250
+                              ? 6
+                              : width >= 850
+                              ? 3
+                              : width >= 520
+                              ? 2
+                              : 1;
+                          return GridView.count(
+                            crossAxisCount: columns,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            crossAxisSpacing: 14,
+                            mainAxisSpacing: 14,
+                            childAspectRatio: width >= 1250 ? 1.18 : 1.35,
+                            children: [
+                              KpiCard(
+                                title: 'PERSONAL',
+                                value: '${workers.length}',
+                                subtitle: 'Activos',
+                                icon: Icons.groups_rounded,
+                                color: const Color(0xFF2367F2),
+                                onTap: () => widget.onNavigate(1),
+                              ),
+                              KpiCard(
+                                title: 'LLEGADAS',
+                                value: '$arrivalsToday',
+                                subtitle: 'Hoy',
+                                icon: Icons.flight_land_rounded,
+                                color: const Color(0xFF16A36A),
+                                onTap: () => widget.onNavigate(2),
+                              ),
+                              KpiCard(
+                                title: 'PASAJES',
+                                value: '${tickets.length}',
+                                subtitle: 'Registrados',
+                                icon: Icons.airplane_ticket_rounded,
+                                color: const Color(0xFFFF7A1A),
+                                onTap: () => widget.onNavigate(3),
+                              ),
+                              KpiCard(
+                                title: 'HOTELES',
+                                value: '${hotels.length}',
+                                subtitle: 'Asignaciones',
+                                icon: Icons.apartment_rounded,
+                                color: const Color(0xFF7B3FF2),
+                                onTap: () => widget.onNavigate(4),
+                              ),
+                              KpiCard(
+                                title: 'TRASLADOS',
+                                value: '${transfers.length}',
+                                subtitle: 'Programados',
+                                icon: Icons.directions_bus_rounded,
+                                color: const Color(0xFF078AA5),
+                                onTap: () => widget.onNavigate(5),
+                              ),
+                              KpiCard(
+                                title: 'ALERTAS',
+                                value: '${alerts.length}',
+                                subtitle: 'Pendientes',
+                                icon: Icons.warning_amber_rounded,
+                                color: const Color(0xFFEF3340),
+                                onTap: () => widget.onNavigate(7),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 18),
+                      WorkerStatusOverview(
+                        workers: workers,
+                        onOpenWorkers: () => widget.onNavigate(1),
+                        onStatusSelected: widget.onOpenWorkerStatus,
+                      ),
+                      const SizedBox(height: 18),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final desktop = constraints.maxWidth >= 980;
+                          final left = Column(
+                            children: [
+                              RecentActivityPanel(
+                                workers: workers,
+                                tickets: tickets,
+                                hotels: hotels,
+                                transfers: transfers,
+                                events: displayEvents,
+                                onOpenAgenda: () => widget.onNavigate(2),
+                              ),
+                              const SizedBox(height: 18),
+                              OperationalHealth(
+                                value: health,
+                                alertCount: alerts.length,
+                              ),
+                            ],
+                          );
+                          final right = Column(
+                            children: [
+                              AlertPanel(
+                                alerts: alerts.take(3).toList(),
+                                onViewAll: () => widget.onNavigate(7),
+                              ),
+                              const SizedBox(height: 18),
+                              QuickActions(onNavigate: widget.onNavigate),
+                            ],
+                          );
+                          if (!desktop)
+                            return Column(
+                              children: [
+                                left,
+                                const SizedBox(height: 18),
+                                right,
+                              ],
+                            );
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(flex: 5, child: left),
+                              const SizedBox(width: 18),
+                              Expanded(flex: 4, child: right),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
+          ),
           ScrollNavigationButtons(controller: _scrollController),
         ],
       ),
@@ -210,5 +292,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return KeyEventResult.handled;
   }
 
-  bool _sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
+  bool _sameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 }

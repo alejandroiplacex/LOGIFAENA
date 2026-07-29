@@ -22,26 +22,28 @@ class OperationNote {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'operationId': operationId,
-        'workerId': workerId,
-        'category': category,
-        'message': message,
-        'priority': priority,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
-        'createdBy': createdBy,
-      };
+    'id': id,
+    'operationId': operationId,
+    'workerId': workerId,
+    'category': category,
+    'message': message,
+    'priority': priority,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+    'createdBy': createdBy,
+  };
 
   factory OperationNote.fromJson(Map<String, dynamic> json) => OperationNote(
-        id: json['id'] as String? ?? '',
-        operationId: json['operationId'] as String? ?? '',
-        workerId: json['workerId'] as String?,
-        category: json['category'] as String? ?? '',
-        message: json['message'] as String? ?? '',
-        priority: json['priority'] as String? ?? 'Informativa',
-        createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
-        updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '') ?? DateTime.now(),
-        createdBy: json['createdBy'] as String? ?? '',
-      );
+    id: json['id'] as String? ?? '',
+    operationId: json['operationId'] as String? ?? '',
+    workerId: json['workerId'] as String?,
+    category: json['category'] as String? ?? '',
+    message: json['message'] as String? ?? '',
+    priority: json['priority'] as String? ?? 'Informativa',
+    createdAt:
+        DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+    updatedAt:
+        DateTime.tryParse(json['updatedAt'] as String? ?? '') ?? DateTime.now(),
+    createdBy: json['createdBy'] as String? ?? '',
+  );
 }

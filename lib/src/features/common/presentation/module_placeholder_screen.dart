@@ -38,15 +38,10 @@ class ModulePlaceholderScreen extends StatelessWidget {
                   Text(
                     description,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                    ),
+                    style: const TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                   const SizedBox(height: 18),
-                  const Chip(
-                    label: Text('Preparado para el siguiente sprint'),
-                  ),
+                  const Chip(label: Text('Preparado para el siguiente sprint')),
                 ],
               ),
             ),

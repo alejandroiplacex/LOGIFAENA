@@ -27,8 +27,9 @@ class WorkerDetailScreen extends StatelessWidget {
       InMemoryHotelRepository.instance.findByWorkerId(worker.id);
 
   List<Transfer> get transfers {
-    final values =
-        InMemoryTransferRepository.instance.findByWorkerId(worker.id);
+    final values = InMemoryTransferRepository.instance.findByWorkerId(
+      worker.id,
+    );
     values.sort((a, b) => b.date.compareTo(a.date));
     return values;
   }
@@ -237,7 +238,6 @@ class WorkerDetailScreen extends StatelessWidget {
     );
   }
 
-
   Widget _readinessChip(LogisticsReadiness readiness) {
     final color = switch (readiness.level) {
       LogisticsReadinessLevel.ready => const Color(0xFF15803D),
@@ -274,8 +274,8 @@ class WorkerDetailScreen extends StatelessWidget {
             final cardWidth = constraints.maxWidth >= 920
                 ? (constraints.maxWidth - 32) / 3
                 : constraints.maxWidth >= 600
-                    ? (constraints.maxWidth - 16) / 2
-                    : constraints.maxWidth;
+                ? (constraints.maxWidth - 16) / 2
+                : constraints.maxWidth;
 
             return Wrap(
               spacing: 16,
@@ -288,17 +288,19 @@ class WorkerDetailScreen extends StatelessWidget {
                     title: 'Pasaje',
                     status: currentTicket?.status.label ?? 'Sin registro',
                     rows: currentTicket == null
-                        ? [
-                            _miniRow('Detalle', worker.ticket),
-                          ]
+                        ? [_miniRow('Detalle', worker.ticket)]
                         : [
                             _miniRow('Tipo', currentTicket.type.label),
                             _miniRow('Empresa', currentTicket.company),
                             _miniRow('Servicio', currentTicket.serviceNumber),
-                            _miniRow('Ruta',
-                                '${currentTicket.origin} → ${currentTicket.destination}'),
-                            _miniRow('Fecha',
-                                '${_date(currentTicket.travelDate)} · ${currentTicket.travelTime}'),
+                            _miniRow(
+                              'Ruta',
+                              '${currentTicket.origin} → ${currentTicket.destination}',
+                            ),
+                            _miniRow(
+                              'Fecha',
+                              '${_date(currentTicket.travelDate)} · ${currentTicket.travelTime}',
+                            ),
                             _miniRow('Reserva', currentTicket.bookingCode),
                           ],
                   ),
@@ -318,9 +320,18 @@ class WorkerDetailScreen extends StatelessWidget {
                             _miniRow('Hotel', currentHotel.hotelName),
                             _miniRow('Ciudad', currentHotel.city),
                             _miniRow('Habitación', currentHotel.room),
-                            _miniRow('Check-in', _date(currentHotel.checkInDate)),
-                            _miniRow('Check-out', _date(currentHotel.checkOutDate)),
-                            _miniRow('Confirmación', currentHotel.confirmationCode),
+                            _miniRow(
+                              'Check-in',
+                              _date(currentHotel.checkInDate),
+                            ),
+                            _miniRow(
+                              'Check-out',
+                              _date(currentHotel.checkOutDate),
+                            ),
+                            _miniRow(
+                              'Confirmación',
+                              currentHotel.confirmationCode,
+                            ),
                           ],
                   ),
                 ),
@@ -331,14 +342,17 @@ class WorkerDetailScreen extends StatelessWidget {
                     title: 'Traslado',
                     status: currentTransfer?.status.label ?? 'Sin registro',
                     rows: currentTransfer == null
-                        ? [
-                            _miniRow('Detalle', worker.transfer),
-                          ]
+                        ? [_miniRow('Detalle', worker.transfer)]
                         : [
-                            _miniRow('Vehículo', currentTransfer.vehicleIdentifier),
+                            _miniRow(
+                              'Vehículo',
+                              currentTransfer.vehicleIdentifier,
+                            ),
                             _miniRow('Patente', currentTransfer.licensePlate),
-                            _miniRow('Ruta',
-                                '${currentTransfer.origin} → ${currentTransfer.destination}'),
+                            _miniRow(
+                              'Ruta',
+                              '${currentTransfer.origin} → ${currentTransfer.destination}',
+                            ),
                             _miniRow('Fecha', _date(currentTransfer.date)),
                             _miniRow('Salida', currentTransfer.departureTime),
                             _miniRow('Conductor', currentTransfer.driverName),
@@ -421,32 +435,38 @@ class WorkerDetailScreen extends StatelessWidget {
     ];
 
     if (currentTicket != null) {
-      entries.add(_historyEntry(
-        Icons.airplane_ticket_outlined,
-        'Pasaje ${currentTicket.status.label.toLowerCase()}',
-        '${currentTicket.company} ${currentTicket.serviceNumber} · '
-            '${_date(currentTicket.travelDate)} ${currentTicket.travelTime} · '
-            '${currentTicket.origin} → ${currentTicket.destination}',
-      ));
+      entries.add(
+        _historyEntry(
+          Icons.airplane_ticket_outlined,
+          'Pasaje ${currentTicket.status.label.toLowerCase()}',
+          '${currentTicket.company} ${currentTicket.serviceNumber} · '
+              '${_date(currentTicket.travelDate)} ${currentTicket.travelTime} · '
+              '${currentTicket.origin} → ${currentTicket.destination}',
+        ),
+      );
     }
 
     if (currentHotel != null) {
-      entries.add(_historyEntry(
-        Icons.hotel_outlined,
-        'Alojamiento ${currentHotel.status.label.toLowerCase()}',
-        '${currentHotel.hotelName} · Habitación ${_value(currentHotel.room)} · '
-            '${_date(currentHotel.checkInDate)} al ${_date(currentHotel.checkOutDate)}',
-      ));
+      entries.add(
+        _historyEntry(
+          Icons.hotel_outlined,
+          'Alojamiento ${currentHotel.status.label.toLowerCase()}',
+          '${currentHotel.hotelName} · Habitación ${_value(currentHotel.room)} · '
+              '${_date(currentHotel.checkInDate)} al ${_date(currentHotel.checkOutDate)}',
+        ),
+      );
     }
 
     for (final transfer in transfers) {
-      entries.add(_historyEntry(
-        Icons.directions_bus_outlined,
-        'Traslado ${transfer.status.label.toLowerCase()}',
-        '${_date(transfer.date)} ${transfer.departureTime} · '
-            '${transfer.origin} → ${transfer.destination} · '
-            '${_value(transfer.vehicleIdentifier)}',
-      ));
+      entries.add(
+        _historyEntry(
+          Icons.directions_bus_outlined,
+          'Traslado ${transfer.status.label.toLowerCase()}',
+          '${_date(transfer.date)} ${transfer.departureTime} · '
+              '${transfer.origin} → ${transfer.destination} · '
+              '${_value(transfer.vehicleIdentifier)}',
+        ),
+      );
     }
 
     return _section(

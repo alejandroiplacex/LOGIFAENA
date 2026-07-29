@@ -4,10 +4,7 @@ import '../domain/worker.dart';
 class WorkerFormScreen extends StatefulWidget {
   final Worker? worker;
 
-  const WorkerFormScreen({
-    super.key,
-    this.worker,
-  });
+  const WorkerFormScreen({super.key, this.worker});
 
   @override
   State<WorkerFormScreen> createState() => _WorkerFormScreenState();
@@ -54,7 +51,9 @@ class _WorkerFormScreenState extends State<WorkerFormScreen> {
     city = TextEditingController(text: worker?.city ?? '');
     phone = TextEditingController(text: worker?.phone ?? '');
     email = TextEditingController(text: worker?.email ?? '');
-    emergencyContact = TextEditingController(text: worker?.emergencyContact ?? '');
+    emergencyContact = TextEditingController(
+      text: worker?.emergencyContact ?? '',
+    );
     emergencyPhone = TextEditingController(text: worker?.emergencyPhone ?? '');
     hotel = TextEditingController(text: worker?.hotel ?? '');
     room = TextEditingController(text: worker?.room ?? '');
@@ -112,8 +111,7 @@ class _WorkerFormScreenState extends State<WorkerFormScreen> {
     if (!formKey.currentState!.validate()) return;
 
     final worker = Worker(
-      id: widget.worker?.id ??
-          DateTime.now().millisecondsSinceEpoch.toString(),
+      id: widget.worker?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
       rut: rut.text.trim(),
       firstName: firstName.text.trim(),
       lastName: lastName.text.trim(),
@@ -267,12 +265,7 @@ class _WorkerFormScreenState extends State<WorkerFormScreen> {
           spacing: 14,
           runSpacing: 14,
           children: children
-              .map(
-                (child) => SizedBox(
-                  width: width,
-                  child: child,
-                ),
-              )
+              .map((child) => SizedBox(width: width, child: child))
               .toList(),
         );
       },

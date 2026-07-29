@@ -12,10 +12,7 @@ import '../services/excel_import_service.dart';
 class ExcelImportScreen extends StatefulWidget {
   final List<Worker> existingWorkers;
 
-  const ExcelImportScreen({
-    super.key,
-    required this.existingWorkers,
-  });
+  const ExcelImportScreen({super.key, required this.existingWorkers});
 
   @override
   State<ExcelImportScreen> createState() => _ExcelImportScreenState();
@@ -28,7 +25,9 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
   DuplicateImportPolicy duplicatePolicy = DuplicateImportPolicy.skip;
   bool loading = false;
   final ScrollController _scrollController = ScrollController();
-  final FocusNode _scrollFocusNode = FocusNode(debugLabel: 'excel-import-scroll');
+  final FocusNode _scrollFocusNode = FocusNode(
+    debugLabel: 'excel-import-scroll',
+  );
 
   @override
   void dispose() {
@@ -36,7 +35,6 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
     _scrollFocusNode.dispose();
     super.dispose();
   }
-
 
   void _moveScroll(double delta) {
     if (!_scrollController.hasClients) return;
@@ -63,13 +61,15 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
   }
 
   Map<ShortcutActivator, VoidCallback> get _scrollShortcuts => {
-        const SingleActivator(LogicalKeyboardKey.arrowDown): () => _moveScroll(56),
-        const SingleActivator(LogicalKeyboardKey.arrowUp): () => _moveScroll(-56),
-        const SingleActivator(LogicalKeyboardKey.pageDown): () => _moveScroll(520),
-        const SingleActivator(LogicalKeyboardKey.pageUp): () => _moveScroll(-520),
-        const SingleActivator(LogicalKeyboardKey.home): () => _jumpToScrollEdge(end: false),
-        const SingleActivator(LogicalKeyboardKey.end): () => _jumpToScrollEdge(end: true),
-      };
+    const SingleActivator(LogicalKeyboardKey.arrowDown): () => _moveScroll(56),
+    const SingleActivator(LogicalKeyboardKey.arrowUp): () => _moveScroll(-56),
+    const SingleActivator(LogicalKeyboardKey.pageDown): () => _moveScroll(520),
+    const SingleActivator(LogicalKeyboardKey.pageUp): () => _moveScroll(-520),
+    const SingleActivator(LogicalKeyboardKey.home): () =>
+        _jumpToScrollEdge(end: false),
+    const SingleActivator(LogicalKeyboardKey.end): () =>
+        _jumpToScrollEdge(end: true),
+  };
 
   Future<void> selectExcel() async {
     setState(() {
@@ -88,7 +88,9 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
       final file = picked.files.single;
       final bytes = file.bytes;
       if (bytes == null) {
-        throw const FormatException('No fue posible leer el archivo seleccionado.');
+        throw const FormatException(
+          'No fue posible leer el archivo seleccionado.',
+        );
       }
 
       selectedBytes = bytes;
@@ -127,7 +129,9 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
     final operation = current?.operation;
     if (current == null || operation == null || operation.workers.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No existen registros válidos para importar.')),
+        const SnackBar(
+          content: Text('No existen registros válidos para importar.'),
+        ),
       );
       return;
     }
@@ -184,124 +188,220 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: const EdgeInsets.fromLTRB(22, 22, 30, 32),
               child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1000),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(22),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Importador inteligente multihoja', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
-                        const SizedBox(height: 10),
-                        const Text('Selecciona la plantilla oficial de LogiFaena. El sistema reconocerá Control, Personal, Pasajes, Hoteles, Traslados y las demás hojas de la operación.'),
-                        const SizedBox(height: 18),
-                        FilledButton.icon(
-                          onPressed: loading ? null : selectExcel,
-                          icon: const Icon(Icons.upload_file),
-                          label: Text(loading ? 'Leyendo archivo...' : 'Seleccionar archivo .xlsx'),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1000),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(22),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Importador inteligente multihoja',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
+                                'Selecciona la plantilla oficial de LogiFaena. El sistema reconocerá Control, Personal, Pasajes, Hoteles, Traslados y las demás hojas de la operación.',
+                              ),
+                              const SizedBox(height: 18),
+                              FilledButton.icon(
+                                onPressed: loading ? null : selectExcel,
+                                icon: const Icon(Icons.upload_file),
+                                label: Text(
+                                  loading
+                                      ? 'Leyendo archivo...'
+                                      : 'Seleccionar archivo .xlsx',
+                                ),
+                              ),
+                              if (selectedFileName != null) ...[
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Archivo: $selectedFileName',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(height: 18),
+                              const Text(
+                                'Cuando el RUT ya existe:',
+                                style: TextStyle(fontWeight: FontWeight.w800),
+                              ),
+                              const SizedBox(height: 8),
+                              SegmentedButton<DuplicateImportPolicy>(
+                                segments: DuplicateImportPolicy.values
+                                    .map(
+                                      (policy) =>
+                                          ButtonSegment<DuplicateImportPolicy>(
+                                            value: policy,
+                                            label: Text(policy.label),
+                                          ),
+                                    )
+                                    .toList(),
+                                selected: {duplicatePolicy},
+                                onSelectionChanged: (selection) {
+                                  setState(
+                                    () => duplicatePolicy = selection.first,
+                                  );
+                                  _parseSelectedFile();
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                        if (selectedFileName != null) ...[
-                          const SizedBox(height: 12),
-                          Text('Archivo: $selectedFileName', style: const TextStyle(fontWeight: FontWeight.w700)),
+                      ),
+                      const SizedBox(height: 16),
+                      if (loading)
+                        const Card(
+                          child: Padding(
+                            padding: EdgeInsets.all(36),
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                        ),
+                      if (current != null) ...[
+                        if (current.operationOverview != null) ...[
+                          _operationOverview(current.operationOverview!),
+                          const SizedBox(height: 16),
                         ],
-                        const SizedBox(height: 18),
-                        const Text('Cuando el RUT ya existe:', style: TextStyle(fontWeight: FontWeight.w800)),
-                        const SizedBox(height: 8),
-                        SegmentedButton<DuplicateImportPolicy>(
-                          segments: DuplicateImportPolicy.values
-                              .map((policy) => ButtonSegment<DuplicateImportPolicy>(value: policy, label: Text(policy.label)))
-                              .toList(),
-                          selected: {duplicatePolicy},
-                          onSelectionChanged: (selection) {
-                            setState(() => duplicatePolicy = selection.first);
-                            _parseSelectedFile();
-                          },
+                        if (current.operation != null) ...[
+                          _importDiagnostics(current.operation!),
+                          const SizedBox(height: 16),
+                        ],
+                        Wrap(
+                          spacing: 14,
+                          runSpacing: 14,
+                          children: [
+                            _metric(
+                              'Registros leídos',
+                              current.rowsRead,
+                              Icons.table_rows,
+                            ),
+                            _metric(
+                              'Listos para procesar',
+                              readyCount,
+                              Icons.check_circle_outline,
+                            ),
+                            _metric(
+                              'Duplicados detectados',
+                              current.duplicateCount,
+                              Icons.content_copy,
+                            ),
+                            _metric(
+                              'No importables',
+                              current.invalidCount,
+                              Icons.warning_amber,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        if (current.warnings.isNotEmpty)
+                          Card(
+                            child: ExpansionTile(
+                              initiallyExpanded: current.invalidCount > 0,
+                              leading: const Icon(
+                                Icons.warning_amber,
+                                color: Colors.orange,
+                              ),
+                              title: Text(
+                                '${current.warnings.length} observación(es)',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              children: current.warnings
+                                  .take(100)
+                                  .map(
+                                    (warning) => ListTile(
+                                      dense: true,
+                                      leading: const Icon(
+                                        Icons.info_outline,
+                                        size: 18,
+                                      ),
+                                      title: Text(warning),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
+                        const SizedBox(height: 16),
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  'Vista previa ($readyCount)',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                SizedBox(
+                                  height: 390,
+                                  child:
+                                      current.operation == null ||
+                                          current.operation!.workers.isEmpty
+                                      ? const Center(
+                                          child: Text(
+                                            'No hay trabajadores válidos en la operación.',
+                                          ),
+                                        )
+                                      : ListView.separated(
+                                          itemCount:
+                                              current.operation!.workers.length,
+                                          separatorBuilder: (_, __) =>
+                                              const Divider(height: 1),
+                                          itemBuilder: (context, index) {
+                                            final worker = current
+                                                .operation!
+                                                .workers[index];
+                                            return ListTile(
+                                              leading: CircleAvatar(
+                                                child: Text(
+                                                  worker.firstName
+                                                      .substring(0, 1)
+                                                      .toUpperCase(),
+                                                ),
+                                              ),
+                                              title: Text(worker.fullName),
+                                              subtitle: Text(
+                                                '${worker.rut} · ${worker.company}\n${worker.role} · ${worker.project}',
+                                              ),
+                                              isThreeLine: true,
+                                              trailing: Text(
+                                                worker.status.label,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                ),
+                                const SizedBox(height: 16),
+                                FilledButton.icon(
+                                  onPressed: readyCount == 0
+                                      ? null
+                                      : confirmImport,
+                                  icon: const Icon(Icons.file_download_done),
+                                  label: Text(
+                                    'Importar operación completa ($readyCount trabajadores)',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (loading)
-                  const Card(child: Padding(padding: EdgeInsets.all(36), child: Center(child: CircularProgressIndicator()))),
-                if (current != null) ...[
-                  if (current.operationOverview != null) ...[
-                    _operationOverview(current.operationOverview!),
-                    const SizedBox(height: 16),
-                  ],
-                  if (current.operation != null) ...[
-                    _importDiagnostics(current.operation!),
-                    const SizedBox(height: 16),
-                  ],
-                  Wrap(
-                    spacing: 14,
-                    runSpacing: 14,
-                    children: [
-                      _metric('Registros leídos', current.rowsRead, Icons.table_rows),
-                      _metric('Listos para procesar', readyCount, Icons.check_circle_outline),
-                      _metric('Duplicados detectados', current.duplicateCount, Icons.content_copy),
-                      _metric('No importables', current.invalidCount, Icons.warning_amber),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  if (current.warnings.isNotEmpty)
-                    Card(
-                      child: ExpansionTile(
-                        initiallyExpanded: current.invalidCount > 0,
-                        leading: const Icon(Icons.warning_amber, color: Colors.orange),
-                        title: Text('${current.warnings.length} observación(es)', style: const TextStyle(fontWeight: FontWeight.w800)),
-                        children: current.warnings
-                            .take(100)
-                            .map((warning) => ListTile(dense: true, leading: const Icon(Icons.info_outline, size: 18), title: Text(warning)))
-                            .toList(),
-                      ),
-                    ),
-                  const SizedBox(height: 16),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text('Vista previa ($readyCount)', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            height: 390,
-                            child: current.operation == null || current.operation!.workers.isEmpty
-                                ? const Center(child: Text('No hay trabajadores válidos en la operación.'))
-                                : ListView.separated(
-                                    itemCount: current.operation!.workers.length,
-                                    separatorBuilder: (_, __) => const Divider(height: 1),
-                                    itemBuilder: (context, index) {
-                                      final worker = current.operation!.workers[index];
-                                      return ListTile(
-                                        leading: CircleAvatar(child: Text(worker.firstName.substring(0, 1).toUpperCase())),
-                                        title: Text(worker.fullName),
-                                        subtitle: Text('${worker.rut} · ${worker.company}\n${worker.role} · ${worker.project}'),
-                                        isThreeLine: true,
-                                        trailing: Text(worker.status.label),
-                                      );
-                                    },
-                                  ),
-                          ),
-                          const SizedBox(height: 16),
-                          FilledButton.icon(
-                            onPressed: readyCount == 0 ? null : confirmImport,
-                            icon: const Icon(Icons.file_download_done),
-                            label: Text('Importar operación completa ($readyCount trabajadores)'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
+                ),
               ),
             ),
           ),
@@ -341,10 +441,24 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
         ),
         child: Row(
           children: [
-            Icon(icon, color: ok ? Colors.green.shade700 : Colors.orange.shade800),
+            Icon(
+              icon,
+              color: ok ? Colors.green.shade700 : Colors.orange.shade800,
+            ),
             const SizedBox(width: 10),
-            Expanded(child: Text(label, style: const TextStyle(fontWeight: FontWeight.w700))),
-            Text('$value / $expected', style: TextStyle(fontWeight: FontWeight.w900, color: ok ? Colors.green.shade800 : Colors.orange.shade900)),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+            Text(
+              '$value / $expected',
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                color: ok ? Colors.green.shade800 : Colors.orange.shade900,
+              ),
+            ),
           ],
         ),
       );
@@ -356,25 +470,55 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Row(children: [Icon(Icons.fact_check_outlined), SizedBox(width: 10), Text('Diagnóstico antes de importar', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800))]),
+            const Row(
+              children: [
+                Icon(Icons.fact_check_outlined),
+                SizedBox(width: 10),
+                Text(
+                  'Diagnóstico antes de importar',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
-            const Text('Comprueba que cada trabajador esté relacionado por RUT con sus servicios logísticos.'),
+            const Text(
+              'Comprueba que cada trabajador esté relacionado por RUT con sus servicios logísticos.',
+            ),
             const SizedBox(height: 16),
-            metric('Trabajadores con pasaje', withTicket, operation.workers.length, Icons.flight),
+            metric(
+              'Trabajadores con pasaje',
+              withTicket,
+              operation.workers.length,
+              Icons.flight,
+            ),
             const SizedBox(height: 10),
-            metric('Trabajadores con hotel', withHotel, operation.workers.length, Icons.hotel),
+            metric(
+              'Trabajadores con hotel',
+              withHotel,
+              operation.workers.length,
+              Icons.hotel,
+            ),
             const SizedBox(height: 10),
-            metric('Trabajadores con traslado', withTransfer, operation.workers.length, Icons.directions_bus),
+            metric(
+              'Trabajadores con traslado',
+              withTransfer,
+              operation.workers.length,
+              Icons.directions_bus,
+            ),
             const Divider(height: 28),
-            Wrap(spacing: 18, runSpacing: 10, children: [
-              Text('Personal: ${operation.workers.length}'),
-              Text('Pasajes: ${operation.tickets.length}'),
-              Text('Hoteles: ${operation.hotels.length}'),
-              Text('Traslados agrupados: ${operation.transfers.length}'),
-              Text('Proveedores: ${operation.providers.length}'),
-              Text('Vehículos: ${operation.vehicles.length}'),
-              Text('Alertas previstas: ${operation.alerts.length}'),
-            ]),
+            Wrap(
+              spacing: 18,
+              runSpacing: 10,
+              children: [
+                Text('Personal: ${operation.workers.length}'),
+                Text('Pasajes: ${operation.tickets.length}'),
+                Text('Hoteles: ${operation.hotels.length}'),
+                Text('Traslados agrupados: ${operation.transfers.length}'),
+                Text('Proveedores: ${operation.providers.length}'),
+                Text('Vehículos: ${operation.vehicles.length}'),
+                Text('Alertas previstas: ${operation.alerts.length}'),
+              ],
+            ),
           ],
         ),
       ),
@@ -399,7 +543,9 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                 ),
                 Chip(
                   avatar: Icon(
-                    overview.issueCount == 0 ? Icons.verified : Icons.warning_amber,
+                    overview.issueCount == 0
+                        ? Icons.verified
+                        : Icons.warning_amber,
                     size: 18,
                   ),
                   label: Text(
@@ -416,10 +562,16 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                 spacing: 10,
                 runSpacing: 8,
                 children: [
-                  if (control['Empresa'] != null) Chip(label: Text('Empresa: ${control['Empresa']}')),
-                  if (control['Proyecto / Faena'] != null) Chip(label: Text('Proyecto: ${control['Proyecto / Faena']}')),
-                  if (control['Turno'] != null) Chip(label: Text('Turno: ${control['Turno']}')),
-                  if (control['Coordinador'] != null) Chip(label: Text('Coordinador: ${control['Coordinador']}')),
+                  if (control['Empresa'] != null)
+                    Chip(label: Text('Empresa: ${control['Empresa']}')),
+                  if (control['Proyecto / Faena'] != null)
+                    Chip(
+                      label: Text('Proyecto: ${control['Proyecto / Faena']}'),
+                    ),
+                  if (control['Turno'] != null)
+                    Chip(label: Text('Turno: ${control['Turno']}')),
+                  if (control['Coordinador'] != null)
+                    Chip(label: Text('Coordinador: ${control['Coordinador']}')),
                 ],
               ),
             ],
@@ -429,8 +581,8 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                 final width = constraints.maxWidth >= 820
                     ? (constraints.maxWidth - 30) / 4
                     : constraints.maxWidth >= 520
-                        ? (constraints.maxWidth - 10) / 2
-                        : constraints.maxWidth;
+                    ? (constraints.maxWidth - 10) / 2
+                    : constraints.maxWidth;
                 return Wrap(
                   spacing: 10,
                   runSpacing: 10,
@@ -441,7 +593,9 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Theme.of(context).dividerColor),
+                          border: Border.all(
+                            color: Theme.of(context).dividerColor,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -450,25 +604,40 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                               !sheet.found
                                   ? Icons.cancel_outlined
                                   : ok
-                                      ? Icons.check_circle_outline
-                                      : Icons.warning_amber_outlined,
+                                  ? Icons.check_circle_outline
+                                  : Icons.warning_amber_outlined,
                               color: !sheet.found
                                   ? Colors.red
                                   : ok
-                                      ? Colors.green
-                                      : Colors.orange,
+                                  ? Colors.green
+                                  : Colors.orange,
                             ),
                             const SizedBox(width: 9),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(sheet.name, style: const TextStyle(fontWeight: FontWeight.w800)),
-                                  Text(sheet.found ? '${sheet.rows} registro(s)' : 'No encontrada'),
+                                  Text(
+                                    sheet.name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  Text(
+                                    sheet.found
+                                        ? '${sheet.rows} registro(s)'
+                                        : 'No encontrada',
+                                  ),
                                   if (sheet.invalidRows > 0)
-                                    Text('${sheet.invalidRows} RUT inválido(s)', style: const TextStyle(fontSize: 12)),
+                                    Text(
+                                      '${sheet.invalidRows} RUT inválido(s)',
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
                                   if (sheet.orphanRutRows > 0)
-                                    Text('${sheet.orphanRutRows} sin trabajador asociado', style: const TextStyle(fontSize: 12)),
+                                    Text(
+                                      '${sheet.orphanRutRows} sin trabajador asociado',
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
                                 ],
                               ),
                             ),
@@ -482,7 +651,9 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
             ),
             if (overview.warnings.isNotEmpty) ...[
               const SizedBox(height: 12),
-              ...overview.warnings.take(8).map(
+              ...overview.warnings
+                  .take(8)
+                  .map(
                     (warning) => Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text('• $warning'),
@@ -509,7 +680,13 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('$value', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+                    Text(
+                      '$value',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     Text(label),
                   ],
                 ),

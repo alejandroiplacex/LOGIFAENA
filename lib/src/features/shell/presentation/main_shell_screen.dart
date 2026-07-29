@@ -26,42 +26,15 @@ class _MainShellScreenState extends State<MainShellScreen> {
   WorkerStatus? workerStatusFilter;
 
   final items = const [
-    _NavigationItem(
-      label: 'Centro de Operaciones',
-      icon: Icons.dashboard,
-    ),
-    _NavigationItem(
-      label: 'Personal',
-      icon: Icons.groups,
-    ),
-    _NavigationItem(
-      label: 'Agenda',
-      icon: Icons.calendar_month,
-    ),
-    _NavigationItem(
-      label: 'Pasajes',
-      icon: Icons.airplane_ticket,
-    ),
-    _NavigationItem(
-      label: 'Hoteles',
-      icon: Icons.hotel,
-    ),
-    _NavigationItem(
-      label: 'Traslados',
-      icon: Icons.directions_bus,
-    ),
-    _NavigationItem(
-      label: 'Reportes',
-      icon: Icons.assignment,
-    ),
-    _NavigationItem(
-      label: 'Alertas',
-      icon: Icons.notifications_active,
-    ),
-    _NavigationItem(
-      label: 'Configuración',
-      icon: Icons.settings,
-    ),
+    _NavigationItem(label: 'Centro de Operaciones', icon: Icons.dashboard),
+    _NavigationItem(label: 'Personal', icon: Icons.groups),
+    _NavigationItem(label: 'Agenda', icon: Icons.calendar_month),
+    _NavigationItem(label: 'Pasajes', icon: Icons.airplane_ticket),
+    _NavigationItem(label: 'Hoteles', icon: Icons.hotel),
+    _NavigationItem(label: 'Traslados', icon: Icons.directions_bus),
+    _NavigationItem(label: 'Reportes', icon: Icons.assignment),
+    _NavigationItem(label: 'Alertas', icon: Icons.notifications_active),
+    _NavigationItem(label: 'Configuración', icon: Icons.settings),
   ];
 
   Future<void> logout() async {
@@ -70,9 +43,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
     if (!mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(
-        builder: (_) => const LoginScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
       (_) => false,
     );
   }
@@ -134,7 +105,6 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
     return const SettingsScreen();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -220,12 +190,12 @@ class _MainShellScreenState extends State<MainShellScreen> {
                           if (selectedIndex != 0)
                             Text(
                               items[selectedIndex].label,
-                              style: const TextStyle(fontWeight: FontWeight.w700),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           const Spacer(),
-                          CircleAvatar(
-                            child: Icon(Icons.person),
-                          ),
+                          CircleAvatar(child: Icon(Icons.person)),
                           SizedBox(width: 10),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -233,9 +203,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
                             children: [
                               Text(
                                 'Alejandro Cárdenas',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
+                                style: TextStyle(fontWeight: FontWeight.w700),
                               ),
                               Text(
                                 'Coordinador Logístico',
@@ -288,10 +256,7 @@ class _Sidebar extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.engineering,
-                      color: AppColors.primary,
-                    ),
+                    child: Icon(Icons.engineering, color: AppColors.primary),
                   ),
                   SizedBox(width: 12),
                   Expanded(
@@ -308,10 +273,7 @@ class _Sidebar extends StatelessWidget {
                         ),
                         Text(
                           AppStrings.edition,
-                          style: TextStyle(
-                            color: Colors.white60,
-                            fontSize: 11,
-                          ),
+                          style: TextStyle(color: Colors.white60, fontSize: 11),
                         ),
                       ],
                     ),
@@ -360,10 +322,7 @@ class _Sidebar extends StatelessWidget {
             ),
             const Divider(color: Colors.white24, height: 1),
             ListTile(
-              leading: const Icon(
-                Icons.logout,
-                color: Colors.white70,
-              ),
+              leading: const Icon(Icons.logout, color: Colors.white70),
               title: const Text(
                 'Cerrar sesión',
                 style: TextStyle(color: Colors.white70),
@@ -382,8 +341,5 @@ class _NavigationItem {
   final String label;
   final IconData icon;
 
-  const _NavigationItem({
-    required this.label,
-    required this.icon,
-  });
+  const _NavigationItem({required this.label, required this.icon});
 }

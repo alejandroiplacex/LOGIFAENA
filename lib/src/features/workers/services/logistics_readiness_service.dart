@@ -48,15 +48,19 @@ class LogisticsReadinessService {
   static LogisticsReadiness evaluate(Worker worker) {
     final ticket = InMemoryTicketRepository.instance.findByWorkerId(worker.id);
     final hotel = InMemoryHotelRepository.instance.findByWorkerId(worker.id);
-    final transfers =
-        InMemoryTransferRepository.instance.findByWorkerId(worker.id);
+    final transfers = InMemoryTransferRepository.instance.findByWorkerId(
+      worker.id,
+    );
 
     final hasTicket = ticket != null || worker.ticket.trim().isNotEmpty;
     final hasHotel = hotel != null || worker.hotel.trim().isNotEmpty;
-    final hasTransfer = transfers.isNotEmpty || worker.transfer.trim().isNotEmpty;
-    final completed = [hasTicket, hasHotel, hasTransfer]
-        .where((value) => value)
-        .length;
+    final hasTransfer =
+        transfers.isNotEmpty || worker.transfer.trim().isNotEmpty;
+    final completed = [
+      hasTicket,
+      hasHotel,
+      hasTransfer,
+    ].where((value) => value).length;
     final percentage = ((completed / 3) * 100).round();
 
     final level = switch (completed) {

@@ -5,10 +5,7 @@ import '../../domain/transfer.dart';
 class TransferStatusChip extends StatelessWidget {
   final TransferStatus status;
 
-  const TransferStatusChip({
-    super.key,
-    required this.status,
-  });
+  const TransferStatusChip({super.key, required this.status});
 
   Color get color {
     switch (status) {
@@ -28,10 +25,7 @@ class TransferStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Chip(
-      avatar: CircleAvatar(
-        radius: 5,
-        backgroundColor: color,
-      ),
+      avatar: CircleAvatar(radius: 5, backgroundColor: color),
       label: Text(status.label),
       backgroundColor: color.withOpacity(0.10),
       side: BorderSide(color: color.withOpacity(0.35)),

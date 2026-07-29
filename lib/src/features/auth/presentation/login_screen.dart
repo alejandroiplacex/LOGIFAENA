@@ -27,9 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (rutController.text.trim().isEmpty ||
         passwordController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Ingresa el RUT y la contraseña.'),
-        ),
+        const SnackBar(content: Text('Ingresa el RUT y la contraseña.')),
       );
       return;
     }
@@ -43,9 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (_) => const MainShellScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const MainShellScreen()),
     );
   }
 
@@ -143,10 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 14),
                     const Text(
                       'Proyecto Maestro · Sprint 1',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black45,
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.black45),
                     ),
                   ],
                 ),

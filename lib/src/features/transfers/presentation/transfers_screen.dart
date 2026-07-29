@@ -37,7 +37,8 @@ class _TransfersScreenState extends State<TransfersScreen> {
           .map((worker) => worker.fullName.toLowerCase())
           .join(' ');
 
-      final matchesSearch = query.isEmpty ||
+      final matchesSearch =
+          query.isEmpty ||
           workerNames.contains(query) ||
           transfer.code.toLowerCase().contains(query) ||
           transfer.origin.toLowerCase().contains(query) ||
@@ -51,12 +52,11 @@ class _TransfersScreenState extends State<TransfersScreen> {
           selectedStatus == null || transfer.status == selectedStatus;
 
       return matchesSearch && matchesStatus;
-    }).toList()
-      ..sort((a, b) {
-        final dateCompare = a.date.compareTo(b.date);
-        if (dateCompare != 0) return dateCompare;
-        return a.departureTime.compareTo(b.departureTime);
-      });
+    }).toList()..sort((a, b) {
+      final dateCompare = a.date.compareTo(b.date);
+      if (dateCompare != 0) return dateCompare;
+      return a.departureTime.compareTo(b.departureTime);
+    });
   }
 
   Worker? _worker(String id) {
@@ -127,9 +127,7 @@ class _TransfersScreenState extends State<TransfersScreen> {
   Future<void> addTransfer() async {
     final transfer = await Navigator.push<Transfer>(
       context,
-      MaterialPageRoute(
-        builder: (_) => const TransferFormScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const TransferFormScreen()),
     );
 
     if (!mounted || transfer == null) return;
@@ -139,9 +137,7 @@ class _TransfersScreenState extends State<TransfersScreen> {
     setState(() {});
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Traslado creado correctamente.'),
-      ),
+      const SnackBar(content: Text('Traslado creado correctamente.')),
     );
   }
 
@@ -150,9 +146,7 @@ class _TransfersScreenState extends State<TransfersScreen> {
 
     final updated = await Navigator.push<Transfer>(
       context,
-      MaterialPageRoute(
-        builder: (_) => TransferFormScreen(transfer: transfer),
-      ),
+      MaterialPageRoute(builder: (_) => TransferFormScreen(transfer: transfer)),
     );
 
     if (!mounted || updated == null) return;
@@ -270,16 +264,14 @@ class _TransfersScreenState extends State<TransfersScreen> {
                                                 transfer.code,
                                                 style: const TextStyle(
                                                   fontSize: 18,
-                                                  fontWeight:
-                                                      FontWeight.w800,
+                                                  fontWeight: FontWeight.w800,
                                                 ),
                                               ),
                                               const SizedBox(width: 10),
                                               Text(
                                                 transfer.vehicleIdentifier,
                                                 style: const TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.w700,
+                                                  fontWeight: FontWeight.w700,
                                                 ),
                                               ),
                                             ],
@@ -311,9 +303,7 @@ class _TransfersScreenState extends State<TransfersScreen> {
                                         ],
                                       ),
                                     ),
-                                    TransferStatusChip(
-                                      status: transfer.status,
-                                    ),
+                                    TransferStatusChip(status: transfer.status),
                                     const SizedBox(width: 6),
                                     PopupMenuButton<String>(
                                       onSelected: (value) {
@@ -337,8 +327,7 @@ class _TransfersScreenState extends State<TransfersScreen> {
                                           value: 'delete',
                                           child: ListTile(
                                             dense: true,
-                                            leading:
-                                                Icon(Icons.delete_outline),
+                                            leading: Icon(Icons.delete_outline),
                                             title: Text('Eliminar'),
                                           ),
                                         ),

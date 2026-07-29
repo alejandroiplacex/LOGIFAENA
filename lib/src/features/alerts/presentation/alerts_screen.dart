@@ -74,7 +74,8 @@ class _AlertsScreenState extends State<AlertsScreen> {
                     alert: alert,
                     onAction: widget.onNavigate == null
                         ? null
-                        : () => widget.onNavigate!(_moduleIndex(alert.category)),
+                        : () =>
+                              widget.onNavigate!(_moduleIndex(alert.category)),
                   ),
                 ),
               ),
@@ -159,8 +160,17 @@ class _SummaryBadge extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('$value', style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900)),
-              Text(label, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+              Text(
+                '$value',
+                style: const TextStyle(
+                  fontSize: 21,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              Text(
+                label,
+                style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              ),
             ],
           ),
         ],
@@ -217,8 +227,8 @@ class _AlertCard extends StatelessWidget {
     final color = alert.severity == AlertSeverity.high
         ? const Color(0xFFDC2626)
         : alert.severity == AlertSeverity.medium
-            ? const Color(0xFFD97706)
-            : const Color(0xFF2367F2);
+        ? const Color(0xFFD97706)
+        : const Color(0xFF2367F2);
     final categoryLabel = switch (alert.category) {
       AlertCategory.ticket => 'Pasaje',
       AlertCategory.hotel => 'Hotel',
@@ -260,14 +270,29 @@ class _AlertCard extends StatelessWidget {
                   spacing: 8,
                   runSpacing: 6,
                   children: [
-                    Text(alert.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+                    Text(
+                      alert.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                     _Tag(label: categoryLabel, color: color),
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text(alert.detail, style: const TextStyle(color: Color(0xFF64748B))),
+                Text(
+                  alert.detail,
+                  style: const TextStyle(color: Color(0xFF64748B)),
+                ),
                 const SizedBox(height: 8),
-                Text('Trabajador: ${alert.workerName}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                Text(
+                  'Trabajador: ${alert.workerName}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ],
             ),
           ),
@@ -299,7 +324,11 @@ class _Tag extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: color),
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          color: color,
+        ),
       ),
     );
   }
@@ -321,9 +350,15 @@ class _EmptyState extends StatelessWidget {
         children: [
           Icon(Icons.check_circle_rounded, size: 58, color: Color(0xFF16A36A)),
           SizedBox(height: 12),
-          Text('No hay alertas en esta categoría', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900)),
+          Text(
+            'No hay alertas en esta categoría',
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+          ),
           SizedBox(height: 5),
-          Text('La operación se encuentra cubierta.', style: TextStyle(color: Color(0xFF64748B))),
+          Text(
+            'La operación se encuentra cubierta.',
+            style: TextStyle(color: Color(0xFF64748B)),
+          ),
         ],
       ),
     );

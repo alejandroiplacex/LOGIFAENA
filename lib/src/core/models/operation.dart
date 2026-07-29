@@ -49,41 +49,57 @@ class Operation {
     required this.createdAt,
     required this.updatedAt,
     required this.createdBy,
-  })  : workers = workers ?? <Worker>[],
-        tickets = tickets ?? <Ticket>[],
-        hotels = hotels ?? <HotelAssignment>[],
-        transfers = transfers ?? <Transfer>[],
-        vehicles = vehicles ?? <Vehicle>[],
-        providers = providers ?? <Provider>[],
-        notes = notes ?? <OperationNote>[],
-        alerts = alerts ?? <LogisticsAlert>[];
+  }) : workers = workers ?? <Worker>[],
+       tickets = tickets ?? <Ticket>[],
+       hotels = hotels ?? <HotelAssignment>[],
+       transfers = transfers ?? <Transfer>[],
+       vehicles = vehicles ?? <Vehicle>[],
+       providers = providers ?? <Provider>[],
+       notes = notes ?? <OperationNote>[],
+       alerts = alerts ?? <LogisticsAlert>[];
 
   int get totalWorkers => workers.length;
-  int get issuedTickets => tickets.where((item) => item.status == TicketStatus.issued).length;
-  int get confirmedHotels => hotels.where((item) =>
-      item.status == HotelStatus.confirmed ||
-      item.status == HotelStatus.checkedIn ||
-      item.status == HotelStatus.checkedOut).length;
-  int get assignedTransfers => workers.where((worker) =>
-      transfers.any((transfer) => transfer.workerIds.contains(worker.id))).length;
+  int get issuedTickets =>
+      tickets.where((item) => item.status == TicketStatus.issued).length;
+  int get confirmedHotels => hotels
+      .where(
+        (item) =>
+            item.status == HotelStatus.confirmed ||
+            item.status == HotelStatus.checkedIn ||
+            item.status == HotelStatus.checkedOut,
+      )
+      .length;
+  int get assignedTransfers => workers
+      .where(
+        (worker) =>
+            transfers.any((transfer) => transfer.workerIds.contains(worker.id)),
+      )
+      .length;
 
   double get operationalReadinessIndex {
     if (workers.isEmpty) return 0;
     var completedRequirements = 0;
     for (final worker in workers) {
-      if (tickets.any((ticket) =>
-          ticket.workerId == worker.id && ticket.status == TicketStatus.issued)) {
+      if (tickets.any(
+        (ticket) =>
+            ticket.workerId == worker.id &&
+            ticket.status == TicketStatus.issued,
+      )) {
         completedRequirements++;
       }
-      if (hotels.any((hotel) =>
-          hotel.workerId == worker.id &&
-          hotel.status != HotelStatus.requested &&
-          hotel.status != HotelStatus.cancelled)) {
+      if (hotels.any(
+        (hotel) =>
+            hotel.workerId == worker.id &&
+            hotel.status != HotelStatus.requested &&
+            hotel.status != HotelStatus.cancelled,
+      )) {
         completedRequirements++;
       }
-      if (transfers.any((transfer) =>
-          transfer.workerIds.contains(worker.id) &&
-          transfer.status != TransferStatus.cancelled)) {
+      if (transfers.any(
+        (transfer) =>
+            transfer.workerIds.contains(worker.id) &&
+            transfer.status != TransferStatus.cancelled,
+      )) {
         completedRequirements++;
       }
     }
@@ -102,24 +118,24 @@ class Operation {
       value.replaceAll(RegExp(r'[^0-9kK]'), '').toUpperCase();
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'company': company,
-        'project': project,
-        'shift': shift,
-        'coordinator': coordinator,
-        'startDate': startDate.toIso8601String(),
-        'endDate': endDate.toIso8601String(),
-        'status': status.name,
-        'workers': workers.map((item) => item.toJson()).toList(),
-        'tickets': tickets.map((item) => item.toJson()).toList(),
-        'hotels': hotels.map((item) => item.toJson()).toList(),
-        'transfers': transfers.map((item) => item.toJson()).toList(),
-        'vehicles': vehicles.map((item) => item.toJson()).toList(),
-        'providers': providers.map((item) => item.toJson()).toList(),
-        'notes': notes.map((item) => item.toJson()).toList(),
-        'alerts': alerts.map((item) => item.toJson()).toList(),
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
-        'createdBy': createdBy,
-      };
+    'id': id,
+    'company': company,
+    'project': project,
+    'shift': shift,
+    'coordinator': coordinator,
+    'startDate': startDate.toIso8601String(),
+    'endDate': endDate.toIso8601String(),
+    'status': status.name,
+    'workers': workers.map((item) => item.toJson()).toList(),
+    'tickets': tickets.map((item) => item.toJson()).toList(),
+    'hotels': hotels.map((item) => item.toJson()).toList(),
+    'transfers': transfers.map((item) => item.toJson()).toList(),
+    'vehicles': vehicles.map((item) => item.toJson()).toList(),
+    'providers': providers.map((item) => item.toJson()).toList(),
+    'notes': notes.map((item) => item.toJson()).toList(),
+    'alerts': alerts.map((item) => item.toJson()).toList(),
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+    'createdBy': createdBy,
+  };
 }
