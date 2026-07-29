@@ -25,52 +25,74 @@ class RecentActivityPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final workerNames = {for (final worker in workers) worker.id: worker.fullName};
+    final workerNames = {
+      for (final worker in workers) worker.id: worker.fullName,
+    };
     final activities = <_Activity>[];
 
     for (final ticket in tickets) {
-      activities.add(_Activity(
-        dateTime: _combine(ticket.travelDate, ticket.travelTime),
-        title: ticket.status == TicketStatus.issued ? 'Pasaje emitido' : 'Pasaje ${ticket.status.label.toLowerCase()}',
-        detail: '${workerNames[ticket.workerId] ?? 'Trabajador'} · ${ticket.company} ${ticket.serviceNumber}',
-        icon: Icons.airplane_ticket_rounded,
-        color: const Color(0xFFFF7A1A),
-        status: ticket.status.label,
-      ));
+      activities.add(
+        _Activity(
+          dateTime: _combine(ticket.travelDate, ticket.travelTime),
+          title: ticket.status == TicketStatus.issued
+              ? 'Pasaje emitido'
+              : 'Pasaje ${ticket.status.label.toLowerCase()}',
+          detail:
+              '${workerNames[ticket.workerId] ?? 'Trabajador'} · ${ticket.company} ${ticket.serviceNumber}',
+          icon: Icons.airplane_ticket_rounded,
+          color: const Color(0xFFFF7A1A),
+          status: ticket.status.label,
+        ),
+      );
     }
 
     for (final hotel in hotels) {
-      activities.add(_Activity(
-        dateTime: hotel.checkInDate,
-        title: hotel.status == HotelStatus.checkedIn ? 'Check-in realizado' : 'Alojamiento ${hotel.status.label.toLowerCase()}',
-        detail: '${workerNames[hotel.workerId] ?? 'Trabajador'} · ${hotel.hotelName}',
-        icon: Icons.apartment_rounded,
-        color: const Color(0xFF7B3FF2),
-        status: hotel.status.label,
-      ));
+      activities.add(
+        _Activity(
+          dateTime: hotel.checkInDate,
+          title: hotel.status == HotelStatus.checkedIn
+              ? 'Check-in realizado'
+              : 'Alojamiento ${hotel.status.label.toLowerCase()}',
+          detail:
+              '${workerNames[hotel.workerId] ?? 'Trabajador'} · ${hotel.hotelName}',
+          icon: Icons.apartment_rounded,
+          color: const Color(0xFF7B3FF2),
+          status: hotel.status.label,
+        ),
+      );
     }
 
     for (final transfer in transfers) {
-      activities.add(_Activity(
-        dateTime: _combine(transfer.date, transfer.departureTime),
-        title: transfer.status == TransferStatus.onRoute ? 'Traslado en ruta' : 'Traslado ${transfer.status.label.toLowerCase()}',
-        detail: '${transfer.vehicleIdentifier} · ${transfer.origin} → ${transfer.destination}',
-        icon: Icons.directions_bus_rounded,
-        color: const Color(0xFF078AA5),
-        status: transfer.status.label,
-      ));
+      activities.add(
+        _Activity(
+          dateTime: _combine(transfer.date, transfer.departureTime),
+          title: transfer.status == TransferStatus.onRoute
+              ? 'Traslado en ruta'
+              : 'Traslado ${transfer.status.label.toLowerCase()}',
+          detail:
+              '${transfer.vehicleIdentifier} · ${transfer.origin} → ${transfer.destination}',
+          icon: Icons.directions_bus_rounded,
+          color: const Color(0xFF078AA5),
+          status: transfer.status.label,
+        ),
+      );
     }
 
     for (final event in events) {
-      if (activities.any((item) => item.title == event.title && item.dateTime == event.dateTime)) continue;
-      activities.add(_Activity(
-        dateTime: event.dateTime,
-        title: event.title,
-        detail: event.subtitle,
-        icon: _eventIcon(event.type),
-        color: const Color(0xFF2367F2),
-        status: event.status.label,
-      ));
+      if (activities.any(
+        (item) => item.title == event.title && item.dateTime == event.dateTime,
+      ))
+        continue;
+      activities.add(
+        _Activity(
+          dateTime: event.dateTime,
+          title: event.title,
+          detail: event.subtitle,
+          icon: _eventIcon(event.type),
+          color: const Color(0xFF2367F2),
+          status: event.status.label,
+        ),
+      );
     }
 
     activities.sort((a, b) => b.dateTime.compareTo(a.dateTime));
@@ -82,7 +104,13 @@ class RecentActivityPanel extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(17),
         border: Border.all(color: const Color(0xFFE5EAF1)),
-        boxShadow: const [BoxShadow(color: Color(0x0D0F172A), blurRadius: 18, offset: Offset(0, 7))],
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0D0F172A),
+            blurRadius: 18,
+            offset: Offset(0, 7),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -90,20 +118,33 @@ class RecentActivityPanel extends StatelessWidget {
             children: [
               const Icon(Icons.history_rounded, color: Color(0xFF2367F2)),
               const SizedBox(width: 9),
-              const Expanded(child: Text('ACTIVIDAD OPERACIONAL RECIENTE', style: TextStyle(fontWeight: FontWeight.w900))),
-              TextButton(onPressed: onOpenAgenda, child: const Text('Ver agenda')),
+              const Expanded(
+                child: Text(
+                  'ACTIVIDAD OPERACIONAL RECIENTE',
+                  style: TextStyle(fontWeight: FontWeight.w900),
+                ),
+              ),
+              TextButton(
+                onPressed: onOpenAgenda,
+                child: const Text('Ver agenda'),
+              ),
             ],
           ),
           if (visible.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 32),
-              child: Text('Todavía no existen movimientos registrados.', style: TextStyle(color: Color(0xFF64748B))),
+              child: Text(
+                'Todavía no existen movimientos registrados.',
+                style: TextStyle(color: Color(0xFF64748B)),
+              ),
             )
           else
-            ...visible.asMap().entries.map((entry) => _ActivityTile(
-                  activity: entry.value,
-                  showDivider: entry.key != visible.length - 1,
-                )),
+            ...visible.asMap().entries.map(
+              (entry) => _ActivityTile(
+                activity: entry.value,
+                showDivider: entry.key != visible.length - 1,
+              ),
+            ),
         ],
       ),
     );
@@ -144,8 +185,10 @@ class _ActivityTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final date = '${activity.dateTime.day.toString().padLeft(2, '0')}/${activity.dateTime.month.toString().padLeft(2, '0')}';
-    final time = '${activity.dateTime.hour.toString().padLeft(2, '0')}:${activity.dateTime.minute.toString().padLeft(2, '0')}';
+    final date =
+        '${activity.dateTime.day.toString().padLeft(2, '0')}/${activity.dateTime.month.toString().padLeft(2, '0')}';
+    final time =
+        '${activity.dateTime.hour.toString().padLeft(2, '0')}:${activity.dateTime.minute.toString().padLeft(2, '0')}';
 
     return Column(
       children: [
@@ -156,7 +199,10 @@ class _ActivityTile extends StatelessWidget {
               Container(
                 width: 42,
                 height: 42,
-                decoration: BoxDecoration(color: activity.color.withOpacity(.11), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                  color: activity.color.withOpacity(.11),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Icon(activity.icon, color: activity.color, size: 21),
               ),
               const SizedBox(width: 12),
@@ -164,9 +210,23 @@ class _ActivityTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(activity.title, style: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF172033))),
+                    Text(
+                      activity.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF172033),
+                      ),
+                    ),
                     const SizedBox(height: 3),
-                    Text(activity.detail, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                    Text(
+                      activity.detail,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -174,16 +234,38 @@ class _ActivityTile extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(time, style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF334155))),
+                  Text(
+                    time,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF334155),
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(date, style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
+                  Text(
+                    date,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF94A3B8),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(width: 12),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                decoration: BoxDecoration(color: activity.color.withOpacity(.09), borderRadius: BorderRadius.circular(20)),
-                child: Text(activity.status, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: activity.color)),
+                decoration: BoxDecoration(
+                  color: activity.color.withOpacity(.09),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  activity.status,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    color: activity.color,
+                  ),
+                ),
               ),
             ],
           ),

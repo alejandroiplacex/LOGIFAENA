@@ -7,7 +7,9 @@ class ReportExportService {
     required List<String> columns,
     required List<List<String>> rows,
   }) {
-    throw UnsupportedError('La descarga directa está disponible en Flutter Web.');
+    throw UnsupportedError(
+      'La descarga directa está disponible en Flutter Web.',
+    );
   }
 
   static void printPdf({

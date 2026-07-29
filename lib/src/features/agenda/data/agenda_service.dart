@@ -31,9 +31,7 @@ class AgendaService {
       id: 'ticket-${ticket.id}',
       type: AgendaEventType.ticket,
       workerId: ticket.workerId,
-      title: ticket.type == TicketType.flight
-          ? 'Viaje aéreo'
-          : 'Viaje en bus',
+      title: ticket.type == TicketType.flight ? 'Viaje aéreo' : 'Viaje en bus',
       subtitle: '${ticket.company} ${ticket.serviceNumber}'.trim(),
       date: ticket.travelDate,
       time: ticket.travelTime.isEmpty ? '00:00' : ticket.travelTime,
@@ -71,7 +69,6 @@ class AgendaService {
     );
   }
 
-
   Iterable<AgendaEvent> _transferEvents(Transfer transfer) sync* {
     for (final workerId in transfer.workerIds) {
       yield AgendaEvent(
@@ -83,9 +80,7 @@ class AgendaService {
             '${transfer.code} · ${transfer.vehicleIdentifier} · '
             '${transfer.driverName}',
         date: transfer.date,
-        time: transfer.departureTime.isEmpty
-            ? '00:00'
-            : transfer.departureTime,
+        time: transfer.departureTime.isEmpty ? '00:00' : transfer.departureTime,
         location: '${transfer.origin} → ${transfer.destination}',
         status: _transferStatus(transfer.status),
         sourceId: transfer.id,

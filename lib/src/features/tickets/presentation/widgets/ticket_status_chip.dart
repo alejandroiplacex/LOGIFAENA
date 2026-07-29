@@ -5,10 +5,7 @@ import '../../domain/ticket.dart';
 class TicketStatusChip extends StatelessWidget {
   final TicketStatus status;
 
-  const TicketStatusChip({
-    super.key,
-    required this.status,
-  });
+  const TicketStatusChip({super.key, required this.status});
 
   Color get color {
     switch (status) {
@@ -26,10 +23,7 @@ class TicketStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Chip(
-      avatar: CircleAvatar(
-        radius: 5,
-        backgroundColor: color,
-      ),
+      avatar: CircleAvatar(radius: 5, backgroundColor: color),
       label: Text(status.label),
       backgroundColor: color.withOpacity(0.10),
       side: BorderSide(color: color.withOpacity(0.35)),

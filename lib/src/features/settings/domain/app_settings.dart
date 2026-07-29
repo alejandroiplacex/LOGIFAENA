@@ -24,17 +24,17 @@ class AppSettings {
   });
 
   factory AppSettings.defaults() => const AppSettings(
-        companyName: 'LogiFaena Enterprise',
-        taxId: '',
-        defaultSite: 'Faena Norte',
-        coordinatorName: 'Alejandro Cárdenas',
-        coordinatorRole: 'Coordinador Logístico',
-        notificationsEnabled: true,
-        automaticBackup: true,
-        automaticSync: false,
-        syncIntervalMinutes: 15,
-        apiBaseUrl: '',
-      );
+    companyName: 'LogiFaena Enterprise',
+    taxId: '',
+    defaultSite: 'Faena Norte',
+    coordinatorName: 'Alejandro Cárdenas',
+    coordinatorRole: 'Coordinador Logístico',
+    notificationsEnabled: true,
+    automaticBackup: true,
+    automaticSync: false,
+    syncIntervalMinutes: 15,
+    apiBaseUrl: '',
+  );
 
   AppSettings copyWith({
     String? companyName,
@@ -63,17 +63,17 @@ class AppSettings {
   }
 
   Map<String, dynamic> toJson() => {
-        'companyName': companyName,
-        'taxId': taxId,
-        'defaultSite': defaultSite,
-        'coordinatorName': coordinatorName,
-        'coordinatorRole': coordinatorRole,
-        'notificationsEnabled': notificationsEnabled,
-        'automaticBackup': automaticBackup,
-        'automaticSync': automaticSync,
-        'syncIntervalMinutes': syncIntervalMinutes,
-        'apiBaseUrl': apiBaseUrl,
-      };
+    'companyName': companyName,
+    'taxId': taxId,
+    'defaultSite': defaultSite,
+    'coordinatorName': coordinatorName,
+    'coordinatorRole': coordinatorRole,
+    'notificationsEnabled': notificationsEnabled,
+    'automaticBackup': automaticBackup,
+    'automaticSync': automaticSync,
+    'syncIntervalMinutes': syncIntervalMinutes,
+    'apiBaseUrl': apiBaseUrl,
+  };
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
     final defaults = AppSettings.defaults();
@@ -86,11 +86,11 @@ class AppSettings {
       coordinatorRole:
           json['coordinatorRole'] as String? ?? defaults.coordinatorRole,
       notificationsEnabled:
-          json['notificationsEnabled'] as bool? ?? defaults.notificationsEnabled,
+          json['notificationsEnabled'] as bool? ??
+          defaults.notificationsEnabled,
       automaticBackup:
           json['automaticBackup'] as bool? ?? defaults.automaticBackup,
-      automaticSync:
-          json['automaticSync'] as bool? ?? defaults.automaticSync,
+      automaticSync: json['automaticSync'] as bool? ?? defaults.automaticSync,
       syncIntervalMinutes:
           json['syncIntervalMinutes'] as int? ?? defaults.syncIntervalMinutes,
       apiBaseUrl: json['apiBaseUrl'] as String? ?? defaults.apiBaseUrl,

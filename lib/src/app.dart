@@ -27,9 +27,7 @@ class LogiFaenaApp extends StatelessWidget {
           PointerDeviceKind.trackpad,
         },
       ),
-      home: hasActiveSession
-          ? const MainShellScreen()
-          : const LoginScreen(),
+      home: hasActiveSession ? const MainShellScreen() : const LoginScreen(),
     );
   }
 }

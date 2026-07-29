@@ -5,10 +5,7 @@ import '../../domain/worker.dart';
 class WorkerStatusChip extends StatelessWidget {
   final WorkerStatus status;
 
-  const WorkerStatusChip({
-    super.key,
-    required this.status,
-  });
+  const WorkerStatusChip({super.key, required this.status});
 
   Color get color {
     switch (status) {
@@ -34,10 +31,7 @@ class WorkerStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Chip(
-      avatar: CircleAvatar(
-        radius: 5,
-        backgroundColor: color,
-      ),
+      avatar: CircleAvatar(radius: 5, backgroundColor: color),
       label: Text(status.label),
       backgroundColor: color.withOpacity(0.10),
       side: BorderSide(color: color.withOpacity(0.35)),

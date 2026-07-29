@@ -1,9 +1,4 @@
-enum TransferVehicleType {
-  bus,
-  van,
-  pickup,
-  taxi,
-}
+enum TransferVehicleType { bus, van, pickup, taxi }
 
 extension TransferVehicleTypeLabel on TransferVehicleType {
   String get label {
@@ -20,13 +15,7 @@ extension TransferVehicleTypeLabel on TransferVehicleType {
   }
 }
 
-enum TransferStatus {
-  scheduled,
-  boarding,
-  onRoute,
-  completed,
-  cancelled,
-}
+enum TransferStatus { scheduled, boarding, onRoute, completed, cancelled }
 
 extension TransferStatusLabel on TransferStatus {
   String get label {
@@ -89,51 +78,50 @@ class Transfer {
   int get availableSeats => capacity - workerIds.length;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'code': code,
-        'date': date.toIso8601String(),
-        'departureTime': departureTime,
-        'estimatedArrivalTime': estimatedArrivalTime,
-        'origin': origin,
-        'destination': destination,
-        'routeDescription': routeDescription,
-        'vehicleType': vehicleType.name,
-        'vehicleIdentifier': vehicleIdentifier,
-        'licensePlate': licensePlate,
-        'capacity': capacity,
-        'driverName': driverName,
-        'driverPhone': driverPhone,
-        'providerCompany': providerCompany,
-        'workerIds': workerIds,
-        'notes': notes,
-        'status': status.name,
-      };
+    'id': id,
+    'code': code,
+    'date': date.toIso8601String(),
+    'departureTime': departureTime,
+    'estimatedArrivalTime': estimatedArrivalTime,
+    'origin': origin,
+    'destination': destination,
+    'routeDescription': routeDescription,
+    'vehicleType': vehicleType.name,
+    'vehicleIdentifier': vehicleIdentifier,
+    'licensePlate': licensePlate,
+    'capacity': capacity,
+    'driverName': driverName,
+    'driverPhone': driverPhone,
+    'providerCompany': providerCompany,
+    'workerIds': workerIds,
+    'notes': notes,
+    'status': status.name,
+  };
 
   factory Transfer.fromJson(Map<String, dynamic> json) => Transfer(
-        id: json['id'] as String,
-        code: json['code'] as String? ?? '',
-        date: DateTime.tryParse(json['date'] as String? ?? '') ?? DateTime.now(),
-        departureTime: json['departureTime'] as String? ?? '',
-        estimatedArrivalTime: json['estimatedArrivalTime'] as String? ?? '',
-        origin: json['origin'] as String? ?? '',
-        destination: json['destination'] as String? ?? '',
-        routeDescription: json['routeDescription'] as String? ?? '',
-        vehicleType: TransferVehicleType.values.firstWhere(
-          (value) => value.name == json['vehicleType'],
-          orElse: () => TransferVehicleType.van,
-        ),
-        vehicleIdentifier: json['vehicleIdentifier'] as String? ?? '',
-        licensePlate: json['licensePlate'] as String? ?? '',
-        capacity: (json['capacity'] as num?)?.toInt() ?? 0,
-        driverName: json['driverName'] as String? ?? '',
-        driverPhone: json['driverPhone'] as String? ?? '',
-        providerCompany: json['providerCompany'] as String? ?? '',
-        workerIds: (json['workerIds'] as List<dynamic>? ?? []).cast<String>(),
-        notes: json['notes'] as String? ?? '',
-        status: TransferStatus.values.firstWhere(
-          (value) => value.name == json['status'],
-          orElse: () => TransferStatus.scheduled,
-        ),
-      );
+    id: json['id'] as String,
+    code: json['code'] as String? ?? '',
+    date: DateTime.tryParse(json['date'] as String? ?? '') ?? DateTime.now(),
+    departureTime: json['departureTime'] as String? ?? '',
+    estimatedArrivalTime: json['estimatedArrivalTime'] as String? ?? '',
+    origin: json['origin'] as String? ?? '',
+    destination: json['destination'] as String? ?? '',
+    routeDescription: json['routeDescription'] as String? ?? '',
+    vehicleType: TransferVehicleType.values.firstWhere(
+      (value) => value.name == json['vehicleType'],
+      orElse: () => TransferVehicleType.van,
+    ),
+    vehicleIdentifier: json['vehicleIdentifier'] as String? ?? '',
+    licensePlate: json['licensePlate'] as String? ?? '',
+    capacity: (json['capacity'] as num?)?.toInt() ?? 0,
+    driverName: json['driverName'] as String? ?? '',
+    driverPhone: json['driverPhone'] as String? ?? '',
+    providerCompany: json['providerCompany'] as String? ?? '',
+    workerIds: (json['workerIds'] as List<dynamic>? ?? []).cast<String>(),
+    notes: json['notes'] as String? ?? '',
+    status: TransferStatus.values.firstWhere(
+      (value) => value.name == json['status'],
+      orElse: () => TransferStatus.scheduled,
+    ),
+  );
 }
-

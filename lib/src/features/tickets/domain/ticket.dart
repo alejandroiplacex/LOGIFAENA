@@ -1,9 +1,4 @@
-enum TicketStatus {
-  requested,
-  issued,
-  rescheduled,
-  cancelled,
-}
+enum TicketStatus { requested, issued, rescheduled, cancelled }
 
 extension TicketStatusLabel on TicketStatus {
   String get label {
@@ -20,10 +15,7 @@ extension TicketStatusLabel on TicketStatus {
   }
 }
 
-enum TicketType {
-  flight,
-  bus,
-}
+enum TicketType { flight, bus }
 
 extension TicketTypeLabel on TicketType {
   String get label {
@@ -70,43 +62,44 @@ class Ticket {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'workerId': workerId,
-        'type': type.name,
-        'company': company,
-        'serviceNumber': serviceNumber,
-        'bookingCode': bookingCode,
-        'origin': origin,
-        'destination': destination,
-        'travelDate': travelDate.toIso8601String(),
-        'travelTime': travelTime,
-        'baggage': baggage,
-        'seat': seat,
-        'notes': notes,
-        'status': status.name,
-      };
+    'id': id,
+    'workerId': workerId,
+    'type': type.name,
+    'company': company,
+    'serviceNumber': serviceNumber,
+    'bookingCode': bookingCode,
+    'origin': origin,
+    'destination': destination,
+    'travelDate': travelDate.toIso8601String(),
+    'travelTime': travelTime,
+    'baggage': baggage,
+    'seat': seat,
+    'notes': notes,
+    'status': status.name,
+  };
 
   factory Ticket.fromJson(Map<String, dynamic> json) => Ticket(
-        id: json['id'] as String,
-        workerId: json['workerId'] as String? ?? '',
-        type: TicketType.values.firstWhere(
-          (value) => value.name == json['type'],
-          orElse: () => TicketType.flight,
-        ),
-        company: json['company'] as String? ?? '',
-        serviceNumber: json['serviceNumber'] as String? ?? '',
-        bookingCode: json['bookingCode'] as String? ?? '',
-        origin: json['origin'] as String? ?? '',
-        destination: json['destination'] as String? ?? '',
-        travelDate: DateTime.tryParse(json['travelDate'] as String? ?? '') ?? DateTime.now(),
-        travelTime: json['travelTime'] as String? ?? '',
-        baggage: json['baggage'] as String? ?? '',
-        seat: json['seat'] as String? ?? '',
-        notes: json['notes'] as String? ?? '',
-        status: TicketStatus.values.firstWhere(
-          (value) => value.name == json['status'],
-          orElse: () => TicketStatus.requested,
-        ),
-      );
+    id: json['id'] as String,
+    workerId: json['workerId'] as String? ?? '',
+    type: TicketType.values.firstWhere(
+      (value) => value.name == json['type'],
+      orElse: () => TicketType.flight,
+    ),
+    company: json['company'] as String? ?? '',
+    serviceNumber: json['serviceNumber'] as String? ?? '',
+    bookingCode: json['bookingCode'] as String? ?? '',
+    origin: json['origin'] as String? ?? '',
+    destination: json['destination'] as String? ?? '',
+    travelDate:
+        DateTime.tryParse(json['travelDate'] as String? ?? '') ??
+        DateTime.now(),
+    travelTime: json['travelTime'] as String? ?? '',
+    baggage: json['baggage'] as String? ?? '',
+    seat: json['seat'] as String? ?? '',
+    notes: json['notes'] as String? ?? '',
+    status: TicketStatus.values.firstWhere(
+      (value) => value.name == json['status'],
+      orElse: () => TicketStatus.requested,
+    ),
+  );
 }
-

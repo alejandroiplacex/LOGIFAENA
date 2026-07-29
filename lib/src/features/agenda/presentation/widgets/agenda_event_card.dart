@@ -7,11 +7,7 @@ class AgendaEventCard extends StatelessWidget {
   final AgendaEvent event;
   final Worker? worker;
 
-  const AgendaEventCard({
-    super.key,
-    required this.event,
-    required this.worker,
-  });
+  const AgendaEventCard({super.key, required this.event, required this.worker});
 
   Color get typeColor {
     switch (event.type) {
@@ -113,10 +109,7 @@ class AgendaEventCard extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Chip(
-              avatar: CircleAvatar(
-                radius: 5,
-                backgroundColor: statusColor,
-              ),
+              avatar: CircleAvatar(radius: 5, backgroundColor: statusColor),
               label: Text(event.status.label),
               backgroundColor: statusColor.withOpacity(0.10),
               side: BorderSide(color: statusColor.withOpacity(0.35)),

@@ -20,7 +20,8 @@ class InMemoryTransferRepository implements TransferRepository {
     }
   }
 
-  static final InMemoryTransferRepository instance = InMemoryTransferRepository._();
+  static final InMemoryTransferRepository instance =
+      InMemoryTransferRepository._();
 
   final List<Transfer> _transfers = [
     Transfer(

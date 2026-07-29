@@ -5,6 +5,7 @@ import '../../../core/database/database_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../data/settings_repository.dart';
 import '../domain/app_settings.dart';
+import 'widgets/sync_queue_status.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -24,7 +25,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late final TextEditingController apiController;
   bool saving = false;
   final ScrollController _scrollController = ScrollController();
-  final FocusNode _keyboardFocusNode = FocusNode(debugLabel: 'settings_keyboard_scroll');
+  final FocusNode _keyboardFocusNode = FocusNode(
+    debugLabel: 'settings_keyboard_scroll',
+  );
 
   @override
   void initState() {
@@ -33,7 +36,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     companyController = TextEditingController(text: settings.companyName);
     taxIdController = TextEditingController(text: settings.taxId);
     siteController = TextEditingController(text: settings.defaultSite);
-    coordinatorController = TextEditingController(text: settings.coordinatorName);
+    coordinatorController = TextEditingController(
+      text: settings.coordinatorName,
+    );
     roleController = TextEditingController(text: settings.coordinatorRole);
     apiController = TextEditingController(text: settings.apiBaseUrl);
   }
@@ -166,133 +171,181 @@ class _SettingsScreenState extends State<SettingsScreen> {
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: const EdgeInsets.all(24),
               children: [
-            _Header(onSave: saving ? null : save),
-            const SizedBox(height: 20),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final twoColumns = constraints.maxWidth >= 980;
-                final cards = [
-                  _SectionCard(
-                    title: 'Empresa y operación',
-                    subtitle: 'Identificación principal de la instalación.',
-                    icon: Icons.business,
-                    children: [
-                      _field(companyController, 'Nombre de la empresa', true),
-                      _field(taxIdController, 'RUT de la empresa', false),
-                      _field(siteController, 'Faena predeterminada', true),
-                    ],
-                  ),
-                  _SectionCard(
-                    title: 'Usuario coordinador',
-                    subtitle: 'Datos visibles en la cabecera del sistema.',
-                    icon: Icons.badge,
-                    children: [
-                      _field(coordinatorController, 'Nombre', true),
-                      _field(roleController, 'Cargo o función', true),
-                    ],
-                  ),
-                  _SectionCard(
-                    title: 'Operación local',
-                    subtitle: 'Preferencias de respaldo y avisos.',
-                    icon: Icons.storage,
-                    children: [
-                      SwitchListTile.adaptive(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Notificaciones operacionales'),
-                        subtitle: const Text('Mostrar avisos generados por el motor logístico.'),
-                        value: settings.notificationsEnabled,
-                        onChanged: (value) => setState(() => settings = settings.copyWith(notificationsEnabled: value)),
+                _Header(onSave: saving ? null : save),
+                const SizedBox(height: 20),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final twoColumns = constraints.maxWidth >= 980;
+                    final cards = [
+                      _SectionCard(
+                        title: 'Empresa y operación',
+                        subtitle: 'Identificación principal de la instalación.',
+                        icon: Icons.business,
+                        children: [
+                          _field(
+                            companyController,
+                            'Nombre de la empresa',
+                            true,
+                          ),
+                          _field(taxIdController, 'RUT de la empresa', false),
+                          _field(siteController, 'Faena predeterminada', true),
+                        ],
                       ),
-                      SwitchListTile.adaptive(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Respaldo automático local'),
-                        subtitle: const Text('Preparado para integrarse con el servicio de respaldos.'),
-                        value: settings.automaticBackup,
-                        onChanged: (value) => setState(() => settings = settings.copyWith(automaticBackup: value)),
+                      _SectionCard(
+                        title: 'Usuario coordinador',
+                        subtitle: 'Datos visibles en la cabecera del sistema.',
+                        icon: Icons.badge,
+                        children: [
+                          _field(coordinatorController, 'Nombre', true),
+                          _field(roleController, 'Cargo o función', true),
+                        ],
                       ),
-                    ],
-                  ),
-                  _SectionCard(
-                    title: 'Base de datos local',
-                    subtitle: 'Estado verificable del almacenamiento SQLite.',
-                    icon: Icons.dns,
-                    children: [
-                      _DatabaseStatus(),
-                    ],
-                  ),
-                  _SectionCard(
-                    title: 'Servidor y sincronización',
-                    subtitle: 'Parámetros preparados para la futura API empresarial.',
-                    icon: Icons.cloud_sync,
-                    children: [
-                      SwitchListTile.adaptive(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Sincronización automática'),
-                        subtitle: const Text('Se habilitará cuando exista un servidor configurado.'),
-                        value: settings.automaticSync,
-                        onChanged: (value) => setState(() => settings = settings.copyWith(automaticSync: value)),
+                      _SectionCard(
+                        title: 'Operación local',
+                        subtitle: 'Preferencias de respaldo y avisos.',
+                        icon: Icons.storage,
+                        children: [
+                          SwitchListTile.adaptive(
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text('Notificaciones operacionales'),
+                            subtitle: const Text(
+                              'Mostrar avisos generados por el motor logístico.',
+                            ),
+                            value: settings.notificationsEnabled,
+                            onChanged: (value) => setState(
+                              () => settings = settings.copyWith(
+                                notificationsEnabled: value,
+                              ),
+                            ),
+                          ),
+                          SwitchListTile.adaptive(
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text('Respaldo automático local'),
+                            subtitle: const Text(
+                              'Preparado para integrarse con el servicio de respaldos.',
+                            ),
+                            value: settings.automaticBackup,
+                            onChanged: (value) => setState(
+                              () => settings = settings.copyWith(
+                                automaticBackup: value,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      DropdownButtonFormField<int>(
-                        value: settings.syncIntervalMinutes,
-                        decoration: const InputDecoration(labelText: 'Intervalo de sincronización'),
-                        items: const [5, 15, 30, 60]
-                            .map((value) => DropdownMenuItem(value: value, child: Text('$value minutos')))
+                      _SectionCard(
+                        title: 'Base de datos local',
+                        subtitle:
+                            'Estado verificable del almacenamiento SQLite.',
+                        icon: Icons.dns,
+                        children: [_DatabaseStatus()],
+                      ),
+                      _SectionCard(
+                        title: 'Servidor y sincronización',
+                        subtitle:
+                            'Parámetros preparados para la futura API empresarial.',
+                        icon: Icons.cloud_sync,
+                        children: [
+                          SwitchListTile.adaptive(
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text('Sincronización automática'),
+                            subtitle: const Text(
+                              'Se habilitará cuando exista un servidor configurado.',
+                            ),
+                            value: settings.automaticSync,
+                            onChanged: (value) => setState(
+                              () => settings = settings.copyWith(
+                                automaticSync: value,
+                              ),
+                            ),
+                          ),
+                          DropdownButtonFormField<int>(
+                            value: settings.syncIntervalMinutes,
+                            decoration: const InputDecoration(
+                              labelText: 'Intervalo de sincronización',
+                            ),
+                            items: const [5, 15, 30, 60]
+                                .map(
+                                  (value) => DropdownMenuItem(
+                                    value: value,
+                                    child: Text('$value minutos'),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              if (value != null)
+                                setState(
+                                  () => settings = settings.copyWith(
+                                    syncIntervalMinutes: value,
+                                  ),
+                                );
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          _field(
+                            apiController,
+                            'URL base de API',
+                            false,
+                            hint: 'https://servidor/api',
+                          ),
+                          const SizedBox(height: 8),
+                          const SyncQueueStatus(),
+                        ],
+                      ),
+                    ];
+
+                    if (!twoColumns) {
+                      return Column(
+                        children: cards
+                            .map(
+                              (card) => Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: card,
+                              ),
+                            )
                             .toList(),
-                        onChanged: (value) {
-                          if (value != null) setState(() => settings = settings.copyWith(syncIntervalMinutes: value));
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      _field(apiController, 'URL base de API', false, hint: 'https://servidor/api'),
-                      const SizedBox(height: 8),
-                      const _StatusBanner(),
-                    ],
-                  ),
-                ];
+                      );
+                    }
 
-                if (!twoColumns) {
-                  return Column(
-                    children: cards
-                        .map((card) => Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
+                    return Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: cards
+                          .map(
+                            (card) => SizedBox(
+                              width: (constraints.maxWidth - 16) / 2,
                               child: card,
-                            ))
-                        .toList(),
-                  );
-                }
-
-                return Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  children: cards
-                      .map((card) => SizedBox(
-                            width: (constraints.maxWidth - 16) / 2,
-                            child: card,
-                          ))
-                      .toList(),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    const Icon(Icons.info_outline, color: AppColors.primary),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text('LogiFaena Enterprise 1.3.1+1301 · Sprint 15.1'),
-                    ),
-                    TextButton.icon(
-                      onPressed: restoreDefaults,
-                      icon: const Icon(Icons.restore),
-                      label: const Text('Restaurar valores'),
-                    ),
-                  ],
+                            ),
+                          )
+                          .toList(),
+                    );
+                  },
                 ),
-              ),
-            ),
+                const SizedBox(height: 16),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Text(
+                            'LogiFaena Enterprise 1.3.1+1301 · Sprint 15.1',
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: restoreDefaults,
+                          icon: const Icon(Icons.restore),
+                          label: const Text('Restaurar valores'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -313,7 +366,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         controller: controller,
         decoration: InputDecoration(labelText: label, hintText: hint),
         validator: required
-            ? (value) => value == null || value.trim().isEmpty ? 'Campo obligatorio' : null
+            ? (value) => value == null || value.trim().isEmpty
+                  ? 'Campo obligatorio'
+                  : null
             : null,
       ),
     );
@@ -334,9 +389,15 @@ class _Header extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Configuración empresarial', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+              Text(
+                'Configuración empresarial',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+              ),
               SizedBox(height: 4),
-              Text('Administra parámetros locales y deja preparada la conexión con servicios centrales.', style: TextStyle(color: Colors.black54)),
+              Text(
+                'Administra parámetros locales y deja preparada la conexión con servicios centrales.',
+                style: TextStyle(color: Colors.black54),
+              ),
             ],
           ),
         ),
@@ -356,7 +417,12 @@ class _SectionCard extends StatelessWidget {
   final IconData icon;
   final List<Widget> children;
 
-  const _SectionCard({required this.title, required this.subtitle, required this.icon, required this.children});
+  const _SectionCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.children,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -368,14 +434,29 @@ class _SectionCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                CircleAvatar(backgroundColor: const Color(0xFFE7F0FC), child: Icon(icon, color: AppColors.primary)),
+                CircleAvatar(
+                  backgroundColor: const Color(0xFFE7F0FC),
+                  child: Icon(icon, color: AppColors.primary),
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
-                      Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black54,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -389,7 +470,6 @@ class _SectionCard extends StatelessWidget {
     );
   }
 }
-
 
 class _DatabaseStatus extends StatelessWidget {
   @override
@@ -429,8 +509,8 @@ class _DatabaseStatus extends StatelessWidget {
                 child: Text(
                   database.isSqlite
                       ? database.databaseExists
-                          ? 'SQLite activo y archivo creado'
-                          : 'SQLite configurado, archivo no detectado'
+                            ? 'SQLite activo y archivo creado'
+                            : 'SQLite configurado, archivo no detectado'
                       : 'Modo web: almacenamiento compatible',
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
@@ -454,29 +534,6 @@ class _DatabaseStatus extends StatelessWidget {
               style: const TextStyle(fontSize: 12, color: Colors.black54),
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _StatusBanner extends StatelessWidget {
-  const _StatusBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFF6E8),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFFFD69A)),
-      ),
-      child: const Row(
-        children: [
-          Icon(Icons.construction, color: AppColors.accent),
-          SizedBox(width: 10),
-          Expanded(child: Text('API y sincronización están preparadas a nivel de configuración; todavía no realizan conexiones reales.')),
         ],
       ),
     );

@@ -3,7 +3,8 @@ class DatabaseBackend {
 
   bool get isAvailable => false;
 
-  Future<List<Map<String, dynamic>>> readCollection(String key) async => const [];
+  Future<List<Map<String, dynamic>>> readCollection(String key) async =>
+      const [];
 
   Future<void> replaceCollection(
     String key,

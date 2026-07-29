@@ -22,7 +22,9 @@ class _TicketsScreenState extends State<TicketsScreen> {
   final searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _listFocusNode = FocusNode(debugLabel: 'TicketsListFocus');
-  final FocusNode _searchFocusNode = FocusNode(debugLabel: 'TicketsSearchFocus');
+  final FocusNode _searchFocusNode = FocusNode(
+    debugLabel: 'TicketsSearchFocus',
+  );
 
   TicketStatus? selectedStatus;
   TicketType? selectedType;
@@ -56,7 +58,8 @@ class _TicketsScreenState extends State<TicketsScreen> {
       final workerName = worker?.fullName.toLowerCase() ?? '';
       final rut = worker?.rut.toLowerCase() ?? '';
 
-      final matchesSearch = query.isEmpty ||
+      final matchesSearch =
+          query.isEmpty ||
           workerName.contains(query) ||
           rut.contains(query) ||
           ticket.company.toLowerCase().contains(query) ||
@@ -70,12 +73,11 @@ class _TicketsScreenState extends State<TicketsScreen> {
       final matchesType = selectedType == null || ticket.type == selectedType;
 
       return matchesSearch && matchesStatus && matchesType;
-    }).toList()
-      ..sort((a, b) {
-        final byDate = a.travelDate.compareTo(b.travelDate);
-        if (byDate != 0) return byDate;
-        return a.travelTime.compareTo(b.travelTime);
-      });
+    }).toList()..sort((a, b) {
+      final byDate = a.travelDate.compareTo(b.travelDate);
+      if (byDate != 0) return byDate;
+      return a.travelTime.compareTo(b.travelTime);
+    });
   }
 
   Worker? _worker(String id) {
@@ -137,9 +139,9 @@ class _TicketsScreenState extends State<TicketsScreen> {
     _syncWorker(updated);
     setState(() {});
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Pasaje actualizado.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Pasaje actualizado.')));
   }
 
   Future<void> deleteTicket(Ticket ticket) async {
@@ -283,8 +285,10 @@ class _TicketsScreenState extends State<TicketsScreen> {
     if (!_scrollController.hasClients) return;
     final viewport = _scrollController.position.viewportDimension;
     final rows = (viewport / _rowExtent).floor().clamp(1, filtered.length);
-    final next =
-        (_selectedIndex + (rows * direction)).clamp(0, filtered.length - 1);
+    final next = (_selectedIndex + (rows * direction)).clamp(
+      0,
+      filtered.length - 1,
+    );
     setState(() => _selectedIndex = next);
     _animateTo(_scrollController.offset + (viewport * 0.85 * direction));
   }
@@ -292,7 +296,10 @@ class _TicketsScreenState extends State<TicketsScreen> {
   void _animateTo(double offset) {
     if (!_scrollController.hasClients) return;
     final position = _scrollController.position;
-    final target = offset.clamp(position.minScrollExtent, position.maxScrollExtent);
+    final target = offset.clamp(
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
     _scrollController.animateTo(
       target.toDouble(),
       duration: const Duration(milliseconds: 180),
@@ -350,13 +357,17 @@ class _TicketsScreenState extends State<TicketsScreen> {
                                         ),
                                         itemBuilder: (context, index) {
                                           final ticket = filtered[index];
-                                          final selected = index == _selectedIndex;
+                                          final selected =
+                                              index == _selectedIndex;
                                           return GestureDetector(
                                             onTap: () {
-                                              setState(() => _selectedIndex = index);
+                                              setState(
+                                                () => _selectedIndex = index,
+                                              );
                                               _listFocusNode.requestFocus();
                                             },
-                                            onDoubleTap: () => editTicket(ticket),
+                                            onDoubleTap: () =>
+                                                editTicket(ticket),
                                             child: _tableView
                                                 ? _ticketTableRow(
                                                     ticket,
@@ -399,8 +410,8 @@ class _TicketsScreenState extends State<TicketsScreen> {
           final itemWidth = constraints.maxWidth >= 1080
               ? (constraints.maxWidth - 64) / 5
               : constraints.maxWidth >= 720
-                  ? (constraints.maxWidth - 32) / 3
-                  : (constraints.maxWidth - 16) / 2;
+              ? (constraints.maxWidth - 32) / 3
+              : (constraints.maxWidth - 16) / 2;
 
           return Wrap(
             spacing: 16,
@@ -438,9 +449,8 @@ class _TicketsScreenState extends State<TicketsScreen> {
                 value: count(TicketStatus.rescheduled).toString(),
                 icon: Icons.update,
                 color: Colors.deepOrange,
-                onTap: () => setState(
-                  () => selectedStatus = TicketStatus.rescheduled,
-                ),
+                onTap: () =>
+                    setState(() => selectedStatus = TicketStatus.rescheduled),
               ),
               _summaryCard(
                 width: itemWidth,
@@ -636,7 +646,8 @@ class _TicketsScreenState extends State<TicketsScreen> {
   }
 
   Widget _activeFilterBar(int visible) {
-    final hasFilters = searchController.text.isNotEmpty ||
+    final hasFilters =
+        searchController.text.isNotEmpty ||
         selectedStatus != null ||
         selectedType != null;
     return Row(

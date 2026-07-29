@@ -48,8 +48,7 @@ class InMemoryOperationRepository implements OperationRepository {
   void delete(String id) {
     _operations.removeWhere((item) => item.id == id);
     if (_activeOperationId == id) {
-      _activeOperationId =
-          _operations.isEmpty ? null : _operations.first.id;
+      _activeOperationId = _operations.isEmpty ? null : _operations.first.id;
     }
   }
 

@@ -39,9 +39,12 @@ class ReportExportService {
     final bodyRows = rows.map((row) {
       return '<tr>${row.map((cell) => '<td>${_html(cell)}</td>').join()}</tr>';
     }).join();
-    final headings = columns.map((column) => '<th>${_html(column)}</th>').join();
+    final headings = columns
+        .map((column) => '<th>${_html(column)}</th>')
+        .join();
 
-    final reportHtml = '''
+    final reportHtml =
+        '''
 <!doctype html>
 <html lang="es">
 <head>
@@ -84,10 +87,12 @@ class ReportExportService {
     });
   }
 
-  static String _csvRow(List<String> values) => values.map((value) {
+  static String _csvRow(List<String> values) => values
+      .map((value) {
         final escaped = value.replaceAll('"', '""');
         return '"$escaped"';
-      }).join(';');
+      })
+      .join(';');
 
   static String _html(String value) => const HtmlEscape().convert(value);
 }

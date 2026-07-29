@@ -6,10 +6,7 @@ import '../domain/transfer.dart';
 class TransferFormScreen extends StatefulWidget {
   final Transfer? transfer;
 
-  const TransferFormScreen({
-    super.key,
-    this.transfer,
-  });
+  const TransferFormScreen({super.key, this.transfer});
 
   @override
   State<TransferFormScreen> createState() => _TransferFormScreenState();
@@ -52,27 +49,31 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
     selectedWorkerIds = {...?transfer?.workerIds};
 
     code = TextEditingController(
-      text: transfer?.code ??
+      text:
+          transfer?.code ??
           'TR-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}',
     );
-    departureTime =
-        TextEditingController(text: transfer?.departureTime ?? '');
-    estimatedArrivalTime =
-        TextEditingController(text: transfer?.estimatedArrivalTime ?? '');
+    departureTime = TextEditingController(text: transfer?.departureTime ?? '');
+    estimatedArrivalTime = TextEditingController(
+      text: transfer?.estimatedArrivalTime ?? '',
+    );
     origin = TextEditingController(text: transfer?.origin ?? '');
     destination = TextEditingController(text: transfer?.destination ?? '');
-    routeDescription =
-        TextEditingController(text: transfer?.routeDescription ?? '');
-    vehicleIdentifier =
-        TextEditingController(text: transfer?.vehicleIdentifier ?? '');
+    routeDescription = TextEditingController(
+      text: transfer?.routeDescription ?? '',
+    );
+    vehicleIdentifier = TextEditingController(
+      text: transfer?.vehicleIdentifier ?? '',
+    );
     licensePlate = TextEditingController(text: transfer?.licensePlate ?? '');
     capacity = TextEditingController(
       text: transfer == null ? '10' : transfer.capacity.toString(),
     );
     driverName = TextEditingController(text: transfer?.driverName ?? '');
     driverPhone = TextEditingController(text: transfer?.driverPhone ?? '');
-    providerCompany =
-        TextEditingController(text: transfer?.providerCompany ?? '');
+    providerCompany = TextEditingController(
+      text: transfer?.providerCompany ?? '',
+    );
     notes = TextEditingController(text: transfer?.notes ?? '');
   }
 
@@ -141,9 +142,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
 
     if (selectedWorkerIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Selecciona al menos un trabajador.'),
-        ),
+        const SnackBar(content: Text('Selecciona al menos un trabajador.')),
       );
       return;
     }
@@ -162,7 +161,8 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
     Navigator.pop(
       context,
       Transfer(
-        id: widget.transfer?.id ??
+        id:
+            widget.transfer?.id ??
             DateTime.now().millisecondsSinceEpoch.toString(),
         code: code.text.trim(),
         date: date,
@@ -224,15 +224,8 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                             child: Text(formatDate(date)),
                           ),
                         ),
-                        field(
-                          departureTime,
-                          'Hora de salida',
-                          required: true,
-                        ),
-                        field(
-                          estimatedArrivalTime,
-                          'Llegada estimada',
-                        ),
+                        field(departureTime, 'Hora de salida', required: true),
+                        field(estimatedArrivalTime, 'Llegada estimada'),
                         field(origin, 'Origen', required: true),
                         field(destination, 'Destino', required: true),
                         field(routeDescription, 'Descripción de ruta'),
@@ -340,8 +333,9 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                                 const Divider(height: 1),
                             itemBuilder: (context, index) {
                               final worker = workers[index];
-                              final selected =
-                                  selectedWorkerIds.contains(worker.id);
+                              final selected = selectedWorkerIds.contains(
+                                worker.id,
+                              );
 
                               return CheckboxListTile(
                                 value: selected,
@@ -384,9 +378,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                         onPressed: save,
                         icon: const Icon(Icons.save),
                         label: Text(
-                          editing
-                              ? 'GUARDAR CAMBIOS'
-                              : 'CREAR TRASLADO',
+                          editing ? 'GUARDAR CAMBIOS' : 'CREAR TRASLADO',
                         ),
                       ),
                     ],

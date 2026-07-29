@@ -6,11 +6,7 @@ import '../data/agenda_service.dart';
 import '../domain/agenda_event.dart';
 import 'widgets/agenda_event_card.dart';
 
-enum AgendaRange {
-  today,
-  upcoming,
-  all,
-}
+enum AgendaRange { today, upcoming, all }
 
 extension AgendaRangeLabel on AgendaRange {
   String get label {
@@ -56,21 +52,20 @@ class _AgendaScreenState extends State<AgendaScreen> {
       final worker = _worker(event.workerId);
       final workerName = worker?.fullName.toLowerCase() ?? '';
 
-      final matchesSearch = query.isEmpty ||
+      final matchesSearch =
+          query.isEmpty ||
           workerName.contains(query) ||
           event.title.toLowerCase().contains(query) ||
           event.subtitle.toLowerCase().contains(query) ||
           event.location.toLowerCase().contains(query);
 
-      final matchesType =
-          selectedType == null || event.type == selectedType;
+      final matchesType = selectedType == null || event.type == selectedType;
 
       final matchesRange = switch (selectedRange) {
         AgendaRange.today =>
           !event.dateTime.isBefore(startToday) &&
               event.dateTime.isBefore(endToday),
-        AgendaRange.upcoming =>
-          !event.dateTime.isBefore(startToday),
+        AgendaRange.upcoming => !event.dateTime.isBefore(startToday),
         AgendaRange.all => true,
       };
 
@@ -109,11 +104,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
     final grouped = <DateTime, List<AgendaEvent>>{};
 
     for (final event in events) {
-      final day = DateTime(
-        event.date.year,
-        event.date.month,
-        event.date.day,
-      );
+      final day = DateTime(event.date.year, event.date.month, event.date.day);
       grouped.putIfAbsent(day, () => []).add(event);
     }
 
@@ -189,8 +180,9 @@ class _AgendaScreenState extends State<AgendaScreen> {
                                   const SizedBox(height: 12),
                                   ...dayEvents.map(
                                     (event) => Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 10),
+                                      padding: const EdgeInsets.only(
+                                        bottom: 10,
+                                      ),
                                       child: AgendaEventCard(
                                         event: event,
                                         worker: _worker(event.workerId),
@@ -329,10 +321,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
         final range = SegmentedButton<AgendaRange>(
           segments: AgendaRange.values
               .map(
-                (item) => ButtonSegment(
-                  value: item,
-                  label: Text(item.label),
-                ),
+                (item) => ButtonSegment(value: item, label: Text(item.label)),
               )
               .toList(),
           selected: {selectedRange},

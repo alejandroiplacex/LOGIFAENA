@@ -1,10 +1,4 @@
-enum AgendaEventType {
-  ticket,
-  hotelCheckIn,
-  hotelCheckOut,
-  transfer,
-  task,
-}
+enum AgendaEventType { ticket, hotelCheckIn, hotelCheckOut, transfer, task }
 
 extension AgendaEventTypeLabel on AgendaEventType {
   String get label {
@@ -23,12 +17,7 @@ extension AgendaEventTypeLabel on AgendaEventType {
   }
 }
 
-enum AgendaEventStatus {
-  pending,
-  confirmed,
-  completed,
-  cancelled,
-}
+enum AgendaEventStatus { pending, confirmed, completed, cancelled }
 
 extension AgendaEventStatusLabel on AgendaEventStatus {
   String get label {
@@ -75,12 +64,6 @@ class AgendaEvent {
     final hour = parts.isNotEmpty ? int.tryParse(parts[0]) ?? 0 : 0;
     final minute = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
 
-    return DateTime(
-      date.year,
-      date.month,
-      date.day,
-      hour,
-      minute,
-    );
+    return DateTime(date.year, date.month, date.day, hour, minute);
   }
 }

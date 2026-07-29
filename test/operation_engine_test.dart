@@ -42,9 +42,9 @@ void main() {
 
     expect(operation.alerts.length, 3);
     expect(
-      operation.alerts.where(
-        (item) => item.severity == LogisticsAlertSeverity.critical,
-      ).length,
+      operation.alerts
+          .where((item) => item.severity == LogisticsAlertSeverity.critical)
+          .length,
       2,
     );
   });

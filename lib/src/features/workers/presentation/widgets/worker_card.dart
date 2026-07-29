@@ -139,7 +139,6 @@ class WorkerCard extends StatelessWidget {
   }
 }
 
-
 class _ReadinessIndicator extends StatelessWidget {
   final LogisticsReadiness readiness;
 
@@ -182,8 +181,8 @@ class _ReadinessIndicator extends StatelessWidget {
   }
 
   Widget _serviceIcon(IconData icon, bool completed) => Icon(
-        completed ? Icons.check_circle : icon,
-        size: 17,
-        color: completed ? const Color(0xFF15803D) : Colors.black38,
-      );
+    completed ? Icons.check_circle : icon,
+    size: 17,
+    color: completed ? const Color(0xFF15803D) : Colors.black38,
+  );
 }

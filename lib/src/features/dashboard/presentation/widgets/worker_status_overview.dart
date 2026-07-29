@@ -16,16 +16,50 @@ class WorkerStatusOverview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = <_StatusItem>[
-      _StatusItem('Pendientes', WorkerStatus.pending, Icons.pending_actions_rounded, const Color(0xFFF59E0B)),
-      _StatusItem('Pasaje emitido', WorkerStatus.ticketIssued, Icons.airplane_ticket_rounded, const Color(0xFF2563EB)),
-      _StatusItem('En viaje', WorkerStatus.traveling, Icons.flight_takeoff_rounded, const Color(0xFF7C3AED)),
-      _StatusItem('Alojados', WorkerStatus.lodging, Icons.hotel_rounded, const Color(0xFF9333EA)),
-      _StatusItem('En traslado', WorkerStatus.transfer, Icons.directions_bus_rounded, const Color(0xFF0891B2)),
-      _StatusItem('En faena', WorkerStatus.atSite, Icons.engineering_rounded, const Color(0xFF16A34A)),
+      _StatusItem(
+        'Pendientes',
+        WorkerStatus.pending,
+        Icons.pending_actions_rounded,
+        const Color(0xFFF59E0B),
+      ),
+      _StatusItem(
+        'Pasaje emitido',
+        WorkerStatus.ticketIssued,
+        Icons.airplane_ticket_rounded,
+        const Color(0xFF2563EB),
+      ),
+      _StatusItem(
+        'En viaje',
+        WorkerStatus.traveling,
+        Icons.flight_takeoff_rounded,
+        const Color(0xFF7C3AED),
+      ),
+      _StatusItem(
+        'Alojados',
+        WorkerStatus.lodging,
+        Icons.hotel_rounded,
+        const Color(0xFF9333EA),
+      ),
+      _StatusItem(
+        'En traslado',
+        WorkerStatus.transfer,
+        Icons.directions_bus_rounded,
+        const Color(0xFF0891B2),
+      ),
+      _StatusItem(
+        'En faena',
+        WorkerStatus.atSite,
+        Icons.engineering_rounded,
+        const Color(0xFF16A34A),
+      ),
     ];
 
     final totalOperational = workers
-        .where((w) => w.status != WorkerStatus.finished && w.status != WorkerStatus.cancelled)
+        .where(
+          (w) =>
+              w.status != WorkerStatus.finished &&
+              w.status != WorkerStatus.cancelled,
+        )
         .length;
 
     return Container(
@@ -72,8 +106,8 @@ class WorkerStatusOverview extends StatelessWidget {
               final columns = constraints.maxWidth >= 760
                   ? 6
                   : constraints.maxWidth >= 480
-                      ? 3
-                      : 2;
+                  ? 3
+                  : 2;
               return GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -86,8 +120,12 @@ class WorkerStatusOverview extends StatelessWidget {
                 ),
                 itemBuilder: (context, index) {
                   final item = items[index];
-                  final count = workers.where((w) => w.status == item.status).length;
-                  final ratio = totalOperational == 0 ? 0.0 : count / totalOperational;
+                  final count = workers
+                      .where((w) => w.status == item.status)
+                      .length;
+                  final ratio = totalOperational == 0
+                      ? 0.0
+                      : count / totalOperational;
                   return _StatusTile(
                     item: item,
                     count: count,
