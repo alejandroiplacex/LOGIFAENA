@@ -29,6 +29,12 @@ void main() {
   ];
 
   testWidgets('muestra y filtra operaciones por estado', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 800));
+
+    addTearDown(() async {
+      await tester.binding.setSurfaceSize(null);
+    });
+
     await tester.pumpWidget(
       MaterialApp(
         home: SyncCenterScreen(
@@ -37,19 +43,39 @@ void main() {
         ),
       ),
     );
+
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('worker Ã‚· update'), findsOneWidget);
-    expect(find.textContaining('ticket Ã‚· create'), findsOneWidget);
+    expect(find.textContaining('worker'), findsOneWidget);
+    expect(find.textContaining('update'), findsOneWidget);
+    expect(find.textContaining('ticket'), findsOneWidget);
+    expect(find.textContaining('create'), findsOneWidget);
 
-    await tester.tap(find.text('Fallidas'));
+    final horizontalScroll = find.byType(SingleChildScrollView);
+
+    expect(horizontalScroll, findsOneWidget);
+
+    await tester.drag(
+      horizontalScroll,
+      const Offset(-600, 0),
+    );
+
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('worker Ã‚· update'), findsNothing);
-    expect(find.textContaining('ticket Ã‚· create'), findsOneWidget);
+    final failedFilter = find.text('Fallidas');
+
+    expect(failedFilter, findsOneWidget);
+
+    await tester.tap(failedFilter);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('worker'), findsNothing);
+    expect(find.textContaining('update'), findsNothing);
+    expect(find.textContaining('ticket'), findsOneWidget);
+    expect(find.textContaining('create'), findsOneWidget);
   });
 
-  testWidgets('reintenta una operaciÃƒÂ³n fallida', (tester) async {
+  testWidgets('reintenta una operación fallida', (tester) async {
     var retriedId = 0;
 
     await tester.pumpWidget(
@@ -63,6 +89,7 @@ void main() {
         ),
       ),
     );
+
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Reintentar'));
