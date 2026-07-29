@@ -10,7 +10,7 @@ class SyncTransportConfig {
   const SyncTransportConfig({
     required this.mode,
     this.apiBaseUrl = '',
-    this.endpointPath = '/api/sync/operations',
+    this.endpointPath = '/api/sync',
     this.timeout = const Duration(seconds: 20),
   });
 
@@ -27,7 +27,7 @@ class SyncTransportConfig {
 
     const endpointPath = String.fromEnvironment(
       'LOGIFAENA_SYNC_ENDPOINT',
-      defaultValue: '/api/sync/operations',
+      defaultValue: '/api/sync',
     );
 
     final mode = modeValue.toLowerCase() == 'http'

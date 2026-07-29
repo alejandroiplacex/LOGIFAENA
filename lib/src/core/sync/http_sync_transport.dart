@@ -12,7 +12,7 @@ class HttpSyncTransport implements SyncTransport {
     required this.baseUrl,
     http.Client? client,
     this.accessTokenProvider,
-    this.endpointPath = '/api/sync/operations',
+    this.endpointPath = '/api/sync',
     this.timeout = const Duration(seconds: 20),
   }) : _client = client ?? http.Client();
 
