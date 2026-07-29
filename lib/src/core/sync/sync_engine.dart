@@ -3,6 +3,7 @@ import 'simulated_sync_transport.dart';
 import 'sync_queue_service.dart';
 import 'sync_result.dart';
 import 'sync_transport.dart';
+import 'sync_transport_factory.dart';
 
 typedef PendingOperationsLoader = List<PendingSyncOperation> Function();
 typedef SyncOperationUpdater = Future<void> Function(int id);
@@ -22,7 +23,9 @@ class SyncEngine {
            markAsCompleted ?? SyncQueueService.instance.markAsCompleted,
        _markAsFailed = markAsFailed ?? SyncQueueService.instance.markAsFailed;
 
-  static final SyncEngine instance = SyncEngine();
+  static final SyncEngine instance = SyncEngine(
+    transport: SyncTransportFactory.create(),
+  );
 
   final SyncTransport _transport;
   final PendingOperationsLoader _loadPending;
