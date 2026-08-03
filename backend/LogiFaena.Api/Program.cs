@@ -1,6 +1,14 @@
 using System.Text.Json;
+using LogiFaena.Api.Data;
+using Microsoft.EntityFrameworkCore;
+using LogiFaena.Api.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<LogiFaenaDbContext>(options =>
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("LogiFaenaDatabase")
+    )
+);
 
 builder.Services.AddOpenApi();
 
@@ -17,7 +25,9 @@ app.MapGet("/", () => Results.Ok(new
     status = "online"
 }));
 
-app.MapPost("/api/sync", (SyncRequest request) =>
+app.MapPost("/api/sync", async (
+    SyncRequest request,
+    LogiFaenaDbContext dbContext) =>
 {
     if (string.IsNullOrWhiteSpace(request.Operation))
     {
@@ -37,11 +47,48 @@ app.MapPost("/api/sync", (SyncRequest request) =>
         ));
     }
 
+    if (string.IsNullOrWhiteSpace(request.EntityId))
+    {
+        return Results.BadRequest(new SyncResponse(
+            Success: false,
+            Message: "El identificador de la entidad es obligatorio.",
+            ReceivedAt: DateTime.UtcNow
+        ));
+    }
+
+    var syncOperation = new SyncOperationEntity
+    {
+        ClientId = request.Id,
+        EntityType = request.EntityType.Trim(),
+        EntityId = request.EntityId.Trim(),
+        Operation = request.Operation.Trim(),
+        PayloadJson = request.Payload.GetRawText(),
+        ClientCreatedAtUtc = request.CreatedAt,
+        ClientAttempts = request.Attempts,
+        ClientStatus = request.Status,
+        ReceivedAtUtc = DateTime.UtcNow,
+        Processed = false
+    };
+
+    dbContext.SyncOperations.Add(syncOperation);
+    await dbContext.SaveChangesAsync();
+
     return Results.Ok(new SyncResponse(
         Success: true,
-        Message: "Sincronización recibida correctamente.",
-        ReceivedAt: DateTime.UtcNow
+        Message: "Sincronización recibida y almacenada correctamente.",
+        ReceivedAt: syncOperation.ReceivedAtUtc
     ));
+    
+});
+app.MapGet("/api/sync/operations", async (
+    LogiFaenaDbContext dbContext) =>
+{
+    var operations = await dbContext.SyncOperations
+        .OrderByDescending(x => x.ReceivedAtUtc)
+        .Take(100)
+        .ToListAsync();
+
+    return Results.Ok(operations);
 });
 
 app.Run();
