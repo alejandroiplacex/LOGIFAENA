@@ -23,6 +23,11 @@ abstract class WorkerRepository {
   void update(Worker worker);
 
   void delete(String id);
+
+  ({int created, int updated, int deleted}) applyServerChanges(
+    List<Worker> workers, {
+    Set<String> deletedIds = const <String>{},
+  });
 }
 
 class InMemoryWorkerRepository implements WorkerRepository {
@@ -328,6 +333,45 @@ class InMemoryWorkerRepository implements WorkerRepository {
         'fullName': deletedWorker.fullName,
       },
     );
+  }
+
+  @override
+  ({int created, int updated, int deleted}) applyServerChanges(
+    List<Worker> workers, {
+    Set<String> deletedIds = const <String>{},
+  }) {
+    var created = 0;
+    var updated = 0;
+    var deleted = 0;
+
+    for (final worker in workers) {
+      final index = _workers.indexWhere(
+        (existingWorker) => existingWorker.id == worker.id,
+      );
+
+      if (index == -1) {
+        _workers.add(worker);
+        created++;
+      } else {
+        _workers[index] = worker;
+        updated++;
+      }
+    }
+
+    for (final deletedId in deletedIds) {
+      final index = _workers.indexWhere((worker) => worker.id == deletedId);
+
+      if (index == -1) {
+        continue;
+      }
+
+      _workers.removeAt(index);
+      deleted++;
+    }
+
+    _persist();
+
+    return (created: created, updated: updated, deleted: deleted);
   }
 
   String _normalizeRut(String rut) {

@@ -40,9 +40,9 @@ void main() {
     await transport.send(operation);
 
     expect(
-      capturedRequest.url.toString(),
-      'https://api.logifaena.cl/api/sync/operations',
-    );
+  capturedRequest.url.toString(),
+  'https://api.logifaena.cl/api/sync',
+);
 
     expect(capturedRequest.method, 'POST');
 
