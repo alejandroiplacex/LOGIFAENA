@@ -9,6 +9,9 @@ public class LogiFaenaDbContext(DbContextOptions<LogiFaenaDbContext> options)
     public DbSet<SyncOperationEntity> SyncOperations =>
         Set<SyncOperationEntity>();
 
+    public DbSet<WorkerEntity> Workers =>
+        Set<WorkerEntity>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         var entity = modelBuilder.Entity<SyncOperationEntity>();
@@ -46,5 +49,32 @@ public class LogiFaenaDbContext(DbContextOptions<LogiFaenaDbContext> options)
             x.Operation,
             x.ClientCreatedAtUtc
         });
+
+        // Configuración de WorkerEntity
+        var worker = modelBuilder.Entity<WorkerEntity>();
+
+        worker.ToTable("Workers");
+
+        worker.HasKey(x => x.Id);
+
+        worker.Property(x => x.ExternalId)
+            .HasMaxLength(200)
+            .IsRequired();
+
+        worker.HasIndex(x => x.ExternalId)
+            .IsUnique();
+
+        worker.Property(x => x.Rut).HasMaxLength(30);
+        worker.Property(x => x.FirstName).HasMaxLength(100);
+        worker.Property(x => x.LastName).HasMaxLength(100);
+        worker.Property(x => x.Company).HasMaxLength(150);
+        worker.Property(x => x.Role).HasMaxLength(150);
+        worker.Property(x => x.Project).HasMaxLength(150);
+        worker.Property(x => x.Shift).HasMaxLength(50);
+        worker.Property(x => x.Supervisor).HasMaxLength(150);
+        worker.Property(x => x.City).HasMaxLength(100);
+        worker.Property(x => x.Phone).HasMaxLength(50);
+        worker.Property(x => x.Email).HasMaxLength(200);
+        worker.Property(x => x.Status).HasMaxLength(100);
     }
 }
