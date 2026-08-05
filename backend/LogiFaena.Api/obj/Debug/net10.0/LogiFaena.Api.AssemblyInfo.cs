@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LogiFaena.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f503447577d8a55a21242737dd22b4e8256eccee")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1a5aac2f708c50a3ae629a304276cb901ea2d362")]
 [assembly: System.Reflection.AssemblyProductAttribute("LogiFaena.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LogiFaena.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

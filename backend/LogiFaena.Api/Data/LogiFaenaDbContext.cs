@@ -57,14 +57,28 @@ public class LogiFaenaDbContext(DbContextOptions<LogiFaenaDbContext> options)
 
         worker.HasKey(x => x.Id);
 
-        worker.Property(x => x.ExternalId)
-            .HasMaxLength(200)
-            .IsRequired();
+   worker.Property(x => x.ExternalId)
+    .HasMaxLength(200)
+    .IsRequired();
 
-        worker.HasIndex(x => x.ExternalId)
-            .IsUnique();
+worker.HasIndex(x => x.ExternalId)
+    .IsUnique();
 
-        worker.Property(x => x.Rut).HasMaxLength(30);
+worker.Property(x => x.WorkerCode)
+    .HasMaxLength(30)
+    .IsRequired();
+
+worker.HasIndex(x => x.WorkerCode)
+    .IsUnique();
+
+worker.Property(x => x.QrToken)
+    .HasMaxLength(100)
+    .IsRequired();
+
+worker.HasIndex(x => x.QrToken)
+    .IsUnique();
+
+worker.Property(x => x.Rut).HasMaxLength(30);
         worker.Property(x => x.FirstName).HasMaxLength(100);
         worker.Property(x => x.LastName).HasMaxLength(100);
         worker.Property(x => x.Company).HasMaxLength(150);

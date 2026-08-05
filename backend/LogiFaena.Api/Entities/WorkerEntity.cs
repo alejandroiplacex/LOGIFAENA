@@ -6,6 +6,10 @@ public class WorkerEntity
 
     public string ExternalId { get; set; } = string.Empty;
 
+    public string WorkerCode { get; set; } = string.Empty;
+
+    public string QrToken { get; set; } = string.Empty;
+
     public string Rut { get; set; } = string.Empty;
 
     public string FirstName { get; set; } = string.Empty;
