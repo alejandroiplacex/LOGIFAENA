@@ -339,6 +339,43 @@ app.MapGet("/api/workers", async (
     return Results.Ok(workers);
 });
 
+app.MapGet("/api/workers/qr/{qrToken}", async (
+    string qrToken,
+    LogiFaenaDbContext dbContext) =>
+{
+    if (string.IsNullOrWhiteSpace(qrToken))
+    {
+        return Results.BadRequest(new
+        {
+            success = false,
+            message = "El token QR es obligatorio."
+        });
+    }
+
+    var normalizedQrToken = qrToken.Trim().ToLowerInvariant();
+
+    var worker = await dbContext.Workers
+        .AsNoTracking()
+        .SingleOrDefaultAsync(
+          x => x.QrToken == normalizedQrToken
+        );
+
+    if (worker is null || worker.IsDeleted)
+    {
+        return Results.NotFound(new
+        {
+            success = false,
+            message = "No se encontró un trabajador asociado al código QR."
+        });
+    }
+
+    return Results.Ok(new
+    {
+        success = true,
+        worker
+    });
+});
+
 app.MapGet("/api/workers/changes", async (
     DateTime? since,
     LogiFaenaDbContext dbContext) =>

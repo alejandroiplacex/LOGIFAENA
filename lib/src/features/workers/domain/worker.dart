@@ -34,6 +34,9 @@ extension WorkerStatusLabel on WorkerStatus {
 
 class Worker {
   final String id;
+
+  String workerCode;
+  String qrToken;
   String rut;
   String firstName;
   String lastName;
@@ -56,6 +59,8 @@ class Worker {
 
   Worker({
     required this.id,
+    this.workerCode = '',
+    this.qrToken = '',
     required this.rut,
     required this.firstName,
     required this.lastName,
@@ -77,54 +82,70 @@ class Worker {
     required this.status,
   });
 
-  String get fullName => '$firstName $lastName';
+  String get fullName => '$firstName $lastName'.trim();
+
+  String get qrData {
+    if (qrToken.trim().isEmpty) {
+      return '';
+    }
+
+    return 'logifaena:worker:${qrToken.trim()}';
+  }
+
+  bool get hasQrIdentity =>
+      workerCode.trim().isNotEmpty &&
+      qrToken.trim().isNotEmpty;
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'rut': rut,
-    'firstName': firstName,
-    'lastName': lastName,
-    'company': company,
-    'role': role,
-    'project': project,
-    'shift': shift,
-    'supervisor': supervisor,
-    'city': city,
-    'phone': phone,
-    'email': email,
-    'emergencyContact': emergencyContact,
-    'emergencyPhone': emergencyPhone,
-    'hotel': hotel,
-    'room': room,
-    'ticket': ticket,
-    'transfer': transfer,
-    'notes': notes,
-    'status': status.name,
-  };
+        'id': id,
+        'workerCode': workerCode,
+        'qrToken': qrToken,
+        'rut': rut,
+        'firstName': firstName,
+        'lastName': lastName,
+        'company': company,
+        'role': role,
+        'project': project,
+        'shift': shift,
+        'supervisor': supervisor,
+        'city': city,
+        'phone': phone,
+        'email': email,
+        'emergencyContact': emergencyContact,
+        'emergencyPhone': emergencyPhone,
+        'hotel': hotel,
+        'room': room,
+        'ticket': ticket,
+        'transfer': transfer,
+        'notes': notes,
+        'status': status.name,
+      };
 
   factory Worker.fromJson(Map<String, dynamic> json) => Worker(
-    id: json['id'] as String,
-    rut: json['rut'] as String? ?? '',
-    firstName: json['firstName'] as String? ?? '',
-    lastName: json['lastName'] as String? ?? '',
-    company: json['company'] as String? ?? '',
-    role: json['role'] as String? ?? '',
-    project: json['project'] as String? ?? '',
-    shift: json['shift'] as String? ?? '',
-    supervisor: json['supervisor'] as String? ?? '',
-    city: json['city'] as String? ?? '',
-    phone: json['phone'] as String? ?? '',
-    email: json['email'] as String? ?? '',
-    emergencyContact: json['emergencyContact'] as String? ?? '',
-    emergencyPhone: json['emergencyPhone'] as String? ?? '',
-    hotel: json['hotel'] as String? ?? '',
-    room: json['room'] as String? ?? '',
-    ticket: json['ticket'] as String? ?? '',
-    transfer: json['transfer'] as String? ?? '',
-    notes: json['notes'] as String? ?? '',
-    status: WorkerStatus.values.firstWhere(
-      (value) => value.name == json['status'],
-      orElse: () => WorkerStatus.pending,
-    ),
-  );
+        id: json['id']?.toString() ?? '',
+        workerCode: json['workerCode'] as String? ?? '',
+        qrToken: json['qrToken'] as String? ?? '',
+        rut: json['rut'] as String? ?? '',
+        firstName: json['firstName'] as String? ?? '',
+        lastName: json['lastName'] as String? ?? '',
+        company: json['company'] as String? ?? '',
+        role: json['role'] as String? ?? '',
+        project: json['project'] as String? ?? '',
+        shift: json['shift'] as String? ?? '',
+        supervisor: json['supervisor'] as String? ?? '',
+        city: json['city'] as String? ?? '',
+        phone: json['phone'] as String? ?? '',
+        email: json['email'] as String? ?? '',
+        emergencyContact: json['emergencyContact'] as String? ?? '',
+        emergencyPhone: json['emergencyPhone'] as String? ?? '',
+        hotel: json['hotel'] as String? ?? '',
+        room: json['room'] as String? ?? '',
+        ticket: json['ticket'] as String? ?? '',
+        transfer: json['transfer'] as String? ?? '',
+        notes: json['notes'] as String? ?? '',
+        status: WorkerStatus.values.firstWhere(
+          (value) => value.name == json['status'],
+          orElse: () => WorkerStatus.pending,
+        ),
+      );
 }

@@ -83,7 +83,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         .length;
 
     return ColoredBox(
-      color: const Color(0xFFF5F7FB),
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: Stack(
         children: [
           Focus(
