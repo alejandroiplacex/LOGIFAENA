@@ -85,7 +85,7 @@ app.MapPost("/api/sync", async (
             .Trim()
             .ToLowerInvariant();
 
-        if (entityType != "worker")
+        if (entityType != "worker" && entityType != "movement")
         {
             syncOperation.ProcessingError =
                 $"El tipo de entidad '{request.EntityType}' aún no está soportado.";
@@ -98,7 +98,106 @@ app.MapPost("/api/sync", async (
                 ReceivedAt: receivedAtUtc
             ));
         }
+if (entityType == "movement")
+{
+    if (operation != "create")
+    {
+        syncOperation.ProcessingError =
+            $"La operación '{request.Operation}' no está soportada para movimientos.";
 
+        await dbContext.SaveChangesAsync();
+
+        return Results.BadRequest(new SyncResponse(
+            Success: false,
+            Message: syncOperation.ProcessingError,
+            ReceivedAt: receivedAtUtc
+        ));
+    }
+
+    var workerId = ReadString(
+        request.Payload,
+        "workerId",
+        string.Empty
+    ).Trim();
+
+    var workerCode = ReadString(
+        request.Payload,
+        "workerCode",
+        string.Empty
+    ).Trim();
+
+    var movementType = ReadString(
+        request.Payload,
+        "type",
+        string.Empty
+    ).Trim();
+
+    if (string.IsNullOrWhiteSpace(workerId))
+    {
+        syncOperation.ProcessingError =
+            "El identificador del trabajador es obligatorio.";
+
+        await dbContext.SaveChangesAsync();
+
+        return Results.BadRequest(new SyncResponse(
+            Success: false,
+            Message: syncOperation.ProcessingError,
+            ReceivedAt: receivedAtUtc
+        ));
+    }
+
+    if (string.IsNullOrWhiteSpace(workerCode))
+    {
+        syncOperation.ProcessingError =
+            "El código del trabajador es obligatorio.";
+
+        await dbContext.SaveChangesAsync();
+
+        return Results.BadRequest(new SyncResponse(
+            Success: false,
+            Message: syncOperation.ProcessingError,
+            ReceivedAt: receivedAtUtc
+        ));
+    }
+
+    if (string.IsNullOrWhiteSpace(movementType))
+    {
+        syncOperation.ProcessingError =
+            "El tipo de movimiento es obligatorio.";
+
+        await dbContext.SaveChangesAsync();
+
+        return Results.BadRequest(new SyncResponse(
+            Success: false,
+            Message: syncOperation.ProcessingError,
+            ReceivedAt: receivedAtUtc
+        ));
+    }
+
+    var movement = new MovementEntity
+    {
+        ClientMovementId = request.Id,
+        WorkerId = workerId,
+        WorkerCode = workerCode,
+        Type = movementType,
+        CreatedAtUtc =
+            request.CreatedAt?.ToUniversalTime() ?? receivedAtUtc,
+        ReceivedAtUtc = receivedAtUtc
+    };
+
+    dbContext.Movements.Add(movement);
+
+    syncOperation.Processed = true;
+    syncOperation.ProcessingError = null;
+
+    await dbContext.SaveChangesAsync();
+
+    return Results.Ok(new SyncResponse(
+        Success: true,
+        Message: "Movimiento sincronizado correctamente.",
+        ReceivedAt: receivedAtUtc
+    ));
+}
         var externalId = request.EntityId.Trim();
 
         var worker = await dbContext.Workers
@@ -394,7 +493,16 @@ app.MapGet("/api/workers/changes", async (
         Workers: workers
     ));
 });
-
+app.MapGet("/api/health", () =>
+{
+    return Results.Ok(new
+    {
+        success = true,
+        service = "LogiFaena.Api",
+        status = "ok",
+        serverTimeUtc = DateTime.UtcNow
+    });
+});
 app.Run();
 
 static string ReadString(

@@ -4,7 +4,9 @@ import '../../../../core/sync/sync_engine.dart';
 import '../../../../core/sync/sync_result.dart';
 import '../../../../core/sync/sync_statistics.dart';
 import '../../../../core/sync/sync_statistics_service.dart';
+import '../../../../core/sync/sync_transport_factory.dart';
 import '../../../sync/presentation/sync_center_screen.dart';
+import '../../../workers/data/http_worker_changes_service.dart';
 
 class SyncQueueStatus extends StatefulWidget {
   const SyncQueueStatus({super.key, this.statisticsLoader, this.syncRunner});
@@ -22,25 +24,40 @@ class _SyncQueueStatusState extends State<SyncQueueStatus> {
   String? _resultMessage;
   bool _isSynchronizing = false;
 
+  HttpWorkerChangesService? _workerChangesService;
+
   @override
   void initState() {
     super.initState();
     _load();
   }
 
+  @override
+  void dispose() {
+    _workerChangesService?.close();
+    super.dispose();
+  }
+
   void _load() {
     try {
       final loader =
           widget.statisticsLoader ?? SyncStatisticsService.instance.load;
+
       final statistics = loader();
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
         _statistics = statistics;
         _error = null;
       });
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
         _statistics = const SyncStatistics.empty();
         _error = error;
@@ -49,7 +66,9 @@ class _SyncQueueStatusState extends State<SyncQueueStatus> {
   }
 
   Future<void> _synchronize() async {
-    if (_isSynchronizing) return;
+    if (_isSynchronizing) {
+      return;
+    }
 
     setState(() {
       _isSynchronizing = true;
@@ -60,19 +79,45 @@ class _SyncQueueStatusState extends State<SyncQueueStatus> {
     try {
       final runner =
           widget.syncRunner ?? SyncEngine.instance.synchronizePending;
+
       final result = await runner();
 
-      if (!mounted) return;
+      ({int created, int updated, int deleted})? workerChanges;
+
+      final config = SyncTransportConfig.fromEnvironment();
+
+      if (config.mode == SyncTransportMode.http) {
+        _workerChangesService ??= HttpWorkerChangesService(config: config);
+
+        workerChanges = await _workerChangesService!.downloadChanges();
+      }
+
+      if (!mounted) {
+        return;
+      }
+
       _load();
+
+      final uploadMessage = result.total == 0
+          ? 'No había operaciones pendientes para enviar.'
+          : '${result.completed} completada(s), '
+                '${result.failed} fallida(s) y '
+                '${result.skipped} omitida(s).';
+
+      final downloadMessage = workerChanges == null
+          ? ''
+          : ' Descarga: ${workerChanges.created} creada(s), '
+                '${workerChanges.updated} actualizada(s) y '
+                '${workerChanges.deleted} eliminada(s).';
+
       setState(() {
-        _resultMessage = result.total == 0
-            ? 'No había operaciones pendientes.'
-            : '${result.completed} completada(s), '
-                  '${result.failed} fallida(s) y '
-                  '${result.skipped} omitida(s).';
+        _resultMessage = '$uploadMessage$downloadMessage';
       });
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
         _error = error;
         _resultMessage = 'No fue posible ejecutar la sincronización.';
@@ -90,7 +135,10 @@ class _SyncQueueStatusState extends State<SyncQueueStatus> {
     await Navigator.of(
       context,
     ).push<void>(MaterialPageRoute(builder: (_) => const SyncCenterScreen()));
-    if (mounted) _load();
+
+    if (mounted) {
+      _load();
+    }
   }
 
   @override
@@ -211,15 +259,19 @@ class _SyncQueueStatusState extends State<SyncQueueStatus> {
     if (statistics.hasProblems) {
       return '${statistics.failed} operación(es) requieren revisión.';
     }
+
     if (statistics.sending > 0) {
       return 'Hay operaciones en proceso de envío.';
     }
+
     if (statistics.pending > 0) {
       return '${statistics.pending} operación(es) esperan sincronización.';
     }
+
     if (statistics.total == 0) {
       return 'La cola está vacía.';
     }
+
     return 'Todas las operaciones registradas están completadas.';
   }
 }

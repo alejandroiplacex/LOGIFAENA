@@ -12,8 +12,12 @@ public class LogiFaenaDbContext(DbContextOptions<LogiFaenaDbContext> options)
     public DbSet<WorkerEntity> Workers =>
         Set<WorkerEntity>();
 
+    public DbSet<MovementEntity> Movements =>
+        Set<MovementEntity>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Configuración de SyncOperationEntity
         var entity = modelBuilder.Entity<SyncOperationEntity>();
 
         entity.ToTable("SyncOperations");
@@ -57,38 +61,92 @@ public class LogiFaenaDbContext(DbContextOptions<LogiFaenaDbContext> options)
 
         worker.HasKey(x => x.Id);
 
-   worker.Property(x => x.ExternalId)
-    .HasMaxLength(200)
-    .IsRequired();
+        worker.Property(x => x.ExternalId)
+            .HasMaxLength(200)
+            .IsRequired();
 
-worker.HasIndex(x => x.ExternalId)
-    .IsUnique();
+        worker.HasIndex(x => x.ExternalId)
+            .IsUnique();
 
-worker.Property(x => x.WorkerCode)
-    .HasMaxLength(30)
-    .IsRequired();
+        worker.Property(x => x.WorkerCode)
+            .HasMaxLength(30)
+            .IsRequired();
 
-worker.HasIndex(x => x.WorkerCode)
-    .IsUnique();
+        worker.HasIndex(x => x.WorkerCode)
+            .IsUnique();
 
-worker.Property(x => x.QrToken)
-    .HasMaxLength(100)
-    .IsRequired();
+        worker.Property(x => x.QrToken)
+            .HasMaxLength(100)
+            .IsRequired();
 
-worker.HasIndex(x => x.QrToken)
-    .IsUnique();
+        worker.HasIndex(x => x.QrToken)
+            .IsUnique();
 
-worker.Property(x => x.Rut).HasMaxLength(30);
-        worker.Property(x => x.FirstName).HasMaxLength(100);
-        worker.Property(x => x.LastName).HasMaxLength(100);
-        worker.Property(x => x.Company).HasMaxLength(150);
-        worker.Property(x => x.Role).HasMaxLength(150);
-        worker.Property(x => x.Project).HasMaxLength(150);
-        worker.Property(x => x.Shift).HasMaxLength(50);
-        worker.Property(x => x.Supervisor).HasMaxLength(150);
-        worker.Property(x => x.City).HasMaxLength(100);
-        worker.Property(x => x.Phone).HasMaxLength(50);
-        worker.Property(x => x.Email).HasMaxLength(200);
-        worker.Property(x => x.Status).HasMaxLength(100);
+        worker.Property(x => x.Rut)
+            .HasMaxLength(30);
+
+        worker.Property(x => x.FirstName)
+            .HasMaxLength(100);
+
+        worker.Property(x => x.LastName)
+            .HasMaxLength(100);
+
+        worker.Property(x => x.Company)
+            .HasMaxLength(150);
+
+        worker.Property(x => x.Role)
+            .HasMaxLength(150);
+
+        worker.Property(x => x.Project)
+            .HasMaxLength(150);
+
+        worker.Property(x => x.Shift)
+            .HasMaxLength(50);
+
+        worker.Property(x => x.Supervisor)
+            .HasMaxLength(150);
+
+        worker.Property(x => x.City)
+            .HasMaxLength(100);
+
+        worker.Property(x => x.Phone)
+            .HasMaxLength(50);
+
+        worker.Property(x => x.Email)
+            .HasMaxLength(200);
+
+        worker.Property(x => x.Status)
+            .HasMaxLength(100);
+
+        // Configuración de MovementEntity
+        var movement = modelBuilder.Entity<MovementEntity>();
+
+        movement.ToTable("Movements");
+
+        movement.HasKey(x => x.Id);
+
+        movement.Property(x => x.WorkerId)
+            .HasMaxLength(200)
+            .IsRequired();
+
+        movement.Property(x => x.WorkerCode)
+            .HasMaxLength(30)
+            .IsRequired();
+
+        movement.Property(x => x.Type)
+            .HasMaxLength(50)
+            .IsRequired();
+
+        movement.Property(x => x.CreatedAtUtc)
+            .IsRequired();
+
+        movement.Property(x => x.ReceivedAtUtc)
+            .IsRequired();
+
+        movement.HasIndex(x => x.WorkerId);
+
+        movement.HasIndex(x => x.WorkerCode);
+
+        movement.HasIndex(x => x.CreatedAtUtc);
     }
 }

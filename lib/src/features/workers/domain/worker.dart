@@ -93,59 +93,102 @@ class Worker {
   }
 
   bool get hasQrIdentity =>
-      workerCode.trim().isNotEmpty &&
-      qrToken.trim().isNotEmpty;
+      workerCode.trim().isNotEmpty && qrToken.trim().isNotEmpty;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'workerCode': workerCode,
-        'qrToken': qrToken,
-        'rut': rut,
-        'firstName': firstName,
-        'lastName': lastName,
-        'company': company,
-        'role': role,
-        'project': project,
-        'shift': shift,
-        'supervisor': supervisor,
-        'city': city,
-        'phone': phone,
-        'email': email,
-        'emergencyContact': emergencyContact,
-        'emergencyPhone': emergencyPhone,
-        'hotel': hotel,
-        'room': room,
-        'ticket': ticket,
-        'transfer': transfer,
-        'notes': notes,
-        'status': status.name,
-      };
+    'id': id,
+    'workerCode': workerCode,
+    'qrToken': qrToken,
+    'rut': rut,
+    'firstName': firstName,
+    'lastName': lastName,
+    'company': company,
+    'role': role,
+    'project': project,
+    'shift': shift,
+    'supervisor': supervisor,
+    'city': city,
+    'phone': phone,
+    'email': email,
+    'emergencyContact': emergencyContact,
+    'emergencyPhone': emergencyPhone,
+    'hotel': hotel,
+    'room': room,
+    'ticket': ticket,
+    'transfer': transfer,
+    'notes': notes,
+    'status': status.name,
+  };
+static WorkerStatus _statusFromJson(dynamic value) {
+  final status = value?.toString().trim().toLowerCase() ?? '';
 
+  switch (status) {
+    case 'pending':
+    case 'pendiente':
+      return WorkerStatus.pending;
+
+    case 'ticketissued':
+    case 'ticket_issued':
+    case 'pasaje_emitido':
+      return WorkerStatus.ticketIssued;
+
+    case 'traveling':
+    case 'travelling':
+    case 'en_viaje':
+      return WorkerStatus.traveling;
+
+    case 'lodging':
+    case 'alojado':
+    case 'en_alojamiento':
+      return WorkerStatus.lodging;
+
+    case 'transfer':
+    case 'en_traslado':
+      return WorkerStatus.transfer;
+
+    case 'active':
+    case 'atsite':
+    case 'at_site':
+    case 'en_faena':
+      return WorkerStatus.atSite;
+
+    case 'finished':
+    case 'finalizado':
+      return WorkerStatus.finished;
+
+    case 'cancelled':
+    case 'canceled':
+    case 'cancelado':
+      return WorkerStatus.cancelled;
+
+    default:
+      return WorkerStatus.pending;
+  }
+}
   factory Worker.fromJson(Map<String, dynamic> json) => Worker(
-        id: json['id']?.toString() ?? '',
-        workerCode: json['workerCode'] as String? ?? '',
-        qrToken: json['qrToken'] as String? ?? '',
-        rut: json['rut'] as String? ?? '',
-        firstName: json['firstName'] as String? ?? '',
-        lastName: json['lastName'] as String? ?? '',
-        company: json['company'] as String? ?? '',
-        role: json['role'] as String? ?? '',
-        project: json['project'] as String? ?? '',
-        shift: json['shift'] as String? ?? '',
-        supervisor: json['supervisor'] as String? ?? '',
-        city: json['city'] as String? ?? '',
-        phone: json['phone'] as String? ?? '',
-        email: json['email'] as String? ?? '',
-        emergencyContact: json['emergencyContact'] as String? ?? '',
-        emergencyPhone: json['emergencyPhone'] as String? ?? '',
-        hotel: json['hotel'] as String? ?? '',
-        room: json['room'] as String? ?? '',
-        ticket: json['ticket'] as String? ?? '',
-        transfer: json['transfer'] as String? ?? '',
-        notes: json['notes'] as String? ?? '',
-        status: WorkerStatus.values.firstWhere(
-          (value) => value.name == json['status'],
-          orElse: () => WorkerStatus.pending,
-        ),
-      );
+    id: json['externalId']?.toString().trim().isNotEmpty == true
+        ? json['externalId'].toString()
+        : json['id']?.toString() ?? '',
+    workerCode: json['workerCode'] as String? ?? '',
+    qrToken: json['qrToken'] as String? ?? '',
+    rut: json['rut'] as String? ?? '',
+    firstName: json['firstName'] as String? ?? '',
+    lastName: json['lastName'] as String? ?? '',
+    company: json['company'] as String? ?? '',
+    role: json['role'] as String? ?? '',
+    project: json['project'] as String? ?? '',
+    shift: json['shift'] as String? ?? '',
+    supervisor: json['supervisor'] as String? ?? '',
+    city: json['city'] as String? ?? '',
+    phone: json['phone'] as String? ?? '',
+    email: json['email'] as String? ?? '',
+    emergencyContact: json['emergencyContact'] as String? ?? '',
+    emergencyPhone: json['emergencyPhone'] as String? ?? '',
+    hotel: json['hotel'] as String? ?? '',
+    room: json['room'] as String? ?? '',
+    ticket: json['ticket'] as String? ?? '',
+    transfer: json['transfer'] as String? ?? '',
+    notes: json['notes'] as String? ?? '',
+    status: _statusFromJson(json['status']),
+  );
 }

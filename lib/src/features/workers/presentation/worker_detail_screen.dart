@@ -9,6 +9,7 @@ import '../../transfers/domain/transfer.dart';
 import '../domain/worker.dart';
 import 'widgets/worker_status_chip.dart';
 import '../services/logistics_readiness_service.dart';
+import 'worker_credential_screen.dart';
 
 class WorkerDetailScreen extends StatelessWidget {
   final Worker worker;
@@ -92,6 +93,24 @@ class WorkerDetailScreen extends StatelessWidget {
         ),
         title: const Text('Ficha completa del trabajador'),
         actions: [
+          OutlinedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => WorkerCredentialScreen(worker: worker),
+                ),
+              );
+            },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.white,
+              side: const BorderSide(color: Colors.white70),
+              minimumSize: const Size(0, 44),
+            ),
+            icon: const Icon(Icons.badge_outlined),
+            label: const Text('Credencial'),
+          ),
+          const SizedBox(width: 10),
           FilledButton.icon(
             onPressed: onEdit,
             icon: const Icon(Icons.edit),
