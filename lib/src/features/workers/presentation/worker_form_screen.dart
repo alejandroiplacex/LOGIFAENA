@@ -207,7 +207,7 @@ class _WorkerFormScreenState extends State<WorkerFormScreen> {
                         field(ticket, 'Pasaje'),
                         field(transfer, 'Traslado'),
                         DropdownButtonFormField<WorkerStatus>(
-                          value: status,
+                          initialValue: status,
                           decoration: const InputDecoration(
                             labelText: 'Estado',
                           ),

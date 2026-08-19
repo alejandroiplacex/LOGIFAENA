@@ -97,7 +97,7 @@ class WorkerCard extends StatelessWidget {
                     child: StatefulBuilder(
                       builder: (context, setState) {
                         return DropdownButtonFormField<WorkerStatus>(
-                          value: worker.status,
+                          initialValue: worker.status,
                           decoration: const InputDecoration(
                             labelText: 'Cambiar estado',
                             isDense: true,
@@ -160,9 +160,9 @@ class _ReadinessIndicator extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
           decoration: BoxDecoration(
-            color: color.withOpacity(.09),
+            color: color.withValues(alpha: .09),
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: color.withOpacity(.35)),
+            border: Border.all(color: color.withValues(alpha: .35)),
           ),
           child: Text(
             '${readiness.percentage}% · ${readiness.label}',

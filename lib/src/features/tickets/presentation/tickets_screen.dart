@@ -352,7 +352,7 @@ class _TicketsScreenState extends State<TicketsScreen> {
                                           bottom: 90,
                                         ),
                                         itemCount: filtered.length,
-                                        separatorBuilder: (_, __) => SizedBox(
+                                        separatorBuilder: (_, _) => SizedBox(
                                           height: _tableView ? 1 : 12,
                                         ),
                                         itemBuilder: (context, index) {
@@ -487,7 +487,7 @@ class _TicketsScreenState extends State<TicketsScreen> {
             child: Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: color.withOpacity(0.12),
+                  backgroundColor: color.withValues(alpha: 0.12),
                   child: Icon(icon, color: color),
                 ),
                 const SizedBox(width: 13),
@@ -528,7 +528,7 @@ class _TicketsScreenState extends State<TicketsScreen> {
         );
 
         final status = DropdownButtonFormField<TicketStatus?>(
-          value: selectedStatus,
+          initialValue: selectedStatus,
           isExpanded: true,
           decoration: const InputDecoration(
             labelText: 'Estado',
@@ -553,7 +553,7 @@ class _TicketsScreenState extends State<TicketsScreen> {
         );
 
         final type = DropdownButtonFormField<TicketType?>(
-          value: selectedType,
+          initialValue: selectedType,
           isExpanded: true,
           decoration: const InputDecoration(
             labelText: 'Tipo',
@@ -714,7 +714,7 @@ class _TicketsScreenState extends State<TicketsScreen> {
     final worker = _worker(ticket.workerId);
     final primary = Theme.of(context).colorScheme.primary;
     final background = selected
-        ? primary.withOpacity(0.10)
+        ? primary.withValues(alpha: 0.10)
         : Theme.of(context).colorScheme.surface;
 
     Widget text(String value, {int flex = 1, double? width}) {
@@ -738,7 +738,7 @@ class _TicketsScreenState extends State<TicketsScreen> {
       decoration: BoxDecoration(
         color: background,
         border: Border(
-          bottom: BorderSide(color: Colors.grey.withOpacity(0.18)),
+          bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.18)),
           left: BorderSide(
             color: selected ? primary : Colors.transparent,
             width: 3,

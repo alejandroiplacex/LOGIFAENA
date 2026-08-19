@@ -134,8 +134,9 @@ class _WorkersScreenState extends State<WorkersScreen> {
       ),
     );
 
-    if (!mounted || payload == null || payload.operation.workers.isEmpty)
+    if (!mounted || payload == null || payload.operation.workers.isEmpty) {
       return;
+    }
 
     final result = repository.importAll(
       payload.workers,
@@ -251,7 +252,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
                 )
               : ListView.separated(
                   itemCount: items.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (_, _) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final item = items[index];
                     final date = DateTime.tryParse(item.importedAt);
@@ -526,7 +527,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
                                           bottom: 90,
                                         ),
                                         itemCount: filtered.length,
-                                        separatorBuilder: (_, __) => SizedBox(
+                                        separatorBuilder: (_, _) => SizedBox(
                                           height: _tableView ? 1 : 12,
                                         ),
                                         itemBuilder: (context, index) {
@@ -641,7 +642,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
   Widget _workerTableRow(Worker worker, {required bool selected}) {
     final primary = Theme.of(context).colorScheme.primary;
     final background = selected
-        ? primary.withOpacity(0.10)
+        ? primary.withValues(alpha: 0.10)
         : Theme.of(context).colorScheme.surface;
 
     Widget value(String text, {int flex = 1, double? width}) {
@@ -681,7 +682,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                 decoration: BoxDecoration(
-                  color: _statusColor(worker.status).withOpacity(0.12),
+                  color: _statusColor(worker.status).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
@@ -838,7 +839,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
           child: Row(
             children: [
               CircleAvatar(
-                backgroundColor: color.withOpacity(0.12),
+                backgroundColor: color.withValues(alpha: 0.12),
                 child: Icon(icon, color: color),
               ),
               const SizedBox(width: 13),
@@ -910,7 +911,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
         );
 
         final status = DropdownButtonFormField<WorkerStatus?>(
-          value: selectedStatus,
+          initialValue: selectedStatus,
           isExpanded: true,
           decoration: const InputDecoration(
             labelText: 'Estado',
@@ -934,7 +935,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
         );
 
         final project = DropdownButtonFormField<String>(
-          value: selectedProject,
+          initialValue: selectedProject,
           isExpanded: true,
           decoration: const InputDecoration(
             labelText: 'Proyecto',

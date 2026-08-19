@@ -221,7 +221,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               QuickActions(onNavigate: widget.onNavigate),
                             ],
                           );
-                          if (!desktop)
+                          if (!desktop) {
                             return Column(
                               children: [
                                 left,
@@ -229,6 +229,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 right,
                               ],
                             );
+                          }
                           return Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

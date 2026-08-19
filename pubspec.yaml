@@ -45,6 +45,7 @@ dependencies:
   sqflite_common_ffi: ^2.3.7+1
   http: ^1.6.0
   qr_flutter: ^4.1.0
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:

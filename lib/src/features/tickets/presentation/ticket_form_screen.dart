@@ -158,7 +158,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<String>(
-                        value: workerId.isEmpty ? null : workerId,
+                        initialValue: workerId.isEmpty ? null : workerId,
                         isExpanded: true,
                         decoration: const InputDecoration(
                           labelText: 'Trabajador',
@@ -195,7 +195,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
                       const SizedBox(height: 16),
                       _formGrid([
                         DropdownButtonFormField<TicketType>(
-                          value: type,
+                          initialValue: type,
                           decoration: const InputDecoration(
                             labelText: 'Tipo de pasaje',
                           ),
@@ -234,7 +234,7 @@ class _TicketFormScreenState extends State<TicketFormScreen> {
                         field(baggage, 'Equipaje'),
                         field(seat, 'Asiento'),
                         DropdownButtonFormField<TicketStatus>(
-                          value: status,
+                          initialValue: status,
                           decoration: const InputDecoration(
                             labelText: 'Estado',
                           ),

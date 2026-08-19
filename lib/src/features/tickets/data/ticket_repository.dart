@@ -22,40 +22,7 @@ class InMemoryTicketRepository implements TicketRepository {
 
   static final InMemoryTicketRepository instance = InMemoryTicketRepository._();
 
-  final List<Ticket> _tickets = [
-    Ticket(
-      id: 't1',
-      workerId: '1',
-      type: TicketType.flight,
-      company: 'LATAM',
-      serviceNumber: 'LA345',
-      bookingCode: 'HG45JK',
-      origin: 'Santiago',
-      destination: 'Calama',
-      travelDate: DateTime(2026, 7, 20),
-      travelTime: '08:15',
-      baggage: '1 maleta de 23 kg',
-      seat: '12A',
-      notes: 'Pasaje confirmado.',
-      status: TicketStatus.issued,
-    ),
-    Ticket(
-      id: 't2',
-      workerId: '2',
-      type: TicketType.flight,
-      company: 'SKY',
-      serviceNumber: 'H201',
-      bookingCode: 'SK1234',
-      origin: 'Santiago',
-      destination: 'Antofagasta',
-      travelDate: DateTime(2026, 7, 22),
-      travelTime: '10:40',
-      baggage: 'Equipaje de cabina',
-      seat: '',
-      notes: 'Pendiente confirmar asiento.',
-      status: TicketStatus.requested,
-    ),
-  ];
+  final List<Ticket> _tickets = <Ticket>[];
 
   void _persist() {
     DatabaseService.instance.writeList(

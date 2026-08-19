@@ -757,8 +757,9 @@ class ExcelImportService {
           ),
         ),
       );
-      if (!transfer.workerIds.contains(worker.id))
+      if (!transfer.workerIds.contains(worker.id)) {
         transfer.workerIds.add(worker.id);
+      }
       worker.transfer = transfer.code;
     }
     return byKey.values.toList();
@@ -959,8 +960,9 @@ class ExcelImportService {
 
   static TicketStatus _parseTicketStatus(String value) {
     final normalized = _normalize(value);
-    if (normalized.contains('emit') || normalized.contains('utiliz'))
+    if (normalized.contains('emit') || normalized.contains('utiliz')) {
       return TicketStatus.issued;
+    }
     if (normalized.contains('reprogram')) return TicketStatus.rescheduled;
     if (normalized.contains('cancel')) return TicketStatus.cancelled;
     return TicketStatus.requested;
@@ -968,33 +970,40 @@ class ExcelImportService {
 
   static HotelStatus _parseHotelStatus(String value) {
     final normalized = _normalize(value);
-    if (normalized.contains('check-in') || normalized.contains('check in'))
+    if (normalized.contains('check-in') || normalized.contains('check in')) {
       return HotelStatus.checkedIn;
-    if (normalized.contains('check-out') || normalized.contains('check out'))
+    }
+    if (normalized.contains('check-out') || normalized.contains('check out')) {
       return HotelStatus.checkedOut;
-    if (normalized.contains('confirm') || normalized.contains('reserv'))
+    }
+    if (normalized.contains('confirm') || normalized.contains('reserv')) {
       return HotelStatus.confirmed;
+    }
     if (normalized.contains('cancel')) return HotelStatus.cancelled;
     return HotelStatus.requested;
   }
 
   static TransferStatus _parseTransferStatus(String value) {
     final normalized = _normalize(value);
-    if (normalized.contains('curso') || normalized.contains('ruta'))
+    if (normalized.contains('curso') || normalized.contains('ruta')) {
       return TransferStatus.onRoute;
+    }
     if (normalized.contains('embar')) return TransferStatus.boarding;
-    if (normalized.contains('complet') || normalized.contains('final'))
+    if (normalized.contains('complet') || normalized.contains('final')) {
       return TransferStatus.completed;
+    }
     if (normalized.contains('cancel')) return TransferStatus.cancelled;
     return TransferStatus.scheduled;
   }
 
   static TransferVehicleType _parseTransferVehicleType(String value) {
     final normalized = _normalize(value);
-    if (normalized.contains('bus') || normalized.contains('minibus'))
+    if (normalized.contains('bus') || normalized.contains('minibus')) {
       return TransferVehicleType.bus;
-    if (normalized.contains('pickup') || normalized.contains('camioneta'))
+    }
+    if (normalized.contains('pickup') || normalized.contains('camioneta')) {
       return TransferVehicleType.pickup;
+    }
     if (normalized.contains('taxi')) return TransferVehicleType.taxi;
     return TransferVehicleType.van;
   }
@@ -1263,8 +1272,9 @@ class ExcelImportService {
 
       String readText(String path) {
         final file = files[_normalizeZipPath(path)];
-        if (file == null)
+        if (file == null) {
           throw FormatException('Falta el componente interno $path.');
+        }
         final content = file.content;
         final data = content;
         return utf8.decode(data, allowMalformed: true);

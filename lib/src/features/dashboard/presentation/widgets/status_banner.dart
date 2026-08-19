@@ -39,10 +39,10 @@ class StatusBanner extends StatelessWidget {
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color.withOpacity(.12), Colors.white],
+          colors: [color.withValues(alpha: .12), Colors.white],
         ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withOpacity(.22)),
+        border: Border.all(color: color.withValues(alpha: .22)),
       ),
       child: Row(
         children: [

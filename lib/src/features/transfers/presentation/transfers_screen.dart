@@ -236,7 +236,7 @@ class _TransfersScreenState extends State<TransfersScreen> {
                         )
                       : ListView.separated(
                           itemCount: filtered.length,
-                          separatorBuilder: (_, __) =>
+                          separatorBuilder: (_, _) =>
                               const SizedBox(height: 12),
                           itemBuilder: (context, index) {
                             final transfer = filtered[index];
@@ -424,7 +424,7 @@ class _TransfersScreenState extends State<TransfersScreen> {
           child: Row(
             children: [
               CircleAvatar(
-                backgroundColor: color.withOpacity(0.12),
+                backgroundColor: color.withValues(alpha: 0.12),
                 child: Icon(icon, color: color),
               ),
               const SizedBox(width: 13),

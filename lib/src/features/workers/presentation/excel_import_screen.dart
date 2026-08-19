@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -358,7 +356,7 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
                                       : ListView.separated(
                                           itemCount:
                                               current.operation!.workers.length,
-                                          separatorBuilder: (_, __) =>
+                                          separatorBuilder: (_, _) =>
                                               const Divider(height: 1),
                                           itemBuilder: (context, index) {
                                             final worker = current

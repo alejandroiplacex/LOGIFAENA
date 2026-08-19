@@ -165,9 +165,9 @@ class _StatusTile extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: item.color.withOpacity(.055),
+            color: item.color.withValues(alpha: .055),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: item.color.withOpacity(.18)),
+            border: Border.all(color: item.color.withValues(alpha: .18)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,7 +178,7 @@ class _StatusTile extends StatelessWidget {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: item.color.withOpacity(.14),
+                      color: item.color.withValues(alpha: .14),
                       borderRadius: BorderRadius.circular(9),
                     ),
                     child: Icon(item.icon, color: item.color, size: 18),
@@ -212,7 +212,7 @@ class _StatusTile extends StatelessWidget {
                   value: ratio.clamp(0.0, 1.0).toDouble(),
                   minHeight: 6,
                   color: item.color,
-                  backgroundColor: item.color.withOpacity(.12),
+                  backgroundColor: item.color.withValues(alpha: .12),
                 ),
               ),
             ],

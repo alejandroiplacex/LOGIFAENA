@@ -23,48 +23,7 @@ class InMemoryTransferRepository implements TransferRepository {
   static final InMemoryTransferRepository instance =
       InMemoryTransferRepository._();
 
-  final List<Transfer> _transfers = [
-    Transfer(
-      id: 'tr1',
-      code: 'TR-001',
-      date: DateTime(2026, 7, 20),
-      departureTime: '16:30',
-      estimatedArrivalTime: '17:15',
-      origin: 'Aeropuerto El Loa',
-      destination: 'Hotel Central',
-      routeDescription: 'Aeropuerto → Hotel',
-      vehicleType: TransferVehicleType.van,
-      vehicleIdentifier: 'Van 03',
-      licensePlate: 'ABCD-12',
-      capacity: 8,
-      driverName: 'Ricardo Muñoz',
-      driverPhone: '+56 9 7777 1000',
-      providerCompany: 'Transportes Norte',
-      workerIds: ['1'],
-      notes: 'Esperar retiro de equipaje.',
-      status: TransferStatus.scheduled,
-    ),
-    Transfer(
-      id: 'tr2',
-      code: 'TR-002',
-      date: DateTime(2026, 7, 21),
-      departureTime: '05:30',
-      estimatedArrivalTime: '07:00',
-      origin: 'Hotel Central',
-      destination: 'Faena Norte',
-      routeDescription: 'Hotel → Faena',
-      vehicleType: TransferVehicleType.bus,
-      vehicleIdentifier: 'Bus 14',
-      licensePlate: 'EFGH-34',
-      capacity: 30,
-      driverName: 'Marcelo Rojas',
-      driverPhone: '+56 9 7777 2000',
-      providerCompany: 'Buses Cordillera',
-      workerIds: ['1', '2'],
-      notes: 'Presentarse 15 minutos antes.',
-      status: TransferStatus.onRoute,
-    ),
-  ];
+  final List<Transfer> _transfers = <Transfer>[];
 
   void _persist() {
     DatabaseService.instance.writeList(

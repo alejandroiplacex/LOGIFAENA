@@ -280,7 +280,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
           child: Row(
             children: [
               CircleAvatar(
-                backgroundColor: color.withOpacity(0.12),
+                backgroundColor: color.withValues(alpha: 0.12),
                 child: Icon(icon, color: color),
               ),
               const SizedBox(width: 13),

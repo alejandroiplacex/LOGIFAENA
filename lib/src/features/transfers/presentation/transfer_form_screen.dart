@@ -329,7 +329,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                           child: ListView.separated(
                             shrinkWrap: true,
                             itemCount: workers.length,
-                            separatorBuilder: (_, __) =>
+                            separatorBuilder: (_, _) =>
                                 const Divider(height: 1),
                             itemBuilder: (context, index) {
                               final worker = workers[index];

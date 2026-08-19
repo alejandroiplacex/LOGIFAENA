@@ -151,7 +151,7 @@ class _SummaryBadge extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: color.withOpacity(.10),
+              color: color.withValues(alpha: .10),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color),
@@ -256,7 +256,7 @@ class _AlertCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: color.withOpacity(.10),
+              color: color.withValues(alpha: .10),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(Icons.warning_rounded, color: color),
@@ -319,7 +319,7 @@ class _Tag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(.10),
+        color: color.withValues(alpha: .10),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(

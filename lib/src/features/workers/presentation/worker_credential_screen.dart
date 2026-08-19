@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../domain/worker.dart';
 import 'widgets/worker_credential_card.dart';
 
-
 class WorkerCredentialScreen extends StatelessWidget {
   final Worker worker;
 

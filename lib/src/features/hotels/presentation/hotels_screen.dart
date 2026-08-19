@@ -145,7 +145,7 @@ class _HotelsScreenState extends State<HotelsScreen> {
                         )
                       : ListView.separated(
                           itemCount: list.length,
-                          separatorBuilder: (_, __) =>
+                          separatorBuilder: (_, _) =>
                               const SizedBox(height: 12),
                           itemBuilder: (context, index) {
                             final a = list[index];
@@ -199,8 +199,9 @@ class _HotelsScreenState extends State<HotelsScreen> {
                                     PopupMenuButton<String>(
                                       onSelected: (value) {
                                         if (value == 'edit') editAssignment(a);
-                                        if (value == 'delete')
+                                        if (value == 'delete') {
                                           deleteAssignment(a);
+                                        }
                                       },
                                       itemBuilder: (context) => const [
                                         PopupMenuItem(
@@ -298,7 +299,7 @@ class _HotelsScreenState extends State<HotelsScreen> {
         child: Row(
           children: [
             CircleAvatar(
-              backgroundColor: color.withOpacity(.12),
+              backgroundColor: color.withValues(alpha: .12),
               child: Icon(icon, color: color),
             ),
             const SizedBox(width: 13),
@@ -357,7 +358,7 @@ class _HotelsScreenState extends State<HotelsScreen> {
         icon: const Icon(Icons.add),
         label: const Text('Nuevo alojamiento'),
       );
-      if (compact)
+      if (compact) {
         return Column(
           children: [
             search,
@@ -367,6 +368,7 @@ class _HotelsScreenState extends State<HotelsScreen> {
             SizedBox(width: double.infinity, child: add),
           ],
         );
+      }
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

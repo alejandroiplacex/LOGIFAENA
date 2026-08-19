@@ -272,8 +272,8 @@ class WorkerDetailScreen extends StatelessWidget {
       child: Chip(
         avatar: Icon(Icons.route_rounded, size: 18, color: color),
         label: Text('${readiness.percentage}% · ${readiness.label}'),
-        side: BorderSide(color: color.withOpacity(.35)),
-        backgroundColor: color.withOpacity(.08),
+        side: BorderSide(color: color.withValues(alpha: .35)),
+        backgroundColor: color.withValues(alpha: .08),
         labelStyle: TextStyle(color: color, fontWeight: FontWeight.w800),
       ),
     );

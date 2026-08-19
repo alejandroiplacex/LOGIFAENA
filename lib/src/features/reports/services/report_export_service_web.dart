@@ -1,6 +1,7 @@
-// ignore_for_file: avoid_web_libraries_in_flutter
 import 'dart:convert';
-import 'dart:html' as html;
+import 'dart:js_interop';
+
+import 'package:web/web.dart' as web;
 
 class ReportExportService {
   static bool get supportsDownloads => true;
@@ -21,12 +22,19 @@ class ReportExportService {
     }
 
     final bytes = utf8.encode('\uFEFF${buffer.toString()}');
-    final blob = html.Blob([bytes], 'text/csv;charset=utf-8');
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    html.AnchorElement(href: url)
-      ..setAttribute('download', '$fileName.csv')
-      ..click();
-    html.Url.revokeObjectUrl(url);
+    final blob = web.Blob(
+      [bytes.toJS].toJS,
+      web.BlobPropertyBag(type: 'text/csv;charset=utf-8'),
+    );
+
+    final url = web.URL.createObjectURL(blob);
+
+    final anchor = web.HTMLAnchorElement()
+      ..href = url
+      ..download = '$fileName.csv';
+
+    anchor.click();
+    web.URL.revokeObjectURL(url);
   }
 
   static void printPdf({
@@ -77,13 +85,17 @@ class ReportExportService {
     // `window.open()` returns WindowBase in current Dart SDKs, which does not
     // expose `document`. Opening a temporary HTML Blob avoids that incompatibility
     // and works reliably in Flutter Web.
-    final blob = html.Blob([reportHtml], 'text/html;charset=utf-8');
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    html.window.open(url, '_blank');
+    final blob = web.Blob(
+      [reportHtml.toJS].toJS,
+      web.BlobPropertyBag(type: 'text/html;charset=utf-8'),
+    );
 
-    // Give the new tab enough time to load the Blob before releasing the URL.
+    final url = web.URL.createObjectURL(blob);
+
+    web.window.open(url, '_blank');
+
     Future<void>.delayed(const Duration(seconds: 10), () {
-      html.Url.revokeObjectUrl(url);
+      web.URL.revokeObjectURL(url);
     });
   }
 

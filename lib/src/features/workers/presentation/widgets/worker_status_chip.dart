@@ -33,8 +33,8 @@ class WorkerStatusChip extends StatelessWidget {
     return Chip(
       avatar: CircleAvatar(radius: 5, backgroundColor: color),
       label: Text(status.label),
-      backgroundColor: color.withOpacity(0.10),
-      side: BorderSide(color: color.withOpacity(0.35)),
+      backgroundColor: color.withValues(alpha: 0.10),
+      side: BorderSide(color: color.withValues(alpha: 0.35)),
       visualDensity: VisualDensity.compact,
     );
   }

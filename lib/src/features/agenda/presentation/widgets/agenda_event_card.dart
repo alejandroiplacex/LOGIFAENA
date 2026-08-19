@@ -64,7 +64,7 @@ class AgendaEventCard extends StatelessWidget {
               width: 70,
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: typeColor.withOpacity(0.10),
+                color: typeColor.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Column(
@@ -111,8 +111,8 @@ class AgendaEventCard extends StatelessWidget {
             Chip(
               avatar: CircleAvatar(radius: 5, backgroundColor: statusColor),
               label: Text(event.status.label),
-              backgroundColor: statusColor.withOpacity(0.10),
-              side: BorderSide(color: statusColor.withOpacity(0.35)),
+              backgroundColor: statusColor.withValues(alpha: 0.10),
+              side: BorderSide(color: statusColor.withValues(alpha: 0.35)),
               visualDensity: VisualDensity.compact,
             ),
           ],

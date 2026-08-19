@@ -11,11 +11,10 @@ class HttpWorkerChangesService {
   HttpWorkerChangesService({
     SyncTransportConfig? config,
     http.Client? client,
-    AccessTokenProvider? accessTokenProvider,
+    this._accessTokenProvider,
   }) : _config = config ?? SyncTransportConfig.fromEnvironment(),
        _client = client ?? http.Client(),
-       _ownsClient = client == null,
-       _accessTokenProvider = accessTokenProvider;
+       _ownsClient = client == null;
 
   final SyncTransportConfig _config;
   final http.Client _client;

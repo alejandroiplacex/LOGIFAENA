@@ -52,7 +52,7 @@ class _EventRow extends StatelessWidget {
             width: 34,
             height: 34,
             decoration: BoxDecoration(
-              color: data.$2.withOpacity(.12),
+              color: data.$2.withValues(alpha: .12),
               shape: BoxShape.circle,
             ),
             child: Icon(data.$1, color: data.$2, size: 19),
@@ -82,7 +82,7 @@ class _EventRow extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
             decoration: BoxDecoration(
-              color: data.$2.withOpacity(.10),
+              color: data.$2.withValues(alpha: .10),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -142,7 +142,7 @@ class _Panel extends StatelessWidget {
             const SizedBox(width: 9),
             Text(title, style: const TextStyle(fontWeight: FontWeight.w900)),
             const Spacer(),
-            if (action != null) action!,
+            ?action,
           ],
         ),
         child,

@@ -119,52 +119,53 @@ class Worker {
     'notes': notes,
     'status': status.name,
   };
-static WorkerStatus _statusFromJson(dynamic value) {
-  final status = value?.toString().trim().toLowerCase() ?? '';
+  static WorkerStatus _statusFromJson(dynamic value) {
+    final status = value?.toString().trim().toLowerCase() ?? '';
 
-  switch (status) {
-    case 'pending':
-    case 'pendiente':
-      return WorkerStatus.pending;
+    switch (status) {
+      case 'pending':
+      case 'pendiente':
+        return WorkerStatus.pending;
 
-    case 'ticketissued':
-    case 'ticket_issued':
-    case 'pasaje_emitido':
-      return WorkerStatus.ticketIssued;
+      case 'ticketissued':
+      case 'ticket_issued':
+      case 'pasaje_emitido':
+        return WorkerStatus.ticketIssued;
 
-    case 'traveling':
-    case 'travelling':
-    case 'en_viaje':
-      return WorkerStatus.traveling;
+      case 'traveling':
+      case 'travelling':
+      case 'en_viaje':
+        return WorkerStatus.traveling;
 
-    case 'lodging':
-    case 'alojado':
-    case 'en_alojamiento':
-      return WorkerStatus.lodging;
+      case 'lodging':
+      case 'alojado':
+      case 'en_alojamiento':
+        return WorkerStatus.lodging;
 
-    case 'transfer':
-    case 'en_traslado':
-      return WorkerStatus.transfer;
+      case 'transfer':
+      case 'en_traslado':
+        return WorkerStatus.transfer;
 
-    case 'active':
-    case 'atsite':
-    case 'at_site':
-    case 'en_faena':
-      return WorkerStatus.atSite;
+      case 'active':
+      case 'atsite':
+      case 'at_site':
+      case 'en_faena':
+        return WorkerStatus.atSite;
 
-    case 'finished':
-    case 'finalizado':
-      return WorkerStatus.finished;
+      case 'finished':
+      case 'finalizado':
+        return WorkerStatus.finished;
 
-    case 'cancelled':
-    case 'canceled':
-    case 'cancelado':
-      return WorkerStatus.cancelled;
+      case 'cancelled':
+      case 'canceled':
+      case 'cancelado':
+        return WorkerStatus.cancelled;
 
-    default:
-      return WorkerStatus.pending;
+      default:
+        return WorkerStatus.pending;
+    }
   }
-}
+
   factory Worker.fromJson(Map<String, dynamic> json) => Worker(
     id: json['externalId']?.toString().trim().isNotEmpty == true
         ? json['externalId'].toString()

@@ -355,7 +355,7 @@ class _SyncCenterScreenState extends State<SyncCenterScreen>
               : ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: operations.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final operation = operations[index];
                     final id = operation.id;
@@ -426,7 +426,7 @@ class _SyncCenterScreenState extends State<SyncCenterScreen>
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _auditEntries.length,
-      separatorBuilder: (_, __) => const Divider(),
+      separatorBuilder: (_, _) => const Divider(),
       itemBuilder: (context, index) {
         final entry = _auditEntries[index];
         return ListTile(

@@ -81,8 +81,9 @@ class RecentActivityPanel extends StatelessWidget {
     for (final event in events) {
       if (activities.any(
         (item) => item.title == event.title && item.dateTime == event.dateTime,
-      ))
+      )) {
         continue;
+      }
       activities.add(
         _Activity(
           dateTime: event.dateTime,
@@ -200,7 +201,7 @@ class _ActivityTile extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: activity.color.withOpacity(.11),
+                  color: activity.color.withValues(alpha: .11),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(activity.icon, color: activity.color, size: 21),
@@ -255,7 +256,7 @@ class _ActivityTile extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                 decoration: BoxDecoration(
-                  color: activity.color.withOpacity(.09),
+                  color: activity.color.withValues(alpha: .09),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(

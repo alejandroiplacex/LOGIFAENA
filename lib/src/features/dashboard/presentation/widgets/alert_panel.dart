@@ -149,9 +149,9 @@ class _SummaryChip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
     decoration: BoxDecoration(
-      color: color.withOpacity(.07),
+      color: color.withValues(alpha: .07),
       borderRadius: BorderRadius.circular(11),
-      border: Border.all(color: color.withOpacity(.16)),
+      border: Border.all(color: color.withValues(alpha: .16)),
     ),
     child: Column(
       children: [
@@ -247,7 +247,7 @@ class _AlertTile extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: color.withOpacity(.1),
+              color: color.withValues(alpha: .1),
               borderRadius: BorderRadius.circular(11),
             ),
             child: Icon(icon, color: color, size: 21),

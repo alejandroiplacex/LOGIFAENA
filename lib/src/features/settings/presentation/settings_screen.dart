@@ -307,7 +307,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                           ),
                           DropdownButtonFormField<int>(
-                            value: settings.syncIntervalMinutes,
+                            initialValue: settings.syncIntervalMinutes,
                             decoration: const InputDecoration(
                               labelText: 'Intervalo de sincronización',
                             ),
@@ -320,12 +320,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 )
                                 .toList(),
                             onChanged: (value) {
-                              if (value != null)
+                              if (value != null) {
                                 setState(
                                   () => settings = settings.copyWith(
                                     syncIntervalMinutes: value,
                                   ),
                                 );
+                              }
                             },
                           ),
                           const SizedBox(height: 12),
