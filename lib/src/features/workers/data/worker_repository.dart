@@ -24,6 +24,8 @@ abstract class WorkerRepository {
 
   void delete(String id);
 
+  void clear();
+
   ({int created, int updated, int deleted}) applyServerChanges(
     List<Worker> workers, {
     Set<String> deletedIds = const <String>{},
@@ -333,6 +335,12 @@ class InMemoryWorkerRepository implements WorkerRepository {
         'fullName': deletedWorker.fullName,
       },
     );
+  }
+
+  @override
+  void clear() {
+    _workers.clear();
+    _persist();
   }
 
   @override

@@ -3,6 +3,10 @@ import 'package:flutter/services.dart';
 
 import '../../../core/database/database_service.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../hotels/data/hotel_repository.dart';
+import '../../tickets/data/ticket_repository.dart';
+import '../../transfers/data/transfer_repository.dart';
+import '../../workers/data/worker_repository.dart';
 import '../data/settings_repository.dart';
 import '../domain/app_settings.dart';
 import 'widgets/sync_queue_status.dart';
@@ -111,6 +115,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
       roleController.text = defaults.coordinatorRole;
       apiController.text = defaults.apiBaseUrl;
     });
+  }
+
+  Future<void> clearOperationalData() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Limpiar datos operacionales'),
+        content: const Text(
+          'Esta acción eliminará los trabajadores, pasajes, alojamientos '
+          'y traslados cargados actualmente en LogiFaena.\n\n'
+          'La configuración empresarial y la sesión actual se conservarán.\n\n'
+          '¿Deseas continuar?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(context, true),
+            icon: const Icon(Icons.delete_forever),
+            label: const Text('Sí, limpiar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    InMemoryTicketRepository.instance.replaceAll([]);
+    InMemoryHotelRepository.instance.replaceAll([]);
+    InMemoryTransferRepository.instance.replaceAll([]);
+    InMemoryWorkerRepository.instance.clear();
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Datos operacionales eliminados correctamente.'),
+      ),
+    );
+
+    setState(() {});
   }
 
   KeyEventResult _handleScrollKeys(FocusNode node, KeyEvent event) {
@@ -337,10 +384,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             'LogiFaena Enterprise 1.3.1+1301 · Sprint 15.1',
                           ),
                         ),
-                        TextButton.icon(
-                          onPressed: restoreDefaults,
-                          icon: const Icon(Icons.restore),
-                          label: const Text('Restaurar valores'),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextButton.icon(
+                              onPressed: clearOperationalData,
+                              icon: const Icon(
+                                Icons.delete_forever,
+                                color: Colors.red,
+                              ),
+                              label: const Text(
+                                'Limpiar operación',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            TextButton.icon(
+                              onPressed: restoreDefaults,
+                              icon: const Icon(Icons.restore),
+                              label: const Text('Restaurar valores'),
+                            ),
+                          ],
                         ),
                       ],
                     ),
