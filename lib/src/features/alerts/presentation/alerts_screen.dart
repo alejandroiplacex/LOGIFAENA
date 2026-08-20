@@ -87,6 +87,8 @@ class _AlertsScreenState extends State<AlertsScreen> {
 
   int _moduleIndex(AlertCategory category) {
     switch (category) {
+      case AlertCategory.presentation:
+        return 1;
       case AlertCategory.ticket:
         return 3;
       case AlertCategory.hotel:
@@ -196,6 +198,13 @@ class _FilterBar extends StatelessWidget {
           selected: selected == null,
           onSelected: (_) => onSelected(null),
         ),
+
+        ChoiceChip(
+          label: const Text('Presentación'),
+          selected: selected == AlertCategory.presentation,
+          onSelected: (_) => onSelected(AlertCategory.presentation),
+        ),
+
         ChoiceChip(
           label: const Text('Pasajes'),
           selected: selected == AlertCategory.ticket,
@@ -230,6 +239,7 @@ class _AlertCard extends StatelessWidget {
         ? const Color(0xFFD97706)
         : const Color(0xFF2367F2);
     final categoryLabel = switch (alert.category) {
+      AlertCategory.presentation => 'Presentación',
       AlertCategory.ticket => 'Pasaje',
       AlertCategory.hotel => 'Hotel',
       AlertCategory.transfer => 'Traslado',

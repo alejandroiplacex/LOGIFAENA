@@ -10,8 +10,9 @@ import '../domain/worker.dart';
 import 'widgets/worker_status_chip.dart';
 import '../services/logistics_readiness_service.dart';
 import 'worker_credential_screen.dart';
+import '../data/worker_repository.dart';
 
-class WorkerDetailScreen extends StatelessWidget {
+class WorkerDetailScreen extends StatefulWidget {
   final Worker worker;
   final VoidCallback onEdit;
 
@@ -20,6 +21,14 @@ class WorkerDetailScreen extends StatelessWidget {
     required this.worker,
     required this.onEdit,
   });
+
+  @override
+  State<WorkerDetailScreen> createState() => _WorkerDetailScreenState();
+}
+
+class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
+  Worker get worker => widget.worker;
+  VoidCallback get onEdit => widget.onEdit;
 
   Ticket? get ticket =>
       InMemoryTicketRepository.instance.findByWorkerId(worker.id);
@@ -204,6 +213,19 @@ class WorkerDetailScreen extends StatelessWidget {
     );
   }
 
+  void _setPresentationStatus(PresentationStatus status) {
+    setState(() {
+      worker.presentationStatus = status;
+      worker.presentationAt = DateTime.now();
+    });
+
+    InMemoryWorkerRepository.instance.update(worker);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Presentación actualizada: ${status.label}')),
+    );
+  }
+
   Widget _presentationControl() {
     return _section(
       title: 'Control de presentación',
@@ -216,9 +238,9 @@ class WorkerDetailScreen extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           children: [
-            const Chip(
-              avatar: Icon(Icons.schedule, size: 18),
-              label: Text('Pendiente de presentación'),
+            Chip(
+              avatar: const Icon(Icons.how_to_reg_outlined, size: 18),
+              label: Text(worker.presentationStatus.label),
             ),
             const Spacer(),
             Wrap(
@@ -226,17 +248,20 @@ class WorkerDetailScreen extends StatelessWidget {
               runSpacing: 8,
               children: [
                 FilledButton.icon(
-                  onPressed: () {},
+                  onPressed: () =>
+                      _setPresentationStatus(PresentationStatus.presented),
                   icon: const Icon(Icons.check_circle_outline),
                   label: const Text('Presentado'),
                 ),
                 OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () =>
+                      _setPresentationStatus(PresentationStatus.late),
                   icon: const Icon(Icons.access_time),
                   label: const Text('Presentación tardía'),
                 ),
                 OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () =>
+                      _setPresentationStatus(PresentationStatus.absent),
                   icon: const Icon(Icons.person_off_outlined),
                   label: const Text('No se presentó'),
                 ),
@@ -500,7 +525,30 @@ class WorkerDetailScreen extends StatelessWidget {
         '${worker.fullName} fue incorporado a ${_value(worker.project)}.',
       ),
     ];
+    if (worker.presentationStatus != PresentationStatus.pending) {
+      final presentationAt = worker.presentationAt;
 
+      final presentationTime = presentationAt == null
+          ? 'Hora no registrada'
+          : '${_date(presentationAt)} '
+                '${presentationAt.hour.toString().padLeft(2, '0')}:'
+                '${presentationAt.minute.toString().padLeft(2, '0')}';
+
+      final icon = switch (worker.presentationStatus) {
+        PresentationStatus.presented => Icons.check_circle_outline,
+        PresentationStatus.late => Icons.access_time,
+        PresentationStatus.absent => Icons.person_off_outlined,
+        PresentationStatus.pending => Icons.schedule,
+      };
+
+      entries.add(
+        _historyEntry(
+          icon,
+          worker.presentationStatus.label,
+          'Control de presentación · $presentationTime',
+        ),
+      );
+    }
     if (currentTicket != null) {
       entries.add(
         _historyEntry(

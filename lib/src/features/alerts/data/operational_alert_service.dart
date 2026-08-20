@@ -2,6 +2,7 @@ import '../../hotels/data/hotel_repository.dart';
 import '../../tickets/data/ticket_repository.dart';
 import '../../transfers/data/transfer_repository.dart';
 import '../../workers/data/worker_repository.dart';
+import '../../workers/domain/worker.dart';
 import '../domain/operational_alert.dart';
 
 class OperationalAlertService {
@@ -14,6 +15,46 @@ class OperationalAlertService {
     final alerts = <OperationalAlert>[];
 
     for (final worker in workers) {
+      if (worker.presentationStatus == PresentationStatus.absent) {
+        final time = worker.presentationAt;
+        final timeText = time == null
+            ? 'Hora no registrada'
+            : '${time.hour.toString().padLeft(2, '0')}:'
+                  '${time.minute.toString().padLeft(2, '0')}';
+
+        alerts.add(
+          OperationalAlert(
+            id: '${worker.id}-presentation-absent',
+            workerId: worker.id,
+            workerName: worker.fullName,
+            title: '${worker.fullName} no se presentó',
+            detail:
+                'Ausencia registrada en control de presentación · $timeText',
+            severity: AlertSeverity.high,
+            category: AlertCategory.presentation,
+          ),
+        );
+      }
+
+      if (worker.presentationStatus == PresentationStatus.late) {
+        final time = worker.presentationAt;
+        final timeText = time == null
+            ? 'Hora no registrada'
+            : '${time.hour.toString().padLeft(2, '0')}:'
+                  '${time.minute.toString().padLeft(2, '0')}';
+
+        alerts.add(
+          OperationalAlert(
+            id: '${worker.id}-presentation-late',
+            workerId: worker.id,
+            workerName: worker.fullName,
+            title: '${worker.fullName} presentó atraso',
+            detail: 'Presentación tardía registrada · $timeText',
+            severity: AlertSeverity.medium,
+            category: AlertCategory.presentation,
+          ),
+        );
+      }
       if (InMemoryTicketRepository.instance.findByWorkerId(worker.id) == null) {
         alerts.add(
           OperationalAlert(

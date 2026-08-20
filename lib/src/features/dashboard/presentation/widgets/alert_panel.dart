@@ -14,6 +14,9 @@ class AlertPanel extends StatelessWidget {
     final medium = alerts
         .where((alert) => alert.severity == AlertSeverity.medium)
         .length;
+    final presentationAlerts = alerts
+        .where((alert) => alert.category == AlertCategory.presentation)
+        .length;
     final ticketAlerts = alerts
         .where((alert) => alert.category == AlertCategory.ticket)
         .length;
@@ -90,6 +93,11 @@ class AlertPanel extends StatelessWidget {
               spacing: 7,
               runSpacing: 7,
               children: [
+                _CategoryChip(
+                  icon: Icons.how_to_reg_outlined,
+                  label: 'Presentación',
+                  value: presentationAlerts,
+                ),
                 _CategoryChip(
                   icon: Icons.airplane_ticket_rounded,
                   label: 'Pasajes',

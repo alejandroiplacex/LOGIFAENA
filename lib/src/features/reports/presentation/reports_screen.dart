@@ -961,6 +961,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   String _alertCategoryLabel(AlertCategory category) {
     switch (category) {
+      case AlertCategory.presentation:
+        return 'Presentación';
       case AlertCategory.ticket:
         return 'Pasaje';
       case AlertCategory.hotel:

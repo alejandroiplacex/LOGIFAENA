@@ -1,6 +1,6 @@
 enum AlertSeverity { high, medium, low }
 
-enum AlertCategory { ticket, hotel, transfer }
+enum AlertCategory { presentation, ticket, hotel, transfer }
 
 class OperationalAlert {
   final String id;
