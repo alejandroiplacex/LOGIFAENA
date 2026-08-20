@@ -31,6 +31,27 @@ extension WorkerStatusLabel on WorkerStatus {
     }
   }
 }
+enum PresentationStatus {
+  pending,
+  presented,
+  late,
+  absent,
+}
+
+extension PresentationStatusLabel on PresentationStatus {
+  String get label {
+    switch (this) {
+      case PresentationStatus.pending:
+        return 'Pendiente de presentación';
+      case PresentationStatus.presented:
+        return 'Presentado';
+      case PresentationStatus.late:
+        return 'Presentación tardía';
+      case PresentationStatus.absent:
+        return 'No se presentó';
+    }
+  }
+}
 
 class Worker {
   final String id;
@@ -56,6 +77,9 @@ class Worker {
   String transfer;
   String notes;
   WorkerStatus status;
+  PresentationStatus presentationStatus;
+DateTime? presentationAt;
+String presentationNote;
 
   Worker({
     required this.id,
@@ -80,6 +104,9 @@ class Worker {
     required this.transfer,
     required this.notes,
     required this.status,
+    this.presentationStatus = PresentationStatus.pending,
+this.presentationAt,
+this.presentationNote = '',
   });
 
   String get fullName => '$firstName $lastName'.trim();
@@ -118,6 +145,10 @@ class Worker {
     'transfer': transfer,
     'notes': notes,
     'status': status.name,
+    'presentationStatus': presentationStatus.name,
+'presentationAt': presentationAt?.toIso8601String(),
+'presentationNote': presentationNote,
+
   };
   static WorkerStatus _statusFromJson(dynamic value) {
     final status = value?.toString().trim().toLowerCase() ?? '';
@@ -165,6 +196,30 @@ class Worker {
         return WorkerStatus.pending;
     }
   }
+static PresentationStatus _presentationStatusFromJson(dynamic value) {
+  final status = value?.toString().trim().toLowerCase() ?? '';
+
+  switch (status) {
+    case 'presented':
+    case 'presentado':
+      return PresentationStatus.presented;
+
+    case 'late':
+    case 'tardio':
+    case 'tardia':
+      return PresentationStatus.late;
+
+    case 'absent':
+    case 'ausente':
+    case 'no_se_presento':
+      return PresentationStatus.absent;
+
+    case 'pending':
+    case 'pendiente':
+    default:
+      return PresentationStatus.pending;
+  }
+}
 
   factory Worker.fromJson(Map<String, dynamic> json) => Worker(
     id: json['externalId']?.toString().trim().isNotEmpty == true
@@ -191,5 +246,8 @@ class Worker {
     transfer: json['transfer'] as String? ?? '',
     notes: json['notes'] as String? ?? '',
     status: _statusFromJson(json['status']),
+    presentationStatus: _presentationStatusFromJson(json['presentationStatus']),
+    presentationAt: DateTime.tryParse(json['presentationAt']?.toString() ?? ''),
+    presentationNote: json['presentationNote'] as String? ?? '',
   );
 }

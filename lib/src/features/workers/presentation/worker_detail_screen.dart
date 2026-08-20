@@ -183,6 +183,10 @@ class WorkerDetailScreen extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 18),
+
+                  _presentationControl(),
+
+                  const SizedBox(height: 18),
                   _logisticsOverview(
                     currentTicket,
                     currentHotel,
@@ -197,6 +201,50 @@ class WorkerDetailScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _presentationControl() {
+    return _section(
+      title: 'Control de presentación',
+      icon: Icons.how_to_reg_outlined,
+      children: [
+        const Text(
+          'Estado de presentación',
+          style: TextStyle(fontSize: 13, color: Colors.black54),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            const Chip(
+              avatar: Icon(Icons.schedule, size: 18),
+              label: Text('Pendiente de presentación'),
+            ),
+            const Spacer(),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilledButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const Text('Presentado'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.access_time),
+                  label: const Text('Presentación tardía'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.person_off_outlined),
+                  label: const Text('No se presentó'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
 
