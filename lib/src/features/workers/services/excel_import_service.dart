@@ -89,6 +89,7 @@ class ExcelImportPayload {
   final String fileName;
   final List<Worker> workers;
   final Operation operation;
+  final OperationImportOverview operationOverview;
   final DuplicateImportPolicy duplicatePolicy;
   final int rowsRead;
   final int invalidCount;
@@ -98,6 +99,7 @@ class ExcelImportPayload {
     required this.fileName,
     required this.workers,
     required this.operation,
+    required this.operationOverview,
     required this.duplicatePolicy,
     required this.rowsRead,
     required this.invalidCount,

@@ -139,6 +139,7 @@ class _ExcelImportScreenState extends State<ExcelImportScreen> {
         fileName: selectedFileName ?? 'Archivo Excel',
         workers: workers,
         operation: operation,
+        operationOverview: current.operationOverview!,
         duplicatePolicy: duplicatePolicy,
         rowsRead: current.rowsRead,
         invalidCount: current.invalidCount,

@@ -131,6 +131,12 @@ class _WorkerFormScreenState extends State<WorkerFormScreen> {
       transfer: transfer.text.trim(),
       notes: notes.text.trim(),
       status: status,
+
+      // Conserva el control de presentación al editar.
+      presentationStatus:
+          widget.worker?.presentationStatus ?? PresentationStatus.pending,
+      presentationAt: widget.worker?.presentationAt,
+      presentationNote: widget.worker?.presentationNote ?? '',
     );
 
     Navigator.pop(context, worker);

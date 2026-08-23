@@ -147,11 +147,28 @@ class _WorkersScreenState extends State<WorkersScreen> {
     operationRepository.save(payload.operation);
     operationRepository.setActive(payload.operation.id);
 
-    // El Excel multihoja representa la fotografía completa de la operación.
-    // Reemplazar elimina registros antiguos, duplicados y relaciones obsoletas.
-    ticketRepository.replaceAll(payload.operation.tickets);
-    hotelRepository.replaceAll(payload.operation.hotels);
-    transferRepository.replaceAll(payload.operation.transfers);
+    bool hasSheet(String name) {
+      final normalized = name.trim().toLowerCase();
+
+      return payload.operationOverview.sheets.any(
+        (sheet) => sheet.found && sheet.name.trim().toLowerCase() == normalized,
+      );
+    }
+
+    // Solo reemplazamos un recurso si la hoja correspondiente
+    // realmente estaba presente en el Excel importado.
+    // Una hoja ausente no debe borrar datos operacionales existentes.
+    if (hasSheet('Pasajes')) {
+      ticketRepository.replaceAll(payload.operation.tickets);
+    }
+
+    if (hasSheet('Hoteles')) {
+      hotelRepository.replaceAll(payload.operation.hotels);
+    }
+
+    if (hasSheet('Traslados')) {
+      transferRepository.replaceAll(payload.operation.transfers);
+    }
 
     importHistoryRepository.add(
       ImportHistory(

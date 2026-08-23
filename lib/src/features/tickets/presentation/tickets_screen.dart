@@ -123,9 +123,13 @@ class _TicketsScreenState extends State<TicketsScreen> {
     ].where((value) => value.trim().isNotEmpty).join(' · ');
 
     if (ticket.status == TicketStatus.issued) {
-      worker.status = WorkerStatus.ticketIssued;
+      if (worker.status == WorkerStatus.pending) {
+        worker.status = WorkerStatus.ticketIssued;
+      }
     } else if (ticket.status == TicketStatus.cancelled) {
-      worker.status = WorkerStatus.pending;
+      if (worker.status == WorkerStatus.ticketIssued) {
+        worker.status = WorkerStatus.pending;
+      }
     }
 
     workerRepository.update(worker);
