@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import '../../agenda/data/agenda_service.dart';
 import '../../../core/widgets/scroll_navigation_buttons.dart';
 import '../../alerts/data/operational_alert_service.dart';
-import '../../agenda/domain/agenda_event.dart';
 import '../../hotels/data/hotel_repository.dart';
 import '../../tickets/data/ticket_repository.dart';
 import '../../transfers/data/transfer_repository.dart';
@@ -97,13 +96,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final displayEvents = todayEvents.isNotEmpty
         ? todayEvents
         : events.take(5).toList();
-    final arrivalsToday = events
-        .where(
-          (event) =>
-              _sameDay(event.date, _now) &&
-              event.type == AgendaEventType.ticket,
-        )
-        .length;
+    final arrivalsToday = transfers
+        .where((transfer) => _sameDay(transfer.date, _now))
+        .fold<int>(0, (total, transfer) => total + transfer.arrivedPassengers);
 
     return ColoredBox(
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -169,7 +164,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 subtitle: 'Hoy',
                                 icon: Icons.flight_land_rounded,
                                 color: const Color(0xFF16A36A),
-                                onTap: () => widget.onNavigate(2),
+                                onTap: () => widget.onNavigate(5),
                               ),
                               KpiCard(
                                 title: 'PASAJES',
@@ -190,7 +185,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               KpiCard(
                                 title: 'TRASLADOS',
                                 value: '${transfers.length}',
-                                subtitle: 'Programados',
+                                subtitle: 'Registradros',
                                 icon: Icons.directions_bus_rounded,
                                 color: const Color(0xFF078AA5),
                                 onTap: () => widget.onNavigate(5),
