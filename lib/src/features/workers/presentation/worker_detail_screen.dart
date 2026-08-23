@@ -577,8 +577,8 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
 
       entries.add(
         _historyEntry(
-          Icons.directions_bus_outlined,
-          'Traslado ${transfer.status.label.toLowerCase()}',
+          Icons.event_available_outlined,
+          'Traslado programado',
           '${_date(transfer.date)} ${transfer.departureTime} · '
               '${transfer.origin} → ${transfer.destination} · '
               '${_value(transfer.vehicleIdentifier)}',
@@ -603,6 +603,26 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
             Icons.check_circle_outline,
             'Llegó a destino',
             '${transfer.code} · Destino: ${transfer.destination}',
+          ),
+        );
+      }
+
+      if (transfer.status == TransferStatus.completed) {
+        entries.add(
+          _historyEntry(
+            Icons.task_alt_outlined,
+            'Traslado finalizado',
+            '${transfer.code} · ${transfer.origin} → ${transfer.destination}',
+          ),
+        );
+      }
+
+      if (transfer.status == TransferStatus.cancelled) {
+        entries.add(
+          _historyEntry(
+            Icons.cancel_outlined,
+            'Traslado cancelado',
+            '${transfer.code} · ${transfer.origin} → ${transfer.destination}',
           ),
         );
       }
