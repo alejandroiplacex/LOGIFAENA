@@ -8,7 +8,9 @@ import 'hotel_form_screen.dart';
 import 'widgets/hotel_status_chip.dart';
 
 class HotelsScreen extends StatefulWidget {
-  const HotelsScreen({super.key});
+  final String? initialWorkerId;
+
+  const HotelsScreen({super.key, this.initialWorkerId});
   @override
   State<HotelsScreen> createState() => _HotelsScreenState();
 }
@@ -18,6 +20,28 @@ class _HotelsScreenState extends State<HotelsScreen> {
   final workerRepository = InMemoryWorkerRepository.instance;
   final searchController = TextEditingController();
   HotelStatus? selectedStatus;
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+
+      final initialWorkerId = widget.initialWorkerId;
+
+      if (initialWorkerId != null && initialWorkerId.trim().isNotEmpty) {
+        final existingAssignment = hotelRepository.findByWorkerId(
+          initialWorkerId,
+        );
+
+        if (existingAssignment != null) {
+          await editAssignment(existingAssignment);
+        } else {
+          await addAssignment(initialWorkerId: initialWorkerId);
+        }
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -67,10 +91,12 @@ class _HotelsScreenState extends State<HotelsScreen> {
     workerRepository.update(w);
   }
 
-  Future<void> addAssignment() async {
+  Future<void> addAssignment({String? initialWorkerId}) async {
     final value = await Navigator.push<HotelAssignment>(
       context,
-      MaterialPageRoute(builder: (_) => const HotelFormScreen()),
+      MaterialPageRoute(
+        builder: (_) => HotelFormScreen(initialWorkerId: initialWorkerId),
+      ),
     );
     if (!mounted || value == null) return;
     hotelRepository.add(value);

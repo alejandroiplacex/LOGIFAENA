@@ -15,6 +15,7 @@ import '../services/excel_import_service.dart';
 import 'worker_detail_screen.dart';
 import 'worker_form_screen.dart';
 import 'widgets/worker_card.dart';
+import 'presentation_control_screen.dart';
 
 class WorkersScreen extends StatefulWidget {
   final WorkerStatus? initialStatus;
@@ -284,6 +285,17 @@ class _WorkersScreenState extends State<WorkersScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> openPresentationControl() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const PresentationControlScreen()),
+    );
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> editWorker(Worker worker) async {
@@ -954,7 +966,11 @@ class _WorkersScreenState extends State<WorkersScreen> {
           icon: const Icon(Icons.upload_file),
           label: const Text('Importar Excel'),
         );
-
+        final presentationControl = FilledButton.tonalIcon(
+          onPressed: openPresentationControl,
+          icon: const Icon(Icons.how_to_reg_outlined),
+          label: const Text('Control de presentación'),
+        );
         final history = OutlinedButton.icon(
           onPressed: showImportHistory,
           icon: const Icon(Icons.history),
@@ -1003,13 +1019,19 @@ class _WorkersScreenState extends State<WorkersScreen> {
               const SizedBox(height: 12),
               Align(alignment: Alignment.centerLeft, child: viewToggle),
               const SizedBox(height: 12),
-              Row(
+              Column(
                 children: [
-                  Expanded(child: history),
-                  const SizedBox(width: 8),
-                  Expanded(child: importExcel),
-                  const SizedBox(width: 8),
-                  Expanded(child: add),
+                  SizedBox(width: double.infinity, child: presentationControl),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(child: history),
+                      const SizedBox(width: 8),
+                      Expanded(child: importExcel),
+                      const SizedBox(width: 8),
+                      Expanded(child: add),
+                    ],
+                  ),
                 ],
               ),
             ],
@@ -1043,6 +1065,8 @@ class _WorkersScreenState extends State<WorkersScreen> {
                   ),
                 ),
                 viewToggle,
+                const SizedBox(width: 10),
+                presentationControl,
                 const SizedBox(width: 10),
                 history,
                 const SizedBox(width: 10),

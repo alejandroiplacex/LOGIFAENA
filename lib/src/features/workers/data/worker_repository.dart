@@ -36,11 +36,15 @@ class InMemoryWorkerRepository implements WorkerRepository {
   InMemoryWorkerRepository._() {
     final saved = DatabaseService.instance.readList('logifaena_workers');
 
+    debugPrint('WORKERS REPOSITORY -> guardados en storage: ${saved.length}');
+
     if (saved.isNotEmpty) {
       _workers
         ..clear()
         ..addAll(saved.map(Worker.fromJson));
     }
+
+    debugPrint('WORKERS REPOSITORY -> cargados en memoria: ${_workers.length}');
   }
 
   static final InMemoryWorkerRepository instance = InMemoryWorkerRepository._();
@@ -48,6 +52,10 @@ class InMemoryWorkerRepository implements WorkerRepository {
   final List<Worker> _workers = <Worker>[];
 
   void _persist() {
+    debugPrint(
+      'WORKERS REPOSITORY -> persistiendo ${_workers.length} trabajadores',
+    );
+
     unawaited(
       DatabaseService.instance.writeList(
         'logifaena_workers',

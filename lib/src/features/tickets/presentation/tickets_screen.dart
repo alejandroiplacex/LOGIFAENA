@@ -10,7 +10,9 @@ import 'ticket_form_screen.dart';
 import 'widgets/ticket_status_chip.dart';
 
 class TicketsScreen extends StatefulWidget {
-  const TicketsScreen({super.key});
+  final String? initialWorkerId;
+
+  const TicketsScreen({super.key, this.initialWorkerId});
 
   @override
   State<TicketsScreen> createState() => _TicketsScreenState();
@@ -36,8 +38,25 @@ class _TicketsScreenState extends State<TicketsScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _listFocusNode.requestFocus();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+
+      final initialWorkerId = widget.initialWorkerId;
+
+      if (initialWorkerId != null && initialWorkerId.trim().isNotEmpty) {
+        final existingTicket = ticketRepository.findByWorkerId(initialWorkerId);
+
+        if (existingTicket != null) {
+          await editTicket(existingTicket);
+        } else {
+          await addTicket(initialWorkerId: initialWorkerId);
+        }
+
+        return;
+      }
+
+      _listFocusNode.requestFocus();
     });
   }
 
@@ -112,10 +131,12 @@ class _TicketsScreenState extends State<TicketsScreen> {
     workerRepository.update(worker);
   }
 
-  Future<void> addTicket() async {
+  Future<void> addTicket({String? initialWorkerId}) async {
     final ticket = await Navigator.push<Ticket>(
       context,
-      MaterialPageRoute(builder: (_) => const TicketFormScreen()),
+      MaterialPageRoute(
+        builder: (_) => TicketFormScreen(initialWorkerId: initialWorkerId),
+      ),
     );
 
     if (!mounted || ticket == null) return;

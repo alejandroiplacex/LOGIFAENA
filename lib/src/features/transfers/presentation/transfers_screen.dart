@@ -5,10 +5,13 @@ import '../../workers/domain/worker.dart';
 import '../data/transfer_repository.dart';
 import '../domain/transfer.dart';
 import 'transfer_form_screen.dart';
+import 'transfer_passenger_control_screen.dart';
 import 'widgets/transfer_status_chip.dart';
 
 class TransfersScreen extends StatefulWidget {
-  const TransfersScreen({super.key});
+  final String? initialWorkerId;
+
+  const TransfersScreen({super.key, this.initialWorkerId});
 
   @override
   State<TransfersScreen> createState() => _TransfersScreenState();
@@ -20,6 +23,32 @@ class _TransfersScreenState extends State<TransfersScreen> {
   final searchController = TextEditingController();
 
   TransferStatus? selectedStatus;
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+
+      final initialWorkerId = widget.initialWorkerId;
+
+      if (initialWorkerId != null && initialWorkerId.trim().isNotEmpty) {
+        final existingTransfers = transferRepository.findByWorkerId(
+          initialWorkerId,
+        );
+
+        final activeTransfers = existingTransfers
+            .where((transfer) => transfer.status != TransferStatus.cancelled)
+            .toList();
+
+        if (activeTransfers.isNotEmpty) {
+          await editTransfer(activeTransfers.first);
+        } else {
+          await addTransfer();
+        }
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -127,7 +156,10 @@ class _TransfersScreenState extends State<TransfersScreen> {
   Future<void> addTransfer() async {
     final transfer = await Navigator.push<Transfer>(
       context,
-      MaterialPageRoute(builder: (_) => const TransferFormScreen()),
+      MaterialPageRoute(
+        builder: (_) =>
+            TransferFormScreen(initialWorkerId: widget.initialWorkerId),
+      ),
     );
 
     if (!mounted || transfer == null) return;
@@ -206,6 +238,19 @@ class _TransfersScreenState extends State<TransfersScreen> {
 
     transferRepository.delete(transfer.id);
     setState(() {});
+  }
+
+  Future<void> controlPassengers(Transfer transfer) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TransferPassengerControlScreen(transfer: transfer),
+      ),
+    );
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   int count(TransferStatus status) {
@@ -300,6 +345,22 @@ class _TransfersScreenState extends State<TransfersScreen> {
                                               color: Colors.black54,
                                             ),
                                           ),
+
+                                          const SizedBox(height: 4),
+
+                                          Text(
+                                            '${transfer.expectedPassengers} esperados · '
+                                            '${transfer.boardedPassengers} abordaron · '
+                                            '${transfer.arrivedPassengers} llegaron · '
+                                            '${transfer.pendingPassengers} por llegar',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              color:
+                                                  transfer.pendingPassengers > 0
+                                                  ? const Color(0xFFD97706)
+                                                  : const Color(0xFF16A36A),
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -307,6 +368,9 @@ class _TransfersScreenState extends State<TransfersScreen> {
                                     const SizedBox(width: 6),
                                     PopupMenuButton<String>(
                                       onSelected: (value) {
+                                        if (value == 'control') {
+                                          controlPassengers(transfer);
+                                        }
                                         if (value == 'edit') {
                                           editTransfer(transfer);
                                         }
@@ -315,6 +379,16 @@ class _TransfersScreenState extends State<TransfersScreen> {
                                         }
                                       },
                                       itemBuilder: (context) => const [
+                                        PopupMenuItem(
+                                          value: 'control',
+                                          child: ListTile(
+                                            dense: true,
+                                            leading: Icon(
+                                              Icons.fact_check_outlined,
+                                            ),
+                                            title: Text('Controlar pasajeros'),
+                                          ),
+                                        ),
                                         PopupMenuItem(
                                           value: 'edit',
                                           child: ListTile(

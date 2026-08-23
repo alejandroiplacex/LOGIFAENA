@@ -59,6 +59,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final workers = InMemoryWorkerRepository.instance.getAll();
     final tickets = InMemoryTicketRepository.instance.getAll();
+    final presentationExpected = workers.length;
+
+    final presentationPresented = workers
+        .where(
+          (worker) => worker.presentationStatus == PresentationStatus.presented,
+        )
+        .length;
+
+    final presentationLate = workers
+        .where((worker) => worker.presentationStatus == PresentationStatus.late)
+        .length;
+
+    final presentationAbsent = workers
+        .where(
+          (worker) => worker.presentationStatus == PresentationStatus.absent,
+        )
+        .length;
+
+    final presentationPending = workers
+        .where(
+          (worker) => worker.presentationStatus == PresentationStatus.pending,
+        )
+        .length;
     final hotels = InMemoryHotelRepository.instance.getAll();
     final transfers = InMemoryTransferRepository.instance.getAll();
     final events = AgendaService.instance.getEvents();
@@ -185,6 +208,82 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         },
                       ),
                       const SizedBox(height: 18),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(
+                                  Icons.how_to_reg_rounded,
+                                  color: Color(0xFF0F4C81),
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  'Control de presentación',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF334155),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              'Estado de presentación del personal',
+                              style: TextStyle(
+                                color: Color(0xFF64748B),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            Wrap(
+                              spacing: 12,
+                              runSpacing: 12,
+                              children: [
+                                _presentationCard(
+                                  title: 'Esperados',
+                                  value: presentationExpected,
+                                  icon: Icons.groups_rounded,
+                                  color: const Color(0xFF64748B),
+                                ),
+                                _presentationCard(
+                                  title: 'Presentados',
+                                  value: presentationPresented,
+                                  icon: Icons.check_circle_rounded,
+                                  color: const Color(0xFF16A36A),
+                                ),
+                                _presentationCard(
+                                  title: 'Tardíos',
+                                  value: presentationLate,
+                                  icon: Icons.access_time_filled_rounded,
+                                  color: const Color(0xFFD97706),
+                                ),
+                                _presentationCard(
+                                  title: 'No se presentaron',
+                                  value: presentationAbsent,
+                                  icon: Icons.person_off_rounded,
+                                  color: const Color(0xFFDC2626),
+                                ),
+                                _presentationCard(
+                                  title: 'Pendientes',
+                                  value: presentationPending,
+                                  icon: Icons.hourglass_top_rounded,
+                                  color: const Color(0xFF2367F2),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 18),
                       WorkerStatusOverview(
                         workers: workers,
                         onOpenWorkers: () => widget.onNavigate(1),
@@ -248,6 +347,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           ScrollNavigationButtons(controller: _scrollController),
         ],
+      ),
+    );
+  }
+
+  Widget _presentationCard({
+    required String title,
+    required int value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return SizedBox(
+      width: 190,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: .08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withValues(alpha: .18)),
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: color.withValues(alpha: .14),
+              child: Icon(icon, color: color),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$value',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: color,
+                    ),
+                  ),
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

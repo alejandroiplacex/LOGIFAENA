@@ -24,6 +24,9 @@ class MainShellScreen extends StatefulWidget {
 class _MainShellScreenState extends State<MainShellScreen> {
   int selectedIndex = 0;
   WorkerStatus? workerStatusFilter;
+  String? ticketInitialWorkerId;
+  String? hotelInitialWorkerId;
+  String? transferInitialWorkerId;
 
   final items = const [
     _NavigationItem(label: 'Centro de Operaciones', icon: Icons.dashboard),
@@ -78,15 +81,14 @@ class _MainShellScreenState extends State<MainShellScreen> {
     }
 
     if (selectedIndex == 3) {
-      return const TicketsScreen();
+      return TicketsScreen(initialWorkerId: ticketInitialWorkerId);
     }
 
     if (selectedIndex == 4) {
-      return const HotelsScreen();
+      return HotelsScreen(initialWorkerId: hotelInitialWorkerId);
     }
-
     if (selectedIndex == 5) {
-      return const TransfersScreen();
+      return TransfersScreen(initialWorkerId: transferInitialWorkerId);
     }
 
     if (selectedIndex == 6) {
@@ -98,6 +100,24 @@ class _MainShellScreenState extends State<MainShellScreen> {
         onNavigate: (index) {
           setState(() {
             selectedIndex = index;
+          });
+        },
+        onManageTicket: (workerId) {
+          setState(() {
+            ticketInitialWorkerId = workerId;
+            selectedIndex = 3;
+          });
+        },
+        onManageHotel: (workerId) {
+          setState(() {
+            hotelInitialWorkerId = workerId;
+            selectedIndex = 4;
+          });
+        },
+        onManageTransfer: (workerId) {
+          setState(() {
+            transferInitialWorkerId = workerId;
+            selectedIndex = 5;
           });
         },
       );

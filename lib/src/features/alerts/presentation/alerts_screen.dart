@@ -4,8 +4,17 @@ import '../domain/operational_alert.dart';
 
 class AlertsScreen extends StatefulWidget {
   final ValueChanged<int>? onNavigate;
+  final ValueChanged<String>? onManageTicket;
+  final ValueChanged<String>? onManageTransfer;
+  final ValueChanged<String>? onManageHotel;
 
-  const AlertsScreen({super.key, this.onNavigate});
+  const AlertsScreen({
+    super.key,
+    this.onNavigate,
+    this.onManageTicket,
+    this.onManageHotel,
+    this.onManageTransfer,
+  });
 
   @override
   State<AlertsScreen> createState() => _AlertsScreenState();
@@ -72,7 +81,17 @@ class _AlertsScreenState extends State<AlertsScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: _AlertCard(
                     alert: alert,
-                    onAction: widget.onNavigate == null
+                    onAction:
+                        alert.category == AlertCategory.ticket &&
+                            widget.onManageTicket != null
+                        ? () => widget.onManageTicket!(alert.workerId)
+                        : alert.category == AlertCategory.hotel &&
+                              widget.onManageHotel != null
+                        ? () => widget.onManageHotel!(alert.workerId)
+                        : alert.category == AlertCategory.transfer &&
+                              widget.onManageTransfer != null
+                        ? () => widget.onManageTransfer!(alert.workerId)
+                        : widget.onNavigate == null
                         ? null
                         : () =>
                               widget.onNavigate!(_moduleIndex(alert.category)),

@@ -5,8 +5,9 @@ import '../domain/transfer.dart';
 
 class TransferFormScreen extends StatefulWidget {
   final Transfer? transfer;
+  final String? initialWorkerId;
 
-  const TransferFormScreen({super.key, this.transfer});
+  const TransferFormScreen({super.key, this.transfer, this.initialWorkerId});
 
   @override
   State<TransferFormScreen> createState() => _TransferFormScreenState();
@@ -46,7 +47,11 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
     date = transfer?.date ?? DateTime.now();
     vehicleType = transfer?.vehicleType ?? TransferVehicleType.bus;
     status = transfer?.status ?? TransferStatus.scheduled;
-    selectedWorkerIds = {...?transfer?.workerIds};
+    selectedWorkerIds = {
+      ...?transfer?.workerIds,
+      if (transfer == null && widget.initialWorkerId != null)
+        widget.initialWorkerId!,
+    };
 
     code = TextEditingController(
       text:
@@ -321,6 +326,17 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                           ),
                         ],
                       ),
+
+                      const SizedBox(height: 8),
+
+                      Text(
+                        'Trabajadores disponibles: ${workers.length}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: Colors.blueGrey,
+                        ),
+                      ),
+
                       const SizedBox(height: 12),
                       Card(
                         color: Colors.grey.shade50,

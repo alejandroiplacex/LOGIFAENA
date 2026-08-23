@@ -34,6 +34,22 @@ extension TransferStatusLabel on TransferStatus {
   }
 }
 
+/// Estado individual de cada trabajador dentro de un traslado.
+enum TransferPassengerStatus { pending, boarded, arrived }
+
+extension TransferPassengerStatusLabel on TransferPassengerStatus {
+  String get label {
+    switch (this) {
+      case TransferPassengerStatus.pending:
+        return 'Pendiente';
+      case TransferPassengerStatus.boarded:
+        return 'Abordó';
+      case TransferPassengerStatus.arrived:
+        return 'Llegó';
+    }
+  }
+}
+
 class Transfer {
   final String id;
   String code;
@@ -51,6 +67,16 @@ class Transfer {
   String driverPhone;
   String providerCompany;
   List<String> workerIds;
+
+  /// Estado individual de cada pasajero.
+  ///
+  /// Ejemplo:
+  /// {
+  ///   'worker-001': TransferPassengerStatus.arrived,
+  ///   'worker-002': TransferPassengerStatus.pending,
+  /// }
+  Map<String, TransferPassengerStatus> passengerStatuses;
+
   String notes;
   TransferStatus status;
 
@@ -71,11 +97,57 @@ class Transfer {
     required this.driverPhone,
     required this.providerCompany,
     required this.workerIds,
+    Map<String, TransferPassengerStatus>? passengerStatuses,
     required this.notes,
     required this.status,
-  });
+  }) : passengerStatuses = passengerStatuses ?? {};
 
   int get availableSeats => capacity - workerIds.length;
+
+  /// Cantidad de trabajadores esperados.
+  int get expectedPassengers => workerIds.length;
+
+  /// Cantidad que ya abordó el vehículo.
+  int get boardedPassengers => workerIds.where((workerId) {
+    final passengerStatus = statusForWorker(workerId);
+
+    return passengerStatus == TransferPassengerStatus.boarded ||
+        passengerStatus == TransferPassengerStatus.arrived;
+  }).length;
+
+  /// Cantidad que confirmó llegada al destino.
+  int get arrivedPassengers => workerIds.where((workerId) {
+    return statusForWorker(workerId) == TransferPassengerStatus.arrived;
+  }).length;
+
+  /// Cantidad que todavía no confirma llegada.
+  int get pendingPassengers => expectedPassengers - arrivedPassengers;
+
+  /// Devuelve el estado de un trabajador.
+  ///
+  /// Si el traslado fue creado antes de incorporar esta función,
+  /// automáticamente se considera Pendiente.
+  TransferPassengerStatus statusForWorker(String workerId) {
+    return passengerStatuses[workerId] ?? TransferPassengerStatus.pending;
+  }
+
+  /// Cambia el estado individual de un trabajador.
+  void setWorkerStatus(
+    String workerId,
+    TransferPassengerStatus passengerStatus,
+  ) {
+    if (!workerIds.contains(workerId)) return;
+
+    passengerStatuses[workerId] = passengerStatus;
+  }
+
+  /// Elimina estados de trabajadores que ya no pertenecen
+  /// al traslado.
+  void cleanPassengerStatuses() {
+    passengerStatuses.removeWhere(
+      (workerId, _) => !workerIds.contains(workerId),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -94,34 +166,53 @@ class Transfer {
     'driverPhone': driverPhone,
     'providerCompany': providerCompany,
     'workerIds': workerIds,
+    'passengerStatuses': passengerStatuses.map(
+      (workerId, passengerStatus) => MapEntry(workerId, passengerStatus.name),
+    ),
     'notes': notes,
     'status': status.name,
   };
 
-  factory Transfer.fromJson(Map<String, dynamic> json) => Transfer(
-    id: json['id'] as String,
-    code: json['code'] as String? ?? '',
-    date: DateTime.tryParse(json['date'] as String? ?? '') ?? DateTime.now(),
-    departureTime: json['departureTime'] as String? ?? '',
-    estimatedArrivalTime: json['estimatedArrivalTime'] as String? ?? '',
-    origin: json['origin'] as String? ?? '',
-    destination: json['destination'] as String? ?? '',
-    routeDescription: json['routeDescription'] as String? ?? '',
-    vehicleType: TransferVehicleType.values.firstWhere(
-      (value) => value.name == json['vehicleType'],
-      orElse: () => TransferVehicleType.van,
-    ),
-    vehicleIdentifier: json['vehicleIdentifier'] as String? ?? '',
-    licensePlate: json['licensePlate'] as String? ?? '',
-    capacity: (json['capacity'] as num?)?.toInt() ?? 0,
-    driverName: json['driverName'] as String? ?? '',
-    driverPhone: json['driverPhone'] as String? ?? '',
-    providerCompany: json['providerCompany'] as String? ?? '',
-    workerIds: (json['workerIds'] as List<dynamic>? ?? []).cast<String>(),
-    notes: json['notes'] as String? ?? '',
-    status: TransferStatus.values.firstWhere(
-      (value) => value.name == json['status'],
-      orElse: () => TransferStatus.scheduled,
-    ),
-  );
+  factory Transfer.fromJson(Map<String, dynamic> json) {
+    final rawPassengerStatuses =
+        json['passengerStatuses'] as Map<String, dynamic>? ?? {};
+
+    final parsedPassengerStatuses = <String, TransferPassengerStatus>{};
+
+    for (final entry in rawPassengerStatuses.entries) {
+      parsedPassengerStatuses[entry.key] = TransferPassengerStatus.values
+          .firstWhere(
+            (value) => value.name == entry.value,
+            orElse: () => TransferPassengerStatus.pending,
+          );
+    }
+
+    return Transfer(
+      id: json['id'] as String,
+      code: json['code'] as String? ?? '',
+      date: DateTime.tryParse(json['date'] as String? ?? '') ?? DateTime.now(),
+      departureTime: json['departureTime'] as String? ?? '',
+      estimatedArrivalTime: json['estimatedArrivalTime'] as String? ?? '',
+      origin: json['origin'] as String? ?? '',
+      destination: json['destination'] as String? ?? '',
+      routeDescription: json['routeDescription'] as String? ?? '',
+      vehicleType: TransferVehicleType.values.firstWhere(
+        (value) => value.name == json['vehicleType'],
+        orElse: () => TransferVehicleType.van,
+      ),
+      vehicleIdentifier: json['vehicleIdentifier'] as String? ?? '',
+      licensePlate: json['licensePlate'] as String? ?? '',
+      capacity: json['capacity'] as int? ?? 0,
+      driverName: json['driverName'] as String? ?? '',
+      driverPhone: json['driverPhone'] as String? ?? '',
+      providerCompany: json['providerCompany'] as String? ?? '',
+      workerIds: (json['workerIds'] as List<dynamic>? ?? []).cast<String>(),
+      passengerStatuses: parsedPassengerStatuses,
+      notes: json['notes'] as String? ?? '',
+      status: TransferStatus.values.firstWhere(
+        (value) => value.name == json['status'],
+        orElse: () => TransferStatus.scheduled,
+      ),
+    );
+  }
 }

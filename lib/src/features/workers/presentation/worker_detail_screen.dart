@@ -573,6 +573,8 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
     }
 
     for (final transfer in transfers) {
+      final passengerStatus = transfer.statusForWorker(worker.id);
+
       entries.add(
         _historyEntry(
           Icons.directions_bus_outlined,
@@ -580,6 +582,38 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
           '${_date(transfer.date)} ${transfer.departureTime} · '
               '${transfer.origin} → ${transfer.destination} · '
               '${_value(transfer.vehicleIdentifier)}',
+        ),
+      );
+
+      if (passengerStatus == TransferPassengerStatus.boarded ||
+          passengerStatus == TransferPassengerStatus.arrived) {
+        entries.add(
+          _historyEntry(
+            Icons.directions_bus_rounded,
+            'Abordó traslado',
+            '${transfer.code} · ${transfer.origin} → ${transfer.destination} · '
+                '${_value(transfer.vehicleIdentifier)}',
+          ),
+        );
+      }
+
+      if (passengerStatus == TransferPassengerStatus.arrived) {
+        entries.add(
+          _historyEntry(
+            Icons.check_circle_outline,
+            'Llegó a destino',
+            '${transfer.code} · Destino: ${transfer.destination}',
+          ),
+        );
+      }
+    }
+
+    if (worker.status == WorkerStatus.atSite) {
+      entries.add(
+        _historyEntry(
+          Icons.location_on_outlined,
+          'En faena',
+          '${worker.fullName} se encuentra en ${_value(worker.project)}.',
         ),
       );
     }
