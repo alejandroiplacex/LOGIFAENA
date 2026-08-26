@@ -337,14 +337,26 @@ if (entityType == "movement")
                 );
 
                 worker.Status = ReadString(
-                    request.Payload,
-                    "status",
-                    worker.Status
-                );
+    request.Payload,
+    "status",
+    worker.Status
+);
 
-                worker.UpdatedAtUtc = receivedAtUtc;
-                worker.IsDeleted = false;
-                break;
+worker.OperationalLocation = ReadString(
+    request.Payload,
+    "operationalLocation",
+    worker.OperationalLocation
+);
+
+worker.OperationalLocationAt = ReadNullableDateTime(
+    request.Payload,
+    "operationalLocationAt",
+    worker.OperationalLocationAt
+);
+
+worker.UpdatedAtUtc = receivedAtUtc;
+worker.IsDeleted = false;
+break;
 
             case "delete":
                 if (worker is null)
@@ -530,6 +542,35 @@ static string ReadString(
     return property.ValueKind == JsonValueKind.String
         ? property.GetString() ?? string.Empty
         : property.ToString();
+}
+
+static DateTime? ReadNullableDateTime(
+    JsonElement payload,
+    string propertyName,
+    DateTime? currentValue)
+{
+    if (payload.ValueKind != JsonValueKind.Object)
+    {
+        return currentValue;
+    }
+
+    if (!payload.TryGetProperty(propertyName, out var property))
+    {
+        return currentValue;
+    }
+
+    if (property.ValueKind == JsonValueKind.Null)
+    {
+        return null;
+    }
+
+    if (property.ValueKind == JsonValueKind.String &&
+        DateTime.TryParse(property.GetString(), out var parsed))
+    {
+        return parsed;
+    }
+
+    return currentValue;
 }
 
 record SyncRequest(

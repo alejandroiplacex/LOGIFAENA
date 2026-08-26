@@ -15,6 +15,31 @@ extension TransferVehicleTypeLabel on TransferVehicleType {
   }
 }
 
+enum TransferPurpose {
+  turnArrival,
+  dailyOutbound,
+  dailyReturn,
+  turnDeparture,
+  special,
+}
+
+extension TransferPurposeLabel on TransferPurpose {
+  String get label {
+    switch (this) {
+      case TransferPurpose.turnArrival:
+        return 'Subida de turno';
+      case TransferPurpose.dailyOutbound:
+        return 'Ida diaria a faena';
+      case TransferPurpose.dailyReturn:
+        return 'Retorno diario a hotel';
+      case TransferPurpose.turnDeparture:
+        return 'Bajada de turno';
+      case TransferPurpose.special:
+        return 'Traslado especial';
+    }
+  }
+}
+
 enum TransferStatus { scheduled, boarding, onRoute, completed, cancelled }
 
 extension TransferStatusLabel on TransferStatus {
@@ -60,12 +85,14 @@ class Transfer {
   String destination;
   String routeDescription;
   TransferVehicleType vehicleType;
+  TransferPurpose purpose;
   String vehicleIdentifier;
   String licensePlate;
   int capacity;
   String driverName;
   String driverPhone;
   String providerCompany;
+  String serviceGroupId;
   List<String> workerIds;
 
   /// Estado individual de cada pasajero.
@@ -90,12 +117,14 @@ class Transfer {
     required this.destination,
     required this.routeDescription,
     required this.vehicleType,
+    this.purpose = TransferPurpose.special,
     required this.vehicleIdentifier,
     required this.licensePlate,
     required this.capacity,
     required this.driverName,
     required this.driverPhone,
     required this.providerCompany,
+    this.serviceGroupId = '',
     required this.workerIds,
     Map<String, TransferPassengerStatus>? passengerStatuses,
     required this.notes,
@@ -159,12 +188,14 @@ class Transfer {
     'destination': destination,
     'routeDescription': routeDescription,
     'vehicleType': vehicleType.name,
+    'purpose': purpose.name,
     'vehicleIdentifier': vehicleIdentifier,
     'licensePlate': licensePlate,
     'capacity': capacity,
     'driverName': driverName,
     'driverPhone': driverPhone,
     'providerCompany': providerCompany,
+    'serviceGroupId': serviceGroupId,
     'workerIds': workerIds,
     'passengerStatuses': passengerStatuses.map(
       (workerId, passengerStatus) => MapEntry(workerId, passengerStatus.name),
@@ -200,12 +231,17 @@ class Transfer {
         (value) => value.name == json['vehicleType'],
         orElse: () => TransferVehicleType.van,
       ),
+      purpose: TransferPurpose.values.firstWhere(
+        (value) => value.name == json['purpose'],
+        orElse: () => TransferPurpose.special,
+      ),
       vehicleIdentifier: json['vehicleIdentifier'] as String? ?? '',
       licensePlate: json['licensePlate'] as String? ?? '',
       capacity: json['capacity'] as int? ?? 0,
       driverName: json['driverName'] as String? ?? '',
       driverPhone: json['driverPhone'] as String? ?? '',
       providerCompany: json['providerCompany'] as String? ?? '',
+      serviceGroupId: json['serviceGroupId'] as String? ?? '',
       workerIds: (json['workerIds'] as List<dynamic>? ?? []).cast<String>(),
       passengerStatuses: parsedPassengerStatuses,
       notes: json['notes'] as String? ?? '',

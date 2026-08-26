@@ -117,6 +117,10 @@ public class LogiFaenaDbContext(DbContextOptions<LogiFaenaDbContext> options)
 
         worker.Property(x => x.Status)
             .HasMaxLength(100);
+worker.Property(x => x.OperationalLocation)
+    .HasMaxLength(100);
+
+worker.Property(x => x.OperationalLocationAt);
 
         // Configuración de MovementEntity
         var movement = modelBuilder.Entity<MovementEntity>();

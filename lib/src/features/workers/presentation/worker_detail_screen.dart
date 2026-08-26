@@ -167,6 +167,10 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
                           _row('Contacto emergencia', worker.emergencyContact),
                           _row('Teléfono emergencia', worker.emergencyPhone),
                           _row('Estado actual', worker.status.label),
+                          _row(
+                            'Ubicación actual',
+                            worker.operationalLocation.label,
+                          ),
                           _row('Observaciones', worker.notes),
                         ],
                       );
@@ -629,11 +633,17 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
     }
 
     if (worker.status == WorkerStatus.atSite) {
+      final siteName = worker.project.trim().isNotEmpty
+          ? worker.project
+          : (latestTransfer?.destination.trim().isNotEmpty == true
+                ? latestTransfer!.destination
+                : 'faena');
+
       entries.add(
         _historyEntry(
           Icons.location_on_outlined,
           'En faena',
-          '${worker.fullName} se encuentra en ${_value(worker.project)}.',
+          '${worker.fullName} se encuentra en $siteName.',
         ),
       );
     }

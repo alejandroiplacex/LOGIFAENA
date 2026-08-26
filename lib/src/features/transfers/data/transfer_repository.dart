@@ -4,6 +4,7 @@ import '../domain/transfer.dart';
 abstract class TransferRepository {
   List<Transfer> getAll();
   List<Transfer> findByWorkerId(String workerId);
+  List<Transfer> findByServiceGroupId(String serviceGroupId);
   void add(Transfer transfer);
   void replaceAll(List<Transfer> transfers);
   void update(Transfer transfer);
@@ -39,6 +40,17 @@ class InMemoryTransferRepository implements TransferRepository {
   List<Transfer> findByWorkerId(String workerId) {
     return _transfers
         .where((transfer) => transfer.workerIds.contains(workerId))
+        .toList();
+  }
+
+  @override
+  List<Transfer> findByServiceGroupId(String serviceGroupId) {
+    return _transfers
+        .where(
+          (transfer) =>
+              transfer.serviceGroupId.trim().isNotEmpty &&
+              transfer.serviceGroupId == serviceGroupId,
+        )
         .toList();
   }
 

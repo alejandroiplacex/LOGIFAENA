@@ -47,6 +47,10 @@ public class WorkerEntity
     public string Notes { get; set; } = string.Empty;
 
     public string Status { get; set; } = string.Empty;
+    
+    public string OperationalLocation { get; set; } = string.Empty;
+
+public DateTime? OperationalLocationAt { get; set; }
 
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 

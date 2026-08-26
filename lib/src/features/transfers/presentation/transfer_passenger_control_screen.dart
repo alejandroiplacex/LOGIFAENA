@@ -77,11 +77,68 @@ class _TransferPassengerControlScreenState
 
           case TransferPassengerStatus.boarded:
             worker.status = WorkerStatus.transfer;
+            worker.operationalLocationAt = DateTime.now();
+
+            switch (transfer.purpose) {
+              case TransferPurpose.turnArrival:
+                worker.operationalLocation =
+                    WorkerOperationalLocation.travelingToCaldera;
+                break;
+
+              case TransferPurpose.dailyOutbound:
+                worker.operationalLocation =
+                    WorkerOperationalLocation.travelingToSite;
+                break;
+
+              case TransferPurpose.dailyReturn:
+                worker.operationalLocation =
+                    WorkerOperationalLocation.returningToHotel;
+                break;
+
+              case TransferPurpose.turnDeparture:
+                worker.operationalLocation =
+                    WorkerOperationalLocation.returningHome;
+                break;
+
+              case TransferPurpose.special:
+                worker.operationalLocation = WorkerOperationalLocation.unknown;
+                break;
+            }
+
             workerRepository.update(worker);
             break;
 
           case TransferPassengerStatus.arrived:
-            worker.status = WorkerStatus.atSite;
+            worker.operationalLocationAt = DateTime.now();
+
+            switch (transfer.purpose) {
+              case TransferPurpose.turnArrival:
+                worker.status = WorkerStatus.lodging;
+                worker.operationalLocation = WorkerOperationalLocation.hotel;
+                break;
+
+              case TransferPurpose.dailyOutbound:
+                worker.status = WorkerStatus.atSite;
+                worker.operationalLocation = WorkerOperationalLocation.site;
+                break;
+
+              case TransferPurpose.dailyReturn:
+                worker.status = WorkerStatus.lodging;
+                worker.operationalLocation = WorkerOperationalLocation.hotel;
+                break;
+
+              case TransferPurpose.turnDeparture:
+                worker.status = WorkerStatus.finished;
+                worker.operationalLocation =
+                    WorkerOperationalLocation.returningHome;
+                break;
+
+              case TransferPurpose.special:
+                worker.status = WorkerStatus.atSite;
+                worker.operationalLocation = WorkerOperationalLocation.unknown;
+                break;
+            }
+
             workerRepository.update(worker);
             break;
         }
@@ -89,6 +146,26 @@ class _TransferPassengerControlScreenState
 
       transferRepository.update(transfer);
     });
+  }
+
+  void _markAllBoarded() {
+    for (final workerId in transfer.workerIds) {
+      final currentStatus = transfer.statusForWorker(workerId);
+
+      if (currentStatus == TransferPassengerStatus.pending) {
+        _changeStatus(workerId, TransferPassengerStatus.boarded);
+      }
+    }
+  }
+
+  void _markAllArrived() {
+    for (final workerId in transfer.workerIds) {
+      final currentStatus = transfer.statusForWorker(workerId);
+
+      if (currentStatus != TransferPassengerStatus.arrived) {
+        _changeStatus(workerId, TransferPassengerStatus.arrived);
+      }
+    }
   }
 
   Color _statusColor(TransferPassengerStatus status) {
@@ -157,7 +234,7 @@ class _TransferPassengerControlScreenState
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '${transfer.origin} → ${transfer.destination}',
+                                    '${transfer.origin} Ã¢â€ â€™ ${transfer.destination}',
                                     style: const TextStyle(
                                       fontSize: 17,
                                       fontWeight: FontWeight.w700,
@@ -171,9 +248,9 @@ class _TransferPassengerControlScreenState
                         ),
                         const SizedBox(height: 14),
                         Text(
-                          '${transfer.vehicleType.label} · '
-                          '${transfer.vehicleIdentifier} · '
-                          '${transfer.licensePlate} · '
+                          '${transfer.vehicleType.label} Ã‚Â· '
+                          '${transfer.vehicleIdentifier} Ã‚Â· '
+                          '${transfer.licensePlate} Ã‚Â· '
                           'Conductor: ${transfer.driverName}',
                           style: const TextStyle(
                             color: Colors.black54,
@@ -247,9 +324,44 @@ class _TransferPassengerControlScreenState
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'Registra individualmente quién abordó y quién llegó al destino.',
+                          'Registra individualmente quiÃƒÂ©n abordÃƒÂ³ y quiÃƒÂ©n llegÃƒÂ³ al destino.',
                           style: TextStyle(color: Colors.black54),
                         ),
+                        const SizedBox(height: 14),
+
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: [
+                            OutlinedButton.icon(
+                              onPressed:
+                                  transfer.workerIds.any(
+                                    (workerId) =>
+                                        transfer.statusForWorker(workerId) ==
+                                        TransferPassengerStatus.pending,
+                                  )
+                                  ? _markAllBoarded
+                                  : null,
+                              icon: const Icon(Icons.directions_bus_rounded),
+                              label: const Text('Todos abordaron'),
+                            ),
+                            FilledButton.icon(
+                              onPressed:
+                                  transfer.workerIds.any(
+                                    (workerId) =>
+                                        transfer.statusForWorker(workerId) !=
+                                        TransferPassengerStatus.arrived,
+                                  )
+                                  ? _markAllArrived
+                                  : null,
+                              icon: const Icon(
+                                Icons.check_circle_outline_rounded,
+                              ),
+                              label: const Text('Todos llegaron'),
+                            ),
+                          ],
+                        ),
+
                         const Divider(height: 28),
 
                         if (transfer.workerIds.isEmpty)
@@ -352,7 +464,7 @@ class _TransferPassengerControlScreenState
 
     final room = hotelAssignment?.room.trim().isNotEmpty == true
         ? hotelAssignment!.room
-        : 'Sin habitación';
+        : 'Sin habitaciÃƒÂ³n';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -382,7 +494,7 @@ class _TransferPassengerControlScreenState
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      '$rut · $hotel · Habitación: $room',
+                      '$rut Ã‚Â· $hotel Ã‚Â· HabitaciÃƒÂ³n: $room',
                       style: const TextStyle(color: Colors.black54),
                     ),
                   ],
@@ -391,10 +503,24 @@ class _TransferPassengerControlScreenState
             ],
           );
 
+          final availableStatuses = switch (status) {
+            TransferPassengerStatus.pending => <TransferPassengerStatus>[
+              TransferPassengerStatus.pending,
+              TransferPassengerStatus.boarded,
+            ],
+            TransferPassengerStatus.boarded => <TransferPassengerStatus>[
+              TransferPassengerStatus.boarded,
+              TransferPassengerStatus.arrived,
+            ],
+            TransferPassengerStatus.arrived => <TransferPassengerStatus>[
+              TransferPassengerStatus.arrived,
+            ],
+          };
+
           final controls = Wrap(
             spacing: 7,
             runSpacing: 7,
-            children: TransferPassengerStatus.values.map((item) {
+            children: availableStatuses.map((item) {
               final selected = status == item;
               final itemColor = _statusColor(item);
 
@@ -406,9 +532,11 @@ class _TransferPassengerControlScreenState
                   color: selected ? Colors.white : itemColor,
                 ),
                 label: Text(item.label),
-                onSelected: (_) {
-                  _changeStatus(workerId, item);
-                },
+                onSelected: selected
+                    ? null
+                    : (_) {
+                        _changeStatus(workerId, item);
+                      },
                 selectedColor: itemColor,
                 labelStyle: TextStyle(
                   color: selected ? Colors.white : Colors.black87,

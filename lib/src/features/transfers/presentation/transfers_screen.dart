@@ -6,6 +6,8 @@ import '../data/transfer_repository.dart';
 import '../domain/transfer.dart';
 import 'transfer_form_screen.dart';
 import 'transfer_passenger_control_screen.dart';
+import 'transfer_service_group_form_screen.dart';
+import 'transfer_service_group_screen.dart';
 import 'widgets/transfer_status_chip.dart';
 
 class TransfersScreen extends StatefulWidget {
@@ -54,6 +56,52 @@ class _TransfersScreenState extends State<TransfersScreen> {
   void dispose() {
     searchController.dispose();
     super.dispose();
+  }
+
+  Map<String, List<Transfer>> get serviceGroups {
+    final groups = <String, List<Transfer>>{};
+
+    for (final transfer in transferRepository.getAll()) {
+      final groupId = transfer.serviceGroupId.trim();
+
+      if (groupId.isEmpty) {
+        continue;
+      }
+
+      groups.putIfAbsent(groupId, () => <Transfer>[]).add(transfer);
+    }
+
+    return groups;
+  }
+
+  ({int buses, int expected, int boarded, int arrived, int pending})
+  _serviceGroupTotals(List<Transfer> group) {
+    final buses = group.length;
+
+    final expected = group.fold<int>(
+      0,
+      (sum, transfer) => sum + transfer.expectedPassengers,
+    );
+
+    final boarded = group.fold<int>(
+      0,
+      (sum, transfer) => sum + transfer.boardedPassengers,
+    );
+
+    final arrived = group.fold<int>(
+      0,
+      (sum, transfer) => sum + transfer.arrivedPassengers,
+    );
+
+    final pending = expected - arrived;
+
+    return (
+      buses: buses,
+      expected: expected,
+      boarded: boarded,
+      arrived: arrived,
+      pending: pending,
+    );
   }
 
   List<Transfer> get transfers {
@@ -260,6 +308,145 @@ class _TransfersScreenState extends State<TransfersScreen> {
         .length;
   }
 
+  Widget _serviceGroupsSummary() {
+    final groups = serviceGroups;
+
+    if (groups.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 0, 22, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: groups.entries.map((entry) {
+          final group = entry.value;
+          final first = group.first;
+          final totals = _serviceGroupTotals(group);
+
+          return Card(
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        TransferServiceGroupScreen(serviceGroupId: entry.key),
+                  ),
+                );
+
+                if (mounted) {
+                  setState(() {});
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${first.purpose.label} · ${formatDate(first.date)}',
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${first.origin} → ${first.destination}',
+                                style: const TextStyle(color: Colors.black54),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Chip(
+                          label: Text(
+                            totals.pending == 0
+                                ? 'Jornada completa'
+                                : '${totals.pending} pendiente(s)',
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        _serviceGroupMetric(
+                          icon: Icons.directions_bus_rounded,
+                          label: 'Buses',
+                          value: totals.buses,
+                        ),
+                        _serviceGroupMetric(
+                          icon: Icons.groups_rounded,
+                          label: 'Esperados',
+                          value: totals.expected,
+                        ),
+                        _serviceGroupMetric(
+                          icon: Icons.directions_bus_filled_rounded,
+                          label: 'Abordaron',
+                          value: totals.boarded,
+                        ),
+                        _serviceGroupMetric(
+                          icon: Icons.check_circle_outline_rounded,
+                          label: 'Llegaron',
+                          value: totals.arrived,
+                        ),
+                        _serviceGroupMetric(
+                          icon: Icons.warning_amber_rounded,
+                          label: 'Pendientes',
+                          value: totals.pending,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _serviceGroupMetric({
+    required IconData icon,
+    required String label,
+    required int value,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black12),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: const Color(0xFF0D477C)),
+          const SizedBox(width: 8),
+          Text('$value', style: const TextStyle(fontWeight: FontWeight.w900)),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final filtered = transfers;
@@ -267,6 +454,7 @@ class _TransfersScreenState extends State<TransfersScreen> {
     return Column(
       children: [
         _summary(),
+        _serviceGroupsSummary(),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(22, 0, 22, 22),
@@ -345,6 +533,7 @@ class _TransfersScreenState extends State<TransfersScreen> {
                                               color: Colors.black54,
                                             ),
                                           ),
+                                          const SizedBox(height: 2),
 
                                           const SizedBox(height: 4),
 
@@ -567,6 +756,23 @@ class _TransfersScreenState extends State<TransfersScreen> {
           label: const Text('Nuevo traslado'),
         );
 
+        final addServiceGroup = OutlinedButton.icon(
+          onPressed: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const TransferServiceGroupFormScreen(),
+              ),
+            );
+
+            if (mounted) {
+              setState(() {});
+            }
+          },
+          icon: const Icon(Icons.alt_route_rounded),
+          label: const Text('Nueva jornada'),
+        );
+
         if (compact) {
           return Column(
             children: [
@@ -575,6 +781,8 @@ class _TransfersScreenState extends State<TransfersScreen> {
               status,
               const SizedBox(height: 12),
               SizedBox(width: double.infinity, child: add),
+              const SizedBox(height: 8),
+              SizedBox(width: double.infinity, child: addServiceGroup),
             ],
           );
         }
@@ -586,6 +794,8 @@ class _TransfersScreenState extends State<TransfersScreen> {
             const SizedBox(width: 12),
             Expanded(child: status),
             const SizedBox(width: 12),
+            addServiceGroup,
+            const SizedBox(width: 8),
             add,
           ],
         );

@@ -31,11 +31,41 @@ extension WorkerStatusLabel on WorkerStatus {
     }
   }
 }
-enum PresentationStatus {
-  pending,
-  presented,
-  late,
-  absent,
+
+enum PresentationStatus { pending, presented, late, absent }
+
+enum WorkerOperationalLocation {
+  unknown,
+  originCity,
+  travelingToCaldera,
+  hotel,
+  travelingToSite,
+  site,
+  returningToHotel,
+  returningHome,
+}
+
+extension WorkerOperationalLocationLabel on WorkerOperationalLocation {
+  String get label {
+    switch (this) {
+      case WorkerOperationalLocation.unknown:
+        return 'Sin ubicación';
+      case WorkerOperationalLocation.originCity:
+        return 'Ciudad de origen';
+      case WorkerOperationalLocation.travelingToCaldera:
+        return 'En viaje a Caldera';
+      case WorkerOperationalLocation.hotel:
+        return 'Hotel Vitrali';
+      case WorkerOperationalLocation.travelingToSite:
+        return 'En traslado a faena';
+      case WorkerOperationalLocation.site:
+        return 'Manto Verde';
+      case WorkerOperationalLocation.returningToHotel:
+        return 'En retorno al hotel';
+      case WorkerOperationalLocation.returningHome:
+        return 'En bajada de turno';
+    }
+  }
 }
 
 extension PresentationStatusLabel on PresentationStatus {
@@ -78,8 +108,10 @@ class Worker {
   String notes;
   WorkerStatus status;
   PresentationStatus presentationStatus;
-DateTime? presentationAt;
-String presentationNote;
+  WorkerOperationalLocation operationalLocation;
+  DateTime? operationalLocationAt;
+  DateTime? presentationAt;
+  String presentationNote;
 
   Worker({
     required this.id,
@@ -105,8 +137,10 @@ String presentationNote;
     required this.notes,
     required this.status,
     this.presentationStatus = PresentationStatus.pending,
-this.presentationAt,
-this.presentationNote = '',
+    this.operationalLocation = WorkerOperationalLocation.unknown,
+    this.operationalLocationAt,
+    this.presentationAt,
+    this.presentationNote = '',
   });
 
   String get fullName => '$firstName $lastName'.trim();
@@ -146,9 +180,10 @@ this.presentationNote = '',
     'notes': notes,
     'status': status.name,
     'presentationStatus': presentationStatus.name,
-'presentationAt': presentationAt?.toIso8601String(),
-'presentationNote': presentationNote,
-
+    'operationalLocation': operationalLocation.name,
+    'operationalLocationAt': operationalLocationAt?.toIso8601String(),
+    'presentationAt': presentationAt?.toIso8601String(),
+    'presentationNote': presentationNote,
   };
   static WorkerStatus _statusFromJson(dynamic value) {
     final status = value?.toString().trim().toLowerCase() ?? '';
@@ -196,30 +231,40 @@ this.presentationNote = '',
         return WorkerStatus.pending;
     }
   }
-static PresentationStatus _presentationStatusFromJson(dynamic value) {
-  final status = value?.toString().trim().toLowerCase() ?? '';
 
-  switch (status) {
-    case 'presented':
-    case 'presentado':
-      return PresentationStatus.presented;
+  static PresentationStatus _presentationStatusFromJson(dynamic value) {
+    final status = value?.toString().trim().toLowerCase() ?? '';
 
-    case 'late':
-    case 'tardio':
-    case 'tardia':
-      return PresentationStatus.late;
+    switch (status) {
+      case 'presented':
+      case 'presentado':
+        return PresentationStatus.presented;
 
-    case 'absent':
-    case 'ausente':
-    case 'no_se_presento':
-      return PresentationStatus.absent;
+      case 'late':
+      case 'tardio':
+      case 'tardia':
+        return PresentationStatus.late;
 
-    case 'pending':
-    case 'pendiente':
-    default:
-      return PresentationStatus.pending;
+      case 'absent':
+      case 'ausente':
+      case 'no_se_presento':
+        return PresentationStatus.absent;
+
+      case 'pending':
+      case 'pendiente':
+      default:
+        return PresentationStatus.pending;
+    }
   }
-}
+
+  static WorkerOperationalLocation _operationalLocationFromJson(dynamic value) {
+    final location = value?.toString().trim();
+
+    return WorkerOperationalLocation.values.firstWhere(
+      (item) => item.name == location,
+      orElse: () => WorkerOperationalLocation.unknown,
+    );
+  }
 
   factory Worker.fromJson(Map<String, dynamic> json) => Worker(
     id: json['externalId']?.toString().trim().isNotEmpty == true
@@ -247,6 +292,12 @@ static PresentationStatus _presentationStatusFromJson(dynamic value) {
     notes: json['notes'] as String? ?? '',
     status: _statusFromJson(json['status']),
     presentationStatus: _presentationStatusFromJson(json['presentationStatus']),
+    operationalLocation: _operationalLocationFromJson(
+      json['operationalLocation'],
+    ),
+    operationalLocationAt: DateTime.tryParse(
+      json['operationalLocationAt']?.toString() ?? '',
+    ),
     presentationAt: DateTime.tryParse(json['presentationAt']?.toString() ?? ''),
     presentationNote: json['presentationNote'] as String? ?? '',
   );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../workers/data/worker_repository.dart';
 import '../../workers/domain/worker.dart';
 import '../domain/transfer.dart';
+import '../data/transfer_repository.dart';
 
 class TransferFormScreen extends StatefulWidget {
   final Transfer? transfer;
@@ -16,9 +17,10 @@ class TransferFormScreen extends StatefulWidget {
 class _TransferFormScreenState extends State<TransferFormScreen> {
   final formKey = GlobalKey<FormState>();
   final workersRepository = InMemoryWorkerRepository.instance;
-
+  final transferRepository = InMemoryTransferRepository.instance;
   late DateTime date;
   late TransferVehicleType vehicleType;
+  late TransferPurpose purpose;
   late TransferStatus status;
   late Set<String> selectedWorkerIds;
 
@@ -37,7 +39,60 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
   late final TextEditingController notes;
 
   bool get editing => widget.transfer != null;
-  List<Worker> get workers => workersRepository.getAll();
+  Set<String> get workerIdsAssignedToOtherTransfersInSameGroup {
+    final dateKey =
+        '${date.year.toString().padLeft(4, '0')}'
+        '${date.month.toString().padLeft(2, '0')}'
+        '${date.day.toString().padLeft(2, '0')}';
+
+    final serviceGroupId = switch (purpose) {
+      TransferPurpose.dailyOutbound => 'DAILY-$dateKey-OUTBOUND',
+      TransferPurpose.dailyReturn => 'DAILY-$dateKey-RETURN',
+      _ => '',
+    };
+
+    if (serviceGroupId.isEmpty) {
+      return <String>{};
+    }
+
+    final currentTransferId = widget.transfer?.id;
+
+    return transferRepository
+        .findByServiceGroupId(serviceGroupId)
+        .where((transfer) => transfer.id != currentTransferId)
+        .expand((transfer) => transfer.workerIds)
+        .toSet();
+  }
+
+  List<Worker> get workers {
+    final allWorkers = workersRepository.getAll();
+
+    return allWorkers.where((worker) {
+      if (workerIdsAssignedToOtherTransfersInSameGroup.contains(worker.id)) {
+        return false;
+      }
+      // Si ya está seleccionado, siempre debe seguir visible.
+      if (selectedWorkerIds.contains(worker.id)) {
+        return true;
+      }
+
+      switch (purpose) {
+        case TransferPurpose.dailyOutbound:
+          // Ida diaria: mostrar trabajadores que están en el hotel.
+          return worker.operationalLocation == WorkerOperationalLocation.hotel;
+
+        case TransferPurpose.dailyReturn:
+          // Retorno diario: mostrar trabajadores que están en faena.
+          return worker.operationalLocation == WorkerOperationalLocation.site;
+
+        case TransferPurpose.turnArrival:
+        case TransferPurpose.turnDeparture:
+        case TransferPurpose.special:
+          // Para los demás tipos mantenemos todos disponibles.
+          return true;
+      }
+    }).toList();
+  }
 
   @override
   void initState() {
@@ -46,6 +101,7 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
 
     date = transfer?.date ?? DateTime.now();
     vehicleType = transfer?.vehicleType ?? TransferVehicleType.bus;
+    purpose = transfer?.purpose ?? TransferPurpose.special;
     status = transfer?.status ?? TransferStatus.scheduled;
     selectedWorkerIds = {
       ...?transfer?.workerIds,
@@ -140,6 +196,27 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
         '${value.year}';
   }
 
+  void selectWorkersUpToCapacity() {
+    final parsedCapacity = int.tryParse(capacity.text.trim()) ?? 0;
+
+    if (parsedCapacity <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ingresa una capacidad válida para el vehículo.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      selectedWorkerIds.clear();
+
+      selectedWorkerIds.addAll(
+        workers.take(parsedCapacity).map((worker) => worker.id),
+      );
+    });
+  }
+
   void save() {
     if (!formKey.currentState!.validate()) return;
 
@@ -163,6 +240,17 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
       return;
     }
 
+    final dateKey =
+        '${date.year.toString().padLeft(4, '0')}'
+        '${date.month.toString().padLeft(2, '0')}'
+        '${date.day.toString().padLeft(2, '0')}';
+
+    final serviceGroupId = switch (purpose) {
+      TransferPurpose.dailyOutbound => 'DAILY-$dateKey-OUTBOUND',
+      TransferPurpose.dailyReturn => 'DAILY-$dateKey-RETURN',
+      _ => '',
+    };
+
     Navigator.pop(
       context,
       Transfer(
@@ -177,6 +265,8 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
         destination: destination.text.trim(),
         routeDescription: routeDescription.text.trim(),
         vehicleType: vehicleType,
+        purpose: purpose,
+        serviceGroupId: serviceGroupId,
         vehicleIdentifier: vehicleIdentifier.text.trim(),
         licensePlate: licensePlate.text.trim(),
         capacity: parsedCapacity,
@@ -234,6 +324,25 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                         field(origin, 'Origen', required: true),
                         field(destination, 'Destino', required: true),
                         field(routeDescription, 'Descripción de ruta'),
+                        DropdownButtonFormField<TransferPurpose>(
+                          initialValue: purpose,
+                          decoration: const InputDecoration(
+                            labelText: 'Tipo de traslado',
+                          ),
+                          items: TransferPurpose.values
+                              .map(
+                                (item) => DropdownMenuItem(
+                                  value: item,
+                                  child: Text(item.label),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => purpose = value);
+                            }
+                          },
+                        ),
                         DropdownButtonFormField<TransferStatus>(
                           initialValue: status,
                           decoration: const InputDecoration(
@@ -335,6 +444,49 @@ class _TransferFormScreenState extends State<TransferFormScreen> {
                           fontWeight: FontWeight.w700,
                           color: Colors.blueGrey,
                         ),
+                      ),
+
+                      if (workerIdsAssignedToOtherTransfersInSameGroup
+                          .isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            '${workerIdsAssignedToOtherTransfersInSameGroup.length} '
+                            'trabajador(es) ya asignado(s) a otros buses de esta jornada',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.blueGrey,
+                            ),
+                          ),
+                        ),
+
+                      const SizedBox(height: 10),
+
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: workers.isEmpty
+                                ? null
+                                : selectWorkersUpToCapacity,
+                            icon: const Icon(
+                              Icons.directions_bus_filled_rounded,
+                            ),
+                            label: const Text('Completar bus'),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: selectedWorkerIds.isEmpty
+                                ? null
+                                : () {
+                                    setState(() {
+                                      selectedWorkerIds.clear();
+                                    });
+                                  },
+                            icon: const Icon(Icons.clear_all_rounded),
+                            label: const Text('Limpiar selección'),
+                          ),
+                        ],
                       ),
 
                       const SizedBox(height: 12),
