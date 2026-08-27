@@ -74,7 +74,14 @@ class _TransfersScreenState extends State<TransfersScreen> {
     return groups;
   }
 
-  ({int buses, int expected, int boarded, int arrived, int pending})
+  ({
+    int buses,
+    int expected,
+    int boarded,
+    int arrived,
+    int pendingBoarding,
+    int inTransit,
+  })
   _serviceGroupTotals(List<Transfer> group) {
     final buses = group.length;
 
@@ -93,14 +100,16 @@ class _TransfersScreenState extends State<TransfersScreen> {
       (sum, transfer) => sum + transfer.arrivedPassengers,
     );
 
-    final pending = expected - arrived;
+    final pendingBoarding = expected - boarded;
+    final inTransit = boarded - arrived;
 
     return (
       buses: buses,
       expected: expected,
       boarded: boarded,
       arrived: arrived,
-      pending: pending,
+      pendingBoarding: pendingBoarding,
+      inTransit: inTransit,
     );
   }
 
@@ -368,9 +377,11 @@ class _TransfersScreenState extends State<TransfersScreen> {
                         ),
                         Chip(
                           label: Text(
-                            totals.pending == 0
+                            totals.pendingBoarding == 0 && totals.inTransit == 0
                                 ? 'Jornada completa'
-                                : '${totals.pending} pendiente(s)',
+                                : totals.inTransit > 0
+                                ? '${totals.inTransit} en viaje'
+                                : '${totals.pendingBoarding} por abordar',
                           ),
                         ),
                       ],
@@ -401,9 +412,14 @@ class _TransfersScreenState extends State<TransfersScreen> {
                           value: totals.arrived,
                         ),
                         _serviceGroupMetric(
-                          icon: Icons.warning_amber_rounded,
-                          label: 'Pendientes',
-                          value: totals.pending,
+                          icon: Icons.hourglass_bottom_rounded,
+                          label: 'Por abordar',
+                          value: totals.pendingBoarding,
+                        ),
+                        _serviceGroupMetric(
+                          icon: Icons.route_rounded,
+                          label: 'En viaje',
+                          value: totals.inTransit,
                         ),
                       ],
                     ),
