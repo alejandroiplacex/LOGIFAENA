@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../hotels/data/hotel_repository.dart';
 import '../../workers/data/worker_repository.dart';
 import '../../workers/domain/worker.dart';
 import '../data/transfer_repository.dart';
 import '../domain/transfer.dart';
-import '../../hotels/data/hotel_repository.dart';
 
 class TransferPassengerControlScreen extends StatefulWidget {
   final Transfer transfer;
@@ -30,6 +30,7 @@ class _TransferPassengerControlScreenState
         return worker;
       }
     }
+
     return null;
   }
 
@@ -68,6 +69,7 @@ class _TransferPassengerControlScreenState
       } else {
         transfer.status = TransferStatus.scheduled;
       }
+
       final worker = _worker(workerId);
 
       if (worker != null) {
@@ -172,8 +174,10 @@ class _TransferPassengerControlScreenState
     switch (status) {
       case TransferPassengerStatus.pending:
         return const Color(0xFFD97706);
+
       case TransferPassengerStatus.boarded:
         return const Color(0xFF2563EB);
+
       case TransferPassengerStatus.arrived:
         return const Color(0xFF16A36A);
     }
@@ -183,8 +187,10 @@ class _TransferPassengerControlScreenState
     switch (status) {
       case TransferPassengerStatus.pending:
         return Icons.schedule_rounded;
+
       case TransferPassengerStatus.boarded:
         return Icons.directions_bus_rounded;
+
       case TransferPassengerStatus.arrived:
         return Icons.check_circle_rounded;
     }
@@ -234,7 +240,8 @@ class _TransferPassengerControlScreenState
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '${transfer.origin} Ã¢â€ â€™ ${transfer.destination}',
+                                    '${transfer.origin} → '
+                                    '${transfer.destination}',
                                     style: const TextStyle(
                                       fontSize: 17,
                                       fontWeight: FontWeight.w700,
@@ -248,9 +255,9 @@ class _TransferPassengerControlScreenState
                         ),
                         const SizedBox(height: 14),
                         Text(
-                          '${transfer.vehicleType.label} Ã‚Â· '
-                          '${transfer.vehicleIdentifier} Ã‚Â· '
-                          '${transfer.licensePlate} Ã‚Â· '
+                          '${transfer.vehicleType.label} · '
+                          '${transfer.vehicleIdentifier} · '
+                          '${transfer.licensePlate} · '
                           'Conductor: ${transfer.driverName}',
                           style: const TextStyle(
                             color: Colors.black54,
@@ -324,9 +331,11 @@ class _TransferPassengerControlScreenState
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'Registra individualmente quiÃƒÂ©n abordÃƒÂ³ y quiÃƒÂ©n llegÃƒÂ³ al destino.',
+                          'Registra individualmente quién abordó '
+                          'y quién llegó al destino.',
                           style: TextStyle(color: Colors.black54),
                         ),
+
                         const SizedBox(height: 14),
 
                         Wrap(
@@ -369,7 +378,8 @@ class _TransferPassengerControlScreenState
                             padding: EdgeInsets.all(30),
                             child: Center(
                               child: Text(
-                                'Este traslado no tiene trabajadores asignados.',
+                                'Este traslado no tiene trabajadores '
+                                'asignados.',
                               ),
                             ),
                           )
@@ -454,6 +464,7 @@ class _TransferPassengerControlScreenState
     final color = _statusColor(status);
 
     final fullName = worker?.fullName ?? 'Trabajador no encontrado';
+
     final rut = worker?.rut ?? 'Sin RUT';
 
     final hotelAssignment = hotelRepository.findByWorkerId(workerId);
@@ -464,7 +475,23 @@ class _TransferPassengerControlScreenState
 
     final room = hotelAssignment?.room.trim().isNotEmpty == true
         ? hotelAssignment!.room
-        : 'Sin habitaciÃƒÂ³n';
+        : 'Sin habitación';
+
+    final availableStatuses = switch (status) {
+      TransferPassengerStatus.pending => <TransferPassengerStatus>[
+        TransferPassengerStatus.pending,
+        TransferPassengerStatus.boarded,
+      ],
+
+      TransferPassengerStatus.boarded => <TransferPassengerStatus>[
+        TransferPassengerStatus.boarded,
+        TransferPassengerStatus.arrived,
+      ],
+
+      TransferPassengerStatus.arrived => <TransferPassengerStatus>[
+        TransferPassengerStatus.arrived,
+      ],
+    };
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -494,7 +521,7 @@ class _TransferPassengerControlScreenState
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      '$rut Ã‚Â· $hotel Ã‚Â· HabitaciÃƒÂ³n: $room',
+                      '$rut · $hotel · Habitación: $room',
                       style: const TextStyle(color: Colors.black54),
                     ),
                   ],
@@ -502,20 +529,6 @@ class _TransferPassengerControlScreenState
               ),
             ],
           );
-
-          final availableStatuses = switch (status) {
-            TransferPassengerStatus.pending => <TransferPassengerStatus>[
-              TransferPassengerStatus.pending,
-              TransferPassengerStatus.boarded,
-            ],
-            TransferPassengerStatus.boarded => <TransferPassengerStatus>[
-              TransferPassengerStatus.boarded,
-              TransferPassengerStatus.arrived,
-            ],
-            TransferPassengerStatus.arrived => <TransferPassengerStatus>[
-              TransferPassengerStatus.arrived,
-            ],
-          };
 
           final controls = Wrap(
             spacing: 7,
@@ -532,11 +545,9 @@ class _TransferPassengerControlScreenState
                   color: selected ? Colors.white : itemColor,
                 ),
                 label: Text(item.label),
-                onSelected: selected
-                    ? null
-                    : (_) {
-                        _changeStatus(workerId, item);
-                      },
+                onSelected: (_) {
+                  _changeStatus(workerId, item);
+                },
                 selectedColor: itemColor,
                 labelStyle: TextStyle(
                   color: selected ? Colors.white : Colors.black87,
