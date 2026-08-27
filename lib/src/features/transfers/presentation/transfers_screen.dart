@@ -392,7 +392,11 @@ class _TransfersScreenState extends State<TransfersScreen> {
                         Chip(
                           label: Text(
                             totals.pendingBoarding == 0 && totals.inTransit == 0
-                                ? 'Jornada completa'
+                                ? totals.noShow > 0
+                                      ? totals.noShow == 1
+                                            ? 'Jornada completa con 1 excepción'
+                                            : 'Jornada completa con ${totals.noShow} excepciones'
+                                      : 'Jornada completa'
                                 : totals.inTransit > 0
                                 ? '${totals.inTransit} en viaje'
                                 : '${totals.pendingBoarding} por abordar',

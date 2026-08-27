@@ -241,7 +241,8 @@ class _TransferPassengerControlScreenState
     final expected = transfer.expectedPassengers;
     final boarded = transfer.boardedPassengers;
     final arrived = transfer.arrivedPassengers;
-    final pendingArrival = expected - arrived;
+    final noShow = transfer.noShowPassengers;
+    final pendingArrival = expected - arrived - transfer.noShowPassengers;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Control de pasajeros')),
@@ -313,8 +314,10 @@ class _TransferPassengerControlScreenState
 
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    final cardWidth = constraints.maxWidth >= 800
-                        ? (constraints.maxWidth - 36) / 4
+                    final cardWidth = constraints.maxWidth >= 1000
+                        ? (constraints.maxWidth - 48) / 5
+                        : constraints.maxWidth >= 650
+                        ? (constraints.maxWidth - 24) / 3
                         : (constraints.maxWidth - 12) / 2;
 
                     return Wrap(
@@ -341,6 +344,13 @@ class _TransferPassengerControlScreenState
                           value: arrived,
                           icon: Icons.check_circle_rounded,
                           color: const Color(0xFF16A36A),
+                        ),
+                        _summaryCard(
+                          width: cardWidth,
+                          title: 'No abordaron',
+                          value: noShow,
+                          icon: Icons.person_off_outlined,
+                          color: const Color(0xFFDC2626),
                         ),
                         _summaryCard(
                           width: cardWidth,
