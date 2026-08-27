@@ -79,6 +79,7 @@ class _TransfersScreenState extends State<TransfersScreen> {
     int expected,
     int boarded,
     int arrived,
+    int noShow,
     int pendingBoarding,
     int inTransit,
   })
@@ -100,14 +101,27 @@ class _TransfersScreenState extends State<TransfersScreen> {
       (sum, transfer) => sum + transfer.arrivedPassengers,
     );
 
-    final pendingBoarding = expected - boarded;
-    final inTransit = boarded - arrived;
+    final noShow = group.fold<int>(
+      0,
+      (sum, transfer) => sum + transfer.noShowPassengers,
+    );
+
+    final pendingBoarding = group.fold<int>(
+      0,
+      (sum, transfer) => sum + transfer.pendingBoardingPassengers,
+    );
+
+    final inTransit = group.fold<int>(
+      0,
+      (sum, transfer) => sum + transfer.inTransitPassengers,
+    );
 
     return (
       buses: buses,
       expected: expected,
       boarded: boarded,
       arrived: arrived,
+      noShow: noShow,
       pendingBoarding: pendingBoarding,
       inTransit: inTransit,
     );
@@ -412,6 +426,11 @@ class _TransfersScreenState extends State<TransfersScreen> {
                           value: totals.arrived,
                         ),
                         _serviceGroupMetric(
+                          icon: Icons.person_off_outlined,
+                          label: 'No abordaron',
+                          value: totals.noShow,
+                        ),
+                        _serviceGroupMetric(
                           icon: Icons.hourglass_bottom_rounded,
                           label: 'Por abordar',
                           value: totals.pendingBoarding,
@@ -470,7 +489,10 @@ class _TransfersScreenState extends State<TransfersScreen> {
     return Column(
       children: [
         _summary(),
-        _serviceGroupsSummary(),
+        Flexible(
+          fit: FlexFit.loose,
+          child: SingleChildScrollView(child: _serviceGroupsSummary()),
+        ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(22, 0, 22, 22),
@@ -553,19 +575,32 @@ class _TransfersScreenState extends State<TransfersScreen> {
 
                                           const SizedBox(height: 4),
 
+                                          const SizedBox(height: 6),
+
                                           Text(
                                             '${transfer.expectedPassengers} esperados · '
                                             '${transfer.boardedPassengers} abordaron · '
-                                            '${transfer.arrivedPassengers} llegaron · '
-                                            '${transfer.pendingPassengers} por llegar',
+                                            '${transfer.arrivedPassengers} llegaron\n'
+                                            '${transfer.pendingBoardingPassengers} por abordar · '
+                                            '${transfer.inTransitPassengers} en viaje · '
+                                            '${transfer.noShowPassengers} no abordó',
                                             style: TextStyle(
                                               fontWeight: FontWeight.w700,
+                                              height: 1.5,
                                               color:
-                                                  transfer.pendingPassengers > 0
+                                                  transfer.pendingBoardingPassengers >
+                                                          0 ||
+                                                      transfer.inTransitPassengers >
+                                                          0
                                                   ? const Color(0xFFD97706)
+                                                  : transfer.noShowPassengers >
+                                                        0
+                                                  ? const Color(0xFFDC2626)
                                                   : const Color(0xFF16A36A),
                                             ),
                                           ),
+
+                                          const SizedBox(height: 6),
                                         ],
                                       ),
                                     ),

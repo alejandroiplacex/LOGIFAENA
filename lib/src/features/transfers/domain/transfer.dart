@@ -60,7 +60,7 @@ extension TransferStatusLabel on TransferStatus {
 }
 
 /// Estado individual de cada trabajador dentro de un traslado.
-enum TransferPassengerStatus { pending, boarded, arrived }
+enum TransferPassengerStatus { pending, boarded, arrived, noShow }
 
 extension TransferPassengerStatusLabel on TransferPassengerStatus {
   String get label {
@@ -71,6 +71,8 @@ extension TransferPassengerStatusLabel on TransferPassengerStatus {
         return 'Abordó';
       case TransferPassengerStatus.arrived:
         return 'Llegó';
+      case TransferPassengerStatus.noShow:
+        return 'No abordó';
     }
   }
 }
@@ -149,8 +151,23 @@ class Transfer {
     return statusForWorker(workerId) == TransferPassengerStatus.arrived;
   }).length;
 
-  /// Cantidad que todavía no confirma llegada.
-  int get pendingPassengers => expectedPassengers - arrivedPassengers;
+  /// Cantidad que fue registrada como no abordó.
+  int get noShowPassengers => workerIds.where((workerId) {
+    return statusForWorker(workerId) == TransferPassengerStatus.noShow;
+  }).length;
+
+  /// Cantidad que todavía está pendiente de abordar.
+  int get pendingBoardingPassengers => workerIds.where((workerId) {
+    return statusForWorker(workerId) == TransferPassengerStatus.pending;
+  }).length;
+
+  /// Cantidad que actualmente está en viaje.
+  int get inTransitPassengers => workerIds.where((workerId) {
+    return statusForWorker(workerId) == TransferPassengerStatus.boarded;
+  }).length;
+
+  /// Cantidad que todavía no tiene resolución final.
+  int get pendingPassengers => pendingBoardingPassengers + inTransitPassengers;
 
   /// Devuelve el estado de un trabajador.
   ///

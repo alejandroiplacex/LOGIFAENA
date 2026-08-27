@@ -42,9 +42,13 @@ class _TransferPassengerControlScreenState
           .map(transfer.statusForWorker)
           .toList();
 
-      final allArrived =
+      final allResolved =
           statuses.isNotEmpty &&
-          statuses.every((status) => status == TransferPassengerStatus.arrived);
+          statuses.every(
+            (status) =>
+                status == TransferPassengerStatus.arrived ||
+                status == TransferPassengerStatus.noShow,
+          );
 
       final anyBoarded = statuses.any(
         (status) =>
@@ -52,17 +56,18 @@ class _TransferPassengerControlScreenState
             status == TransferPassengerStatus.arrived,
       );
 
-      final allBoardedOrArrived =
+      final allBoardedArrivedOrNoShow =
           statuses.isNotEmpty &&
           statuses.every(
             (status) =>
                 status == TransferPassengerStatus.boarded ||
-                status == TransferPassengerStatus.arrived,
+                status == TransferPassengerStatus.arrived ||
+                status == TransferPassengerStatus.noShow,
           );
 
-      if (allArrived) {
+      if (allResolved) {
         transfer.status = TransferStatus.completed;
-      } else if (allBoardedOrArrived) {
+      } else if (allBoardedArrivedOrNoShow && anyBoarded) {
         transfer.status = TransferStatus.onRoute;
       } else if (anyBoarded) {
         transfer.status = TransferStatus.boarding;
@@ -143,6 +148,35 @@ class _TransferPassengerControlScreenState
 
             workerRepository.update(worker);
             break;
+
+          case TransferPassengerStatus.noShow:
+            worker.operationalLocationAt = DateTime.now();
+
+            switch (transfer.purpose) {
+              case TransferPurpose.turnArrival:
+                worker.operationalLocation =
+                    WorkerOperationalLocation.originCity;
+                break;
+
+              case TransferPurpose.dailyOutbound:
+                worker.operationalLocation = WorkerOperationalLocation.hotel;
+                break;
+
+              case TransferPurpose.dailyReturn:
+                worker.operationalLocation = WorkerOperationalLocation.site;
+                break;
+
+              case TransferPurpose.turnDeparture:
+                worker.operationalLocation = WorkerOperationalLocation.site;
+                break;
+
+              case TransferPurpose.special:
+                worker.operationalLocation = WorkerOperationalLocation.unknown;
+                break;
+            }
+
+            workerRepository.update(worker);
+            break;
         }
       }
 
@@ -164,7 +198,7 @@ class _TransferPassengerControlScreenState
     for (final workerId in transfer.workerIds) {
       final currentStatus = transfer.statusForWorker(workerId);
 
-      if (currentStatus != TransferPassengerStatus.arrived) {
+      if (currentStatus == TransferPassengerStatus.boarded) {
         _changeStatus(workerId, TransferPassengerStatus.arrived);
       }
     }
@@ -180,6 +214,9 @@ class _TransferPassengerControlScreenState
 
       case TransferPassengerStatus.arrived:
         return const Color(0xFF16A36A);
+
+      case TransferPassengerStatus.noShow:
+        return const Color(0xFFDC2626);
     }
   }
 
@@ -193,6 +230,9 @@ class _TransferPassengerControlScreenState
 
       case TransferPassengerStatus.arrived:
         return Icons.check_circle_rounded;
+
+      case TransferPassengerStatus.noShow:
+        return Icons.person_off_outlined;
     }
   }
 
@@ -481,6 +521,7 @@ class _TransferPassengerControlScreenState
       TransferPassengerStatus.pending => <TransferPassengerStatus>[
         TransferPassengerStatus.pending,
         TransferPassengerStatus.boarded,
+        TransferPassengerStatus.noShow,
       ],
 
       TransferPassengerStatus.boarded => <TransferPassengerStatus>[
@@ -490,6 +531,10 @@ class _TransferPassengerControlScreenState
 
       TransferPassengerStatus.arrived => <TransferPassengerStatus>[
         TransferPassengerStatus.arrived,
+      ],
+
+      TransferPassengerStatus.noShow => <TransferPassengerStatus>[
+        TransferPassengerStatus.noShow,
       ],
     };
 
