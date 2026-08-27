@@ -131,6 +131,8 @@ class _MainShellScreenState extends State<MainShellScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final desktop = constraints.maxWidth >= 900;
+        final compactSidebar =
+            constraints.maxWidth >= 900 && constraints.maxWidth < 1200;
 
         if (!desktop) {
           return Scaffold(
@@ -158,6 +160,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
               child: _Sidebar(
                 items: items,
                 selectedIndex: selectedIndex,
+                compact: false,
                 onSelected: (index) {
                   setState(() {
                     selectedIndex = index;
@@ -176,10 +179,11 @@ class _MainShellScreenState extends State<MainShellScreen> {
           body: Row(
             children: [
               SizedBox(
-                width: 276,
+                width: compactSidebar ? 88 : 276,
                 child: _Sidebar(
                   items: items,
                   selectedIndex: selectedIndex,
+                  compact: compactSidebar,
                   onSelected: (index) {
                     setState(() {
                       selectedIndex = index;
@@ -255,12 +259,14 @@ class _Sidebar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onSelected;
   final VoidCallback onLogout;
+  final bool compact;
 
   const _Sidebar({
     required this.items,
     required this.selectedIndex,
     required this.onSelected,
     required this.onLogout,
+    required this.compact,
   });
 
   @override
@@ -270,34 +276,47 @@ class _Sidebar extends StatelessWidget {
       child: SafeArea(
         child: Column(
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 22, 20, 18),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                compact ? 14 : 20,
+                22,
+                compact ? 14 : 20,
+                18,
+              ),
               child: Row(
+                mainAxisAlignment: compact
+                    ? MainAxisAlignment.center
+                    : MainAxisAlignment.start,
                 children: [
-                  CircleAvatar(
+                  const CircleAvatar(
                     backgroundColor: Colors.white,
                     child: Icon(Icons.engineering, color: AppColors.primary),
                   ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppStrings.appName,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
+                  if (!compact) ...[
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppStrings.appName,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
-                        ),
-                        Text(
-                          AppStrings.edition,
-                          style: TextStyle(color: Colors.white60, fontSize: 11),
-                        ),
-                      ],
+                          Text(
+                            AppStrings.edition,
+                            style: TextStyle(
+                              color: Colors.white60,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -309,6 +328,39 @@ class _Sidebar extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final item = items[index];
                   final selected = index == selectedIndex;
+
+                  if (compact) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      child: Tooltip(
+                        message: item.label,
+                        child: Material(
+                          color: selected
+                              ? Colors.white.withValues(alpha: 0.13)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(12),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () => onSelected(index),
+                            child: SizedBox(
+                              height: 48,
+                              child: Center(
+                                child: Icon(
+                                  item.icon,
+                                  color: selected
+                                      ? Colors.white
+                                      : Colors.white70,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(
@@ -341,14 +393,41 @@ class _Sidebar extends StatelessWidget {
               ),
             ),
             const Divider(color: Colors.white24, height: 1),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.white70),
-              title: const Text(
-                'Cerrar sesión',
-                style: TextStyle(color: Colors.white70),
+
+            if (compact)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                child: Tooltip(
+                  message: 'Cerrar sesión',
+                  child: Material(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: onLogout,
+                      child: const SizedBox(
+                        height: 48,
+                        child: Center(
+                          child: Icon(Icons.logout, color: Colors.white70),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            else
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.white70),
+                title: const Text(
+                  'Cerrar sesión',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                onTap: onLogout,
               ),
-              onTap: onLogout,
-            ),
+
             const SizedBox(height: 8),
           ],
         ),
