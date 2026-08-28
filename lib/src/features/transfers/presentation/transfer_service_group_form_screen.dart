@@ -65,12 +65,13 @@ class _TransferServiceGroupFormScreenState
 
   void initializeUnknownWorkersAtHotel() {
     final unknownWorkers = workersRepository
-        .getAll()
-        .where(
-          (worker) =>
-              worker.operationalLocation == WorkerOperationalLocation.unknown,
-        )
-        .toList();
+    .getAll()
+    .where(
+      (worker) =>
+          worker.operationalLocation == WorkerOperationalLocation.unknown &&
+          worker.presentationStatus != PresentationStatus.absent,
+    )
+    .toList();
 
     if (unknownWorkers.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
