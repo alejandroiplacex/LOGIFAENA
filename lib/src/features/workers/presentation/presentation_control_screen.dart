@@ -55,6 +55,42 @@ class _PresentationControlScreenState extends State<PresentationControlScreen> {
     });
   }
 
+  void markPendingAsPresented() {
+    final pendingWorkers = repository
+        .getAll()
+        .where(
+          (worker) => worker.presentationStatus == PresentationStatus.pending,
+        )
+        .toList();
+
+    if (pendingWorkers.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No existen trabajadores pendientes de presentación.'),
+        ),
+      );
+      return;
+    }
+
+    final now = DateTime.now();
+
+    setState(() {
+      for (final worker in pendingWorkers) {
+        worker.presentationStatus = PresentationStatus.presented;
+        worker.presentationAt = now;
+        repository.update(worker);
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '${pendingWorkers.length} trabajadores marcados como presentados.',
+        ),
+      ),
+    );
+  }
+
   Color statusColor(PresentationStatus status) {
     switch (status) {
       case PresentationStatus.pending:
@@ -142,6 +178,22 @@ class _PresentationControlScreenState extends State<PresentationControlScreen> {
             ),
 
             const SizedBox(height: 18),
+
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.icon(
+                onPressed: count(PresentationStatus.pending) == 0
+                    ? null
+                    : markPendingAsPresented,
+                icon: const Icon(Icons.done_all_rounded),
+                label: Text(
+                  'Marcar pendientes como presentados '
+                  '(${count(PresentationStatus.pending)})',
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
 
             Row(
               children: [
