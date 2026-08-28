@@ -4,7 +4,16 @@ using LogiFaena.Api.Entities;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("LogiFaenaWeb", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:7358")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 builder.Services.AddDbContext<LogiFaenaDbContext>(options =>
     options.UseSqlite(
         builder.Configuration.GetConnectionString("LogiFaenaDatabase")
@@ -14,6 +23,8 @@ builder.Services.AddDbContext<LogiFaenaDbContext>(options =>
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+app.UseCors("LogiFaenaWeb");
 
 if (app.Environment.IsDevelopment())
 {
