@@ -17,6 +17,7 @@ import 'widgets/operational_health.dart';
 import 'widgets/quick_actions.dart';
 import 'widgets/status_banner.dart';
 import 'widgets/worker_status_overview.dart';
+import '../../transfers/domain/transfer.dart';
 
 class DashboardScreen extends StatefulWidget {
   final ValueChanged<int> onNavigate;
@@ -97,7 +98,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ? todayEvents
         : events.take(5).toList();
     final arrivalsToday = transfers
-        .where((transfer) => _sameDay(transfer.date, _now))
+        .where(
+          (transfer) =>
+              _sameDay(transfer.date, _now) &&
+              transfer.purpose == TransferPurpose.dailyOutbound,
+        )
         .fold<int>(0, (total, transfer) => total + transfer.arrivedPassengers);
 
     return ColoredBox(
