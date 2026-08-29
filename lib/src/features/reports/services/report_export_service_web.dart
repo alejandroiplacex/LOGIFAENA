@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:js_interop';
 
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:web/web.dart' as web;
 
 class ReportExportService {
@@ -37,66 +39,120 @@ class ReportExportService {
     web.URL.revokeObjectURL(url);
   }
 
-  static void printPdf({
+  static Future<void> printPdf({
     required String title,
     required String subtitle,
     required List<String> columns,
     required List<List<String>> rows,
-  }) {
+  }) async {
     final generated = DateTime.now();
-    final bodyRows = rows.map((row) {
-      return '<tr>${row.map((cell) => '<td>${_html(cell)}</td>').join()}</tr>';
-    }).join();
-    final headings = columns
-        .map((column) => '<th>${_html(column)}</th>')
-        .join();
 
-    final reportHtml =
-        '''
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<title>${_html(title)}</title>
-<style>
-  @page { size: A4 landscape; margin: 14mm; }
-  body { font-family: Arial, sans-serif; color: #172033; margin: 0; }
-  .brand { color: #0d355c; font-size: 24px; font-weight: 800; }
-  h1 { margin: 12px 0 4px; font-size: 22px; }
-  .meta { color: #64748b; font-size: 12px; margin-bottom: 18px; }
-  table { width: 100%; border-collapse: collapse; font-size: 10px; }
-  th { background: #0d355c; color: white; text-align: left; padding: 8px; }
-  td { border: 1px solid #dbe3ec; padding: 7px; vertical-align: top; }
-  tr:nth-child(even) td { background: #f8fafc; }
-  .footer { margin-top: 16px; color: #64748b; font-size: 10px; }
-</style>
-</head>
-<body>
-  <div class="brand">LOGIFAENA <span style="font-size:12px;font-weight:400">Enterprise Edition</span></div>
-  <h1>${_html(title)}</h1>
-  <div class="meta">${_html(subtitle)} · Generado ${generated.day.toString().padLeft(2, '0')}/${generated.month.toString().padLeft(2, '0')}/${generated.year} ${generated.hour.toString().padLeft(2, '0')}:${generated.minute.toString().padLeft(2, '0')} · Coordinador: Alejandro Cárdenas</div>
-  <table><thead><tr>$headings</tr></thead><tbody>$bodyRows</tbody></table>
-  <div class="footer">Documento generado desde LogiFaena. Use “Guardar como PDF” en el diálogo de impresión.</div>
-<script>window.onload = function(){ window.print(); };</script>
-</body>
-</html>
-''';
+    final document = pw.Document();
 
-    // `window.open()` returns WindowBase in current Dart SDKs, which does not
-    // expose `document`. Opening a temporary HTML Blob avoids that incompatibility
-    // and works reliably in Flutter Web.
-    final blob = web.Blob(
-      [reportHtml.toJS].toJS,
-      web.BlobPropertyBag(type: 'text/html;charset=utf-8'),
+    document.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4.landscape,
+        margin: const pw.EdgeInsets.all(28),
+        header: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Row(
+                crossAxisAlignment: pw.CrossAxisAlignment.end,
+                children: [
+                  pw.Text(
+                    'LOGIFAENA',
+                    style: pw.TextStyle(
+                      fontSize: 22,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.SizedBox(width: 8),
+                  pw.Text(
+                    'Enterprise Edition',
+                    style: const pw.TextStyle(fontSize: 10),
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 8),
+              pw.Text(
+                title,
+                style: pw.TextStyle(
+                  fontSize: 18,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.SizedBox(height: 4),
+              pw.Text(
+                '$subtitle · Generado '
+                '${generated.day.toString().padLeft(2, '0')}/'
+                '${generated.month.toString().padLeft(2, '0')}/'
+                '${generated.year} '
+                '${generated.hour.toString().padLeft(2, '0')}:'
+                '${generated.minute.toString().padLeft(2, '0')} '
+                '· Coordinador: Alejandro Cárdenas',
+                style: const pw.TextStyle(
+                  fontSize: 9,
+                  color: PdfColors.grey700,
+                ),
+              ),
+              pw.SizedBox(height: 12),
+            ],
+          );
+        },
+        footer: (context) {
+          return pw.Container(
+            alignment: pw.Alignment.centerRight,
+            margin: const pw.EdgeInsets.only(top: 8),
+            child: pw.Text(
+              'Página ${context.pageNumber} de ${context.pagesCount}',
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+            ),
+          );
+        },
+        build: (context) => [
+          pw.TableHelper.fromTextArray(
+            headers: columns,
+            data: rows,
+            headerStyle: pw.TextStyle(
+              fontSize: 8,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.white,
+            ),
+            headerDecoration: const pw.BoxDecoration(
+              color: PdfColors.blueGrey800,
+            ),
+            cellStyle: const pw.TextStyle(fontSize: 7),
+            cellAlignment: pw.Alignment.centerLeft,
+            cellPadding: const pw.EdgeInsets.all(4),
+            border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+          ),
+        ],
+      ),
     );
 
-    final url = web.URL.createObjectURL(blob);
+    final bytes = await document.save();
 
-    web.window.open(url, '_blank');
+final blob = web.Blob(
+  [bytes.toJS].toJS,
+  web.BlobPropertyBag(type: 'application/pdf'),
+);
 
-    Future<void>.delayed(const Duration(seconds: 10), () {
-      web.URL.revokeObjectURL(url);
-    });
+final url = web.URL.createObjectURL(blob);
+
+final safeTitle = title
+    .replaceAll(RegExp(r'[\\/:*?"<>|]'), '_')
+    .replaceAll(' ', '_');
+
+final anchor = web.HTMLAnchorElement()
+  ..href = url
+  ..download = 'logifaena_$safeTitle.pdf';
+
+anchor.click();
+
+Future<void>.delayed(const Duration(seconds: 2), () {
+  web.URL.revokeObjectURL(url);
+});
   }
 
   static String _csvRow(List<String> values) => values
@@ -105,6 +161,4 @@ class ReportExportService {
         return '"$escaped"';
       })
       .join(';');
-
-  static String _html(String value) => const HtmlEscape().convert(value);
 }

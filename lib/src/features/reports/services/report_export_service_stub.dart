@@ -12,7 +12,7 @@ class ReportExportService {
     );
   }
 
-  static void printPdf({
+  static Future<void> printPdf({
     required String title,
     required String subtitle,
     required List<String> columns,

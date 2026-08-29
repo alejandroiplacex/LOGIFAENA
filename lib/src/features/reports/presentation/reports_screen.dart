@@ -910,24 +910,25 @@ class _ReportsScreenState extends State<ReportsScreen> {
     }
   }
 
-  void _exportPdf() {
+  Future<void> _exportPdf() async {
     final payload = _currentExport;
+
     try {
-      ReportExportService.printPdf(
+      await ReportExportService.printPdf(
         title: payload.title,
         subtitle:
             '${payload.rows.length} registros · Empresa: $_selectedCompany · Faena: $_selectedProject · Periodo: $_selectedPeriod',
         columns: payload.columns,
         rows: payload.rows,
       );
-      _showSuccess(
-        'Vista de impresión abierta. Selecciona “Guardar como PDF”.',
-      );
-    } on UnsupportedError catch (error) {
-      _showSuccess(
-        error.message?.toString() ??
-            'Impresión no disponible en esta plataforma.',
-      );
+
+      if (!mounted) return;
+
+      _showSuccess('PDF generado correctamente.');
+    } catch (error) {
+      if (!mounted) return;
+
+      _showSuccess('No fue posible generar el PDF: $error');
     }
   }
 
