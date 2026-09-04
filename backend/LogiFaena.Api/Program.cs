@@ -196,6 +196,56 @@ if (entityType == "movement")
         ReceivedAtUtc = receivedAtUtc
     };
 
+    var movementWorker = await dbContext.Workers
+        .SingleOrDefaultAsync(
+            x => !x.IsDeleted &&
+                 x.ExternalId == workerId
+        );
+
+    if (movementWorker is null)
+    {
+        syncOperation.ProcessingError =
+            $"No se encontro el trabajador '{workerId}' asociado al movimiento.";
+
+        await dbContext.SaveChangesAsync();
+
+        return Results.BadRequest(new SyncResponse(
+            Success: false,
+            Message: syncOperation.ProcessingError,
+            ReceivedAt: receivedAtUtc
+        ));
+    }
+
+    if (!string.Equals(
+        movementWorker.WorkerCode,
+        workerCode,
+        StringComparison.OrdinalIgnoreCase))
+    {
+        syncOperation.ProcessingError =
+            "El codigo del trabajador no coincide con el movimiento recibido.";
+
+        await dbContext.SaveChangesAsync();
+
+        return Results.BadRequest(new SyncResponse(
+            Success: false,
+            Message: syncOperation.ProcessingError,
+            ReceivedAt: receivedAtUtc
+        ));
+    }
+
+    if (movementType.Equals(
+        "faena_in",
+        StringComparison.OrdinalIgnoreCase))
+    {
+        var movementAtUtc =
+            request.CreatedAt?.ToUniversalTime() ?? receivedAtUtc;
+
+        movementWorker.Status = "atSite";
+        movementWorker.OperationalLocation = "site";
+        movementWorker.OperationalLocationAt = movementAtUtc;
+        movementWorker.UpdatedAtUtc = receivedAtUtc;
+    }
+
     dbContext.Movements.Add(movement);
 
     syncOperation.Processed = true;
@@ -363,6 +413,24 @@ worker.OperationalLocationAt = ReadNullableDateTime(
     request.Payload,
     "operationalLocationAt",
     worker.OperationalLocationAt
+);
+
+worker.PresentationStatus = ReadString(
+    request.Payload,
+    "presentationStatus",
+    worker.PresentationStatus
+);
+
+worker.PresentationAt = ReadNullableDateTime(
+    request.Payload,
+    "presentationAt",
+    worker.PresentationAt
+);
+
+worker.PresentationNote = ReadString(
+    request.Payload,
+    "presentationNote",
+    worker.PresentationNote
 );
 
 worker.UpdatedAtUtc = receivedAtUtc;

@@ -50,7 +50,13 @@ public class WorkerEntity
     
     public string OperationalLocation { get; set; } = string.Empty;
 
-public DateTime? OperationalLocationAt { get; set; }
+    public DateTime? OperationalLocationAt { get; set; }
+
+    public string PresentationStatus { get; set; } = string.Empty;
+
+    public DateTime? PresentationAt { get; set; }
+
+    public string PresentationNote { get; set; } = string.Empty;
 
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 
